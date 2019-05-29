@@ -4,37 +4,18 @@ require 'thor/group'
 
 module Ros
   module Generators
-    class Service
-      attr_accessor :action, :args, :options
-
-      def initialize(action, args, options)
-        self.action = action
-        self.args = args
-        self.options = options
-      end
-
-      def execute
-        name = args.first
-        generator = ServiceGenerator.new
-        generator.name = name
-        generator.options = options
-        generator.destination_root = "services/#{name}"
-        generator.project = File.basename(Dir.pwd)
-        generator.invoke_all
-      end
-    end
-
     class ServiceGenerator < Thor::Group
       include Thor::Actions
-      attr_accessor :name, :options, :project
-      desc 'Generate a new Ros service'
+      argument :name
+      argument :project
 
-      def self.source_root; Pathname(File.dirname(__FILE__)).join('../../../assets').to_s end
+      def self.source_paths; ["#{File.dirname(__FILE__)}/templates", File.dirname(__FILE__)] end
 
+      # TODO: db and dummy path are set from config values
       def generate
         return unless self.behavior.eql? :invoke
         return if Dir.exists?("services/#{name}")
-        template_file = "#{self.class.source_root}/service/templates/application.rb"
+        template_file = "#{File.dirname(__FILE__)}/rails/service_generator.rb"
         plugin = Ros.is_ros? ? 'plugin' : ''
         rails_options = '--api -G -S -J -C -T -M --database=postgresql --skip-active-storage'
         plugin_options = Ros.is_ros? ? '--full --dummy-path=spec/dummy' : ''
@@ -49,11 +30,11 @@ module Ros
       end
 
       def sdk_content
-        append_file "../sdk/lib/#{project}_sdk/models.rb", <<~HEREDOC
+        append_file "lib/sdk/lib/#{project}_sdk/models.rb", <<~RUBY
           require '#{project}_sdk/models/#{name}.rb'
-        HEREDOC
+        RUBY
 
-        create_file "../sdk/lib/#{project}_sdk/models/#{name}.rb", <<~HEREDOC
+        create_file "lib/sdk/lib/#{project}_sdk/models/#{name}.rb", <<~RUBY
           # frozen_string_literal: true
 
           module #{project.split('_').collect(&:capitalize).join}
@@ -64,7 +45,7 @@ module Ros
               class Tenant < Base; end
             end
           end
-        HEREDOC
+        RUBY
       end
 
       def finish_message

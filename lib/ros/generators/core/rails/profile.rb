@@ -22,7 +22,7 @@ class Profile
     self.routes_file = "#{app_dir}/config/routes.rb"
     # TODO: this should be calculated if this is an engine or not
     self.ros_path = '../../ros'
-    self.ros_lib_path = "#{ros_path}/services"
+    self.ros_lib_path = "#{ros_path}/lib"
   end
   def is_engine?; is_engine end
   def is_ros?; is_ros end

@@ -49,5 +49,6 @@ inject_into_file @profile.initializer_file, after: ".api_only = true\n" do <<-RU
         Settings.service.name = name # '#{@profile.service_name}'
         Settings.service.policy_name = name.capitalize # '#{@profile.service_name.capitalize}'
       end
+      # end if false
 RUBY
 end
