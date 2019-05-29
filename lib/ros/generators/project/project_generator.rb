@@ -4,45 +4,19 @@ require 'thor/group'
 
 module Ros
   module Generators
-    class Project
-      attr_accessor :action, :args, :options
-
-      def initialize(action, args, options)
-        self.action = action
-        self.args = args
-        self.options = options
-      end
-
-      def execute
-        template_dir = Pathname(File.dirname(__FILE__)).join('../../../assets')
-        unless Dir.exists? "#{template_dir}/rails-templates"
-          Dir.chdir(template_dir) { %x(git clone https://github.com/rjayroach/rails-templates.git) }
-        end
-        generator = ProjectGenerator.new
-        generator.name = args.first
-        generator.options = options
-        generator.destination_root = '.'
-        generator.invoke_all
-      end
-    end
-
     class ProjectGenerator < Thor::Group
       include Thor::Actions
-      attr_accessor :name, :options
-      desc 'Generate a new Ros project'
+      argument :name
 
-      def self.source_root; Pathname(File.dirname(__FILE__)).join('../../../assets/project').to_s end
+      def self.source_paths; [Pathname(File.dirname(__FILE__)).join('templates').to_s, File.dirname(__FILE__)] end
 
       def generate
         in_root do
           %x(git clone https://github.com/rails-on-services/ros.git)
-          directory('files', '.')
-          empty_directory('services')
           FileUtils.cp_r('ros/devops', '.')
-        end
-      end
-
-      def finish_message
+        end if false
+        directory('files', '.')
+        empty_directory('services')
         say "\nCreated Ros project at #{destination_root}"
       end
 

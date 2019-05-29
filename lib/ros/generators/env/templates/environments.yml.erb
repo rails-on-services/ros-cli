@@ -1,31 +1,31 @@
 # Rails
-secret_key_base: <%= keys.secret_key_base %>
-rails_master_key: <%= keys.rails_master_key %>
+secret_key_base: <%= SecureRandom.hex %>
+rails_master_key: <%= SecureRandom.hex(64) %>
 
 # Uncomment to set to a remote host
 # rails_database_host: localhost
 
 # Service
 platform:
-  partition_name: <%= keys.platform.partition_name %>
+  partition_name: <%= partition_name %>
 
 # JWT
   jwt:
-    encryption_key: <%= keys.platform.jwt.encryption_key %>
-    iss: <%= options.uri.scheme %>://iam.<%= options.uri.to_s.split('//').last %>
-    aud: <%= options.uri %>
+    encryption_key: <%= SecureRandom.hex %>
+    iss: <%= uri.scheme %>://iam.<%= uri.to_s.split('//').last %>
+    aud: <%= uri %>
 
 # Hosts to which these services respond to
-  hosts: <%= options.uri.host %>
+  hosts: <%= uri.host %>
 
 # Postman workspace to which API documentation updates are written
   postman:
-    workspace: <%= options.uri.host %>
+    workspace: <%= uri.host %>
     api_key:
 
   api_docs:
     server:
-      host: <%= options.uri %>
+      host: <%= uri %>
 
 # SDK
   connection:
@@ -38,10 +38,10 @@ services:
     environment:
       platform:
         credential:
-          salt: <%= keys.platform.credential.salt %>
+          salt: <%= rand(10 ** 9) %>
   comm:
     environment:
       platform:
-        encryption_key: <%= keys.platform.encryption_key %>
+        encryption_key: <%= SecureRandom.hex %>
         twilio_account_sid: test
         twilio_auth_token: test2
