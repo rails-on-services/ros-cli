@@ -14,6 +14,7 @@ module Ros
       def self.source_paths; ["#{File.dirname(__FILE__)}/templates", File.dirname(__FILE__)] end
 
       def generate_secrets
+        self.uri = URI(uri)
         require 'securerandom'
         template 'environments.yml.erb', "#{Ros.environments_dir}/#{name}.yml"
       end

@@ -72,6 +72,20 @@ module Ros
         end)
     end
 
+    def uri; URI("#{Settings.infra.endpoint.scheme}://#{api_hostname}") end
+
+    def api_hostname
+      @api_hostname ||=
+        if Settings.infra.branch_deployments
+          branch_name.eql?(infra.api_branch) ? Settings.infra.endpoint.host : "#{branch_name}-#{Settins.infra.endpoint.host}"
+        else
+          Settings.infra.endpoint.host
+        end + ".#{Settings.infra.dns.subdomain}.#{Settings.infra.dns.domain}"
+    end
+
+    def service_names_enabled; Settings.services.reject{|s| s.last.enabled.eql? false }.map{ |s| s.first } end
+    def service_names; Settings.services.keys end
+
     def tf_root; root.join('devops/terraform') end
     def ansible_root; root.join('devops/ansible') end
     def helm_root; root.join('devops/helm') end
@@ -81,7 +95,7 @@ module Ros
     def environments_dir; "#{config_dir}/environments" end
     def deployments_dir; "#{config_dir}/deployments" end
 
-    def ros_root; root.join('ros') end
+    def ros_root; is_ros? ? root : root.join('ros') end
 
     def has_ros?; not is_ros? and Dir.exists?(ros_root) end
 

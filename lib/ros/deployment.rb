@@ -26,17 +26,8 @@ module Ros
     def template_hash(name = '', profile = ''); template_vars(name, profile).merge(base_vars) end
     def template_vars(name, profile); {} end
     def base_vars; { infra: infra, platform: platform, services: services, profiles: profiles, images: images } end
-
-    def uri; URI("#{infra.endpoint.scheme}://#{api_hostname}") end
-
-    def api_hostname
-      @api_hostname ||=
-        if infra.branch_deployments
-          branch_name.eql?(infra.api_branch) ? infra.endpoint.host : "#{branch_name}-#{infra.endpoint.host}"
-        else
-          infra.endpoint.host
-        end + ".#{infra.dns.subdomain}.#{infra.dns.domain}"
-    end
+    def uri; Ros.uri end
+    def api_hostname; Ros.api_hostname end
 
     def version; Bump::Bump.current end
     def image; images[Settings.meta.components.image] end

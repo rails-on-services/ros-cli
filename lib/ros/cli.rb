@@ -93,9 +93,14 @@ module Ros
 
     desc 'console', 'Start the Ros console (short-cut alias: "c")'
     map %w(c) => :console
-    def console(env = nil)
-      Ros.load_env(env) if (env and env != Ros.default_env)
-      Pry.start
+    def console(service = nil)
+      if service
+        system("docker-compose exec #{service} rails console")
+        return
+      else
+        # Ros.load_env(env) if (env and env != Ros.default_env)
+        Pry.start
+      end
     end
 
     desc 'list', 'List configuration objects'
@@ -116,6 +121,18 @@ module Ros
       Ros.ops_action(:service, :provision, options)
     end
 
+    # wrap docker compose commands
+    desc 'up', 'bring up service(s)'
+    option :daemon, type: :boolean, aliases: '-d'
+    def up(services = nil)
+      compose(:up, services)
+    end
+
+    desc 'ps', 'List running services'
+    def ps
+      puts %x(docker-compose ps)
+    end
+
     desc 'reset SERVICE', 'Reset a service'
     def reset(service)
       %x(docker-compose stop #{service})
@@ -124,21 +141,25 @@ module Ros
       %x(docker container exec #{Settings.platform.environment.partition_name}_nginx_1 nginx -s reload)
     end
 
-    desc 'ps', 'List running services'
-    def ps
-      puts %x(docker-compose ps)
-    end
-
     desc 'restart all non-platform services', 'Restarts all non-platform services'
-    def restart
+    def restart(services = nil)
+      services = (services.nil? ? Ros.service_names_enabled : [services]).join(' ')
       # TODO: needs to get the correct name of the worker, etc
       # Settings.services.each_with_object([]) do |service, ary|
       #   ary.concat service.profiles
       # end
-      %x(docker-compose stop #{Settings.services.keys.join(' ')})
-      %x(docker-compose up -d #{Settings.services.keys.join(' ')})
+      %x(docker-compose stop #{services})
+      %x(docker-compose up -d #{services})
       sleep 3
       %x(docker container exec #{Settings.platform.environment.partition_name}_nginx_1 nginx -s reload)
+    end
+    private
+    def compose(command, services = nil)
+      services = (services.nil? ? Ros.service_names_enabled : [services]).join(' ')
+      compose_options = options.daemon ? '-d' : ''
+      cmd_string = "docker-compose #{command} #{compose_options} #{services}"
+      puts "Running #{cmd_string}"
+      # %x(docker-compose #{cmd_string})
     end
   end
 end

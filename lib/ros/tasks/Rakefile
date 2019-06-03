@@ -1,5 +1,28 @@
 require 'ros'
 require 'ros/exec'
+require 'pry'
+
+namespace :credentials do
+  desc 'Display IAM credentials for the current deployment'
+  task :show do
+    puts "Credentials for #{Ros.uri}"
+    name = Ros.uri.to_s.gsub('://', '_')
+    path = "#{Ros.ros_root}/services/iam/tmp/installations/#{name}"
+    puts File.read("#{path}/credentials/cli")
+    puts "\n\nPostman\n"
+    Dir["#{path}/credentials/postman/*"].each do |cred|
+      puts File.read(cred)
+    end
+  end
+  task :link do
+    installations_path = "#{Ros.ros_root}/services/iam/tmp/installations/*"
+    FileUtils.mkdir_p("#{Dir.home}/.ros") # unless Dir.exists?("#{Dir.home}/.ros")
+    Dir.chdir("#{Dir.home}/.ros")
+    Dir[installations_path].each do |dir|
+      FileUtils.ln_s("#{dir}/credentials/cli", dir.split('/').last)
+    end
+  end
+end
 
 namespace :ops do
   %i(configure provision rollback).each do |action|
