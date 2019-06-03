@@ -54,13 +54,7 @@ module Ros
       raise Error, set_color("ERROR: invalid artifact #{artifact}. valid artifacts are: #{valid_artifacts.join(', ')}", :red) unless valid_artifacts.include? artifact
       raise Error, set_color("ERROR: must supply a name for #{artifact}", :red) if %w(service env).include?(artifact) and args[0].nil?
       require_relative "generators/#{artifact}/#{artifact}_generator.rb"
-      name = args[0]
-      args.push(File.basename(Dir.pwd))
-      generator = Object.const_get("Ros::Generators::#{artifact.capitalize}Generator").new(args)
-      generator.options = options
-      # generator.destination_root = '.'
-      # generator.destination_root = Ros.root
-      generator.invoke_all
+      send(artifact, args)
     end
 
     # TODO: refactor setting action to :destroy
@@ -95,7 +89,12 @@ module Ros
     map %w(c) => :console
     def console(service = nil)
       if service
-        system("docker-compose exec #{service} rails console")
+        # binding.pry
+        type = Settings.meta.components.provider.split('/').last
+        if type.eql?('instance')
+          # Settings.platform.environment.partition_name}_nginx_1 nginx -s reload)
+          system("docker-compose exec #{service} rails console")
+        end
         return
       else
         # Ros.load_env(env) if (env and env != Ros.default_env)
@@ -133,33 +132,53 @@ module Ros
       puts %x(docker-compose ps)
     end
 
-    desc 'reset SERVICE', 'Reset a service'
-    def reset(service)
-      %x(docker-compose stop #{service})
-      %x(docker-compose rm #{service})
-      %x(docker-compose up -d #{service})
+    desc 'restart SERVICE', 'Restart a service'
+    def restart(service)
+      compose(:stop, service)
+      compose(:rm, service)
+      compose('up -d', service)
+      sleep 3
       %x(docker container exec #{Settings.platform.environment.partition_name}_nginx_1 nginx -s reload)
     end
 
-    desc 'restart all non-platform services', 'Restarts all non-platform services'
-    def restart(services = nil)
+    desc 'reload all non-platform services', 'Reloads all non-platform services'
+    def reload(services = nil)
+      compose(:stop, services)
+      compose('up -d', services)
+      sleep 3
+      %x(docker container exec #{Settings.platform.environment.partition_name}_nginx_1 nginx -s reload)
+    end
+
+    private
+
+    def compose(command, services = nil)
       services = (services.nil? ? Ros.service_names_enabled : [services]).join(' ')
       # TODO: needs to get the correct name of the worker, etc
       # Settings.services.each_with_object([]) do |service, ary|
       #   ary.concat service.profiles
       # end
-      %x(docker-compose stop #{services})
-      %x(docker-compose up -d #{services})
-      sleep 3
-      %x(docker container exec #{Settings.platform.environment.partition_name}_nginx_1 nginx -s reload)
-    end
-    private
-    def compose(command, services = nil)
-      services = (services.nil? ? Ros.service_names_enabled : [services]).join(' ')
       compose_options = options.daemon ? '-d' : ''
       cmd_string = "docker-compose #{command} #{compose_options} #{services}"
       puts "Running #{cmd_string}"
-      # %x(docker-compose #{cmd_string})
+      %x(docker-compose #{cmd_string})
+    end
+
+    def service(args)
+      name = args[0]
+      generator = Ros::Generators::EnvGenerator.new(args)
+      generator.options = options
+      generator.destination_root = Ros.root
+      generator.invoke_all
+    end
+
+    def env(args)
+      args.push('http://localhost:3000') unless args[1]
+      args.push(File.basename(Ros.root)) unless args[2]
+      args.push('')
+      generator = Ros::Generators::EnvGenerator.new(args)
+      generator.options = options
+      generator.destination_root = Ros.root
+      generator.invoke_all
     end
   end
 end

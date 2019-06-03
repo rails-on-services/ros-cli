@@ -7,8 +7,8 @@ module Ros
     class EnvGenerator < Thor::Group
       include Thor::Actions
       argument :name
-      argument :partition_name
       argument :uri
+      argument :partition_name
       argument :content
 
       def self.source_paths; ["#{File.dirname(__FILE__)}/templates", File.dirname(__FILE__)] end
