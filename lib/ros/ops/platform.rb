@@ -41,30 +41,7 @@ module Ros
         end
       end
 
-      def environment
-        {
-          # secret_key_base: ENV['SECRET_KEY_BASE'],
-          # rails_master_key: ENV['RAILS_MASTER_KEY'],
-          jwt: {
-            # encryption_key: ENV['PLATFORM__ENCRYPTION_KEY'],
-            iss: "#{uri.scheme}://iam.#{uri.to_s.split('//').last}",
-            aud: uri.to_s
-          },
-          # PLATFORM__CREDENTIAL__SALT
-          # PLATFORM__CONNECTION__TYPE=host
-          # PLATFORM__EXTERNAL_CONNECTION_TYPE=path
-          hosts: uri.to_s.split('//').last,
-          postman: {
-            workspace: uri.to_s.split('//').last,
-            # api_key: ENV['PLATFORM__POSTMAN__API_KEY']
-          },
-          api_docs: {
-            server: {
-              host: uri.to_s
-            }
-          }
-        }
-      end
+      def environment; YAML.load_file("#{Ros.root}/config/environments/#{Ros.env}.yml") end
 
         def write_fluentd
           content = File.read("#{template_services_root}/fluentd/requests.conf.erb")

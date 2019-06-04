@@ -54,7 +54,7 @@ module Ros
       raise Error, set_color("ERROR: invalid artifact #{artifact}. valid artifacts are: #{valid_artifacts.join(', ')}", :red) unless valid_artifacts.include? artifact
       raise Error, set_color("ERROR: must supply a name for #{artifact}", :red) if %w(service env).include?(artifact) and args[0].nil?
       require_relative "generators/#{artifact}/#{artifact}_generator.rb"
-      send(artifact, args)
+      send("Ros.generate_#{artifact}", args)
     end
 
     # TODO: refactor setting action to :destroy
@@ -102,13 +102,6 @@ module Ros
       end
     end
 
-    desc 'list', 'List configuration objects'
-    map %w(ls) => :list
-    def list(what = nil)
-      STDOUT.puts 'Options: services, profiles, images' if what.nil?
-      STDOUT.puts "#{Settings.send(what).keys.join("\n")}" unless what.nil?
-    end
-
     desc 'server PROFILE', 'Start all services (short-cut alias: "s")'
     option :build, type: :boolean, aliases: '-b'
     option :daemon, type: :boolean, aliases: '-d'
@@ -117,6 +110,7 @@ module Ros
     map %w(s) => :server
     def server
       Ros.load_env(options.environment) if options.environment != Ros.default_env
+      # Ros.preflight_check(options)
       Ros.ops_action(:service, :provision, options)
     end
 
@@ -125,11 +119,6 @@ module Ros
     option :daemon, type: :boolean, aliases: '-d'
     def up(services = nil)
       compose(:up, services)
-    end
-
-    desc 'ps', 'List running services'
-    def ps
-      puts %x(docker-compose ps)
     end
 
     desc 'restart SERVICE', 'Restart a service'
@@ -149,6 +138,18 @@ module Ros
       %x(docker container exec #{Settings.platform.environment.partition_name}_nginx_1 nginx -s reload)
     end
 
+    desc 'ps', 'List running services'
+    def ps
+      puts %x(docker-compose ps)
+    end
+
+    desc 'list', 'List configuration objects'
+    map %w(ls) => :list
+    def list(what = nil)
+      STDOUT.puts 'Options: services, profiles, images' if what.nil?
+      STDOUT.puts "#{Settings.send(what).keys.join("\n")}" unless what.nil?
+    end
+
     private
 
     def compose(command, services = nil)
@@ -161,24 +162,6 @@ module Ros
       cmd_string = "docker-compose #{command} #{compose_options} #{services}"
       puts "Running #{cmd_string}"
       %x(docker-compose #{cmd_string})
-    end
-
-    def service(args)
-      name = args[0]
-      generator = Ros::Generators::EnvGenerator.new(args)
-      generator.options = options
-      generator.destination_root = Ros.root
-      generator.invoke_all
-    end
-
-    def env(args)
-      args.push('http://localhost:3000') unless args[1]
-      args.push(File.basename(Ros.root)) unless args[2]
-      args.push('')
-      generator = Ros::Generators::EnvGenerator.new(args)
-      generator.options = options
-      generator.destination_root = Ros.root
-      generator.invoke_all
     end
   end
 end

@@ -116,7 +116,7 @@ module Ros
 
         def compose_envs
           {
-            compose_file: Dir["#{deploy_root}/**/*.yml"].map{ |p| p.gsub("#{Ros.root}/", '') }.join(':'),
+            compose_file: Dir["#{deploy_root}/**/*.yml"].map{ |p| p.gsub("#{Ros.root}/", '') }.sort.join(':'),
             compose_project_name: platform.environment.partition_name,
             context_dir: "#{relative_path}/..",
             ros_context_dir: "#{relative_path}/../ros",

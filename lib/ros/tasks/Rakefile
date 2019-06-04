@@ -2,6 +2,18 @@ require 'ros'
 require 'ros/exec'
 require 'pry'
 
+namespace :preflight do
+  desc 'Check that platform requirements are present'
+  task :check do
+    Ros.preflight_check
+  end
+
+  desc 'Auto fix any missing platform requirements'
+  task :fix do
+    Ros.preflight_fix
+  end
+end
+
 namespace :credentials do
   desc 'Display IAM credentials for the current deployment'
   task :show do
@@ -24,9 +36,9 @@ namespace :credentials do
   end
 end
 
-namespace :ops do
+namespace :deployment do
   %i(configure provision rollback).each do |action|
-    desc "#{action.capitalize} all"
+    desc "#{action.capitalize} #{Ros.env} deployment (#{Settings.meta.components.provider.split('/').last})"
     task action do |task, args|
       %i(infra platform service).each do |type|
         Ros.ops_action(type, action)
@@ -35,7 +47,7 @@ namespace :ops do
 
     namespace action do
       %i(infra platform service).each do |namespace|
-        desc "#{action.capitalize} #{namespace}"
+        # desc "#{action.capitalize} #{namespace}"
         task namespace do |task, args|
           ns, action, type = task.name.split(':')
           Ros.ops_action(type, action)
