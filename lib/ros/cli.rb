@@ -53,8 +53,8 @@ module Ros
       valid_artifacts = %w(service env)
       raise Error, set_color("ERROR: invalid artifact #{artifact}. valid artifacts are: #{valid_artifacts.join(', ')}", :red) unless valid_artifacts.include? artifact
       raise Error, set_color("ERROR: must supply a name for #{artifact}", :red) if %w(service env).include?(artifact) and args[0].nil?
-      require_relative "generators/#{artifact}/#{artifact}_generator.rb"
-      send("Ros.generate_#{artifact}", args)
+      # require_relative "generators/#{artifact}/#{artifact}_generator.rb"
+      send("Ros.generate_#{artifact}", args, options)
     end
 
     # TODO: refactor setting action to :destroy
@@ -103,15 +103,19 @@ module Ros
     end
 
     desc 'server PROFILE', 'Start all services (short-cut alias: "s")'
-    option :build, type: :boolean, aliases: '-b'
     option :daemon, type: :boolean, aliases: '-d'
     option :environment, type: :string, aliases: '-e', default: 'local'
-    option :initialize, type: :boolean, aliases: '-i'
+    # option :initialize, type: :boolean, aliases: '-i'
     map %w(s) => :server
     def server
       Ros.load_env(options.environment) if options.environment != Ros.default_env
-      # Ros.preflight_check(options)
       Ros.ops_action(:service, :provision, options)
+    end
+
+    desc 'build IMAGE', 'build one or all images'
+    map %w(b) => :build
+    def build(services = nil)
+      compose(:build, services)
     end
 
     # wrap docker compose commands
@@ -161,7 +165,10 @@ module Ros
       compose_options = options.daemon ? '-d' : ''
       cmd_string = "docker-compose #{command} #{compose_options} #{services}"
       puts "Running #{cmd_string}"
-      %x(docker-compose #{cmd_string})
+      FileUtils.rm_f('.env')
+      FileUtils.ln_s("#{compose_dir}/#{Ros.env}.env", '.env')
+      system(cmd_string)
     end
+    def compose_dir; "#{Ros.root}/tmp/compose" end
   end
 end

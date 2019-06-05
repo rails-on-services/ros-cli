@@ -10,7 +10,7 @@ namespace :preflight do
 
   desc 'Auto fix any missing platform requirements'
   task :fix do
-    Ros.preflight_fix
+    Ros.preflight_check(fix: true)
   end
 end
 
@@ -119,14 +119,14 @@ namespace :db do
 
     desc 'Reset a database (drop, create and run migrations)'
     task :reset do |task|
-      Ros::Exec.new.execute(task.name)
+      Ros::Exec.new.execute("ros:#{task.name}")
     end
   end
 
   namespace :reset do
     desc 'Reset a database and seed it'
     task :seed do |task|
-      Ros::Exec.new.execute(task.name)
+      Ros::Exec.new.execute("ros:#{task.name}", ARGV)
     end
   end
 end

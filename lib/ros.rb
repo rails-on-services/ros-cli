@@ -23,6 +23,43 @@ module Ros
   end
 
   class << self
+    def preflight_check(fix: false)
+      options = {}
+      ros_repo = Dir.exists?(Ros.ros_root)
+      env_config = File.exists?("#{environments_dir}/#{Ros.env}.yml")
+      deploy_config = Dir.exists?("tmp/deployments/#{Ros.env}")
+      if fix
+        %x(git clone git@github.com:rails-on-services/ros.git) unless ros_repo
+        generate_env([Ros.env]) unless env_config
+        Ros.ops_action(:platform, :configure, options) unless deploy_config
+        Ros.ops_action(:service, :configure, options) unless deploy_config
+      else
+        puts "ros repo: #{ros_repo ? 'ok' : 'missing'}"
+        puts "environment configuration: #{env_config ? 'ok' : 'missing'}"
+        puts "deployment configuration: #{deploy_config ? 'ok' : 'missing'}"
+      end
+    end
+
+    def generate_service(args, options = {})
+      name = args[0]
+      require_relative "ros/generators/service/service_generator.rb"
+      generator = Ros::Generators::ServiceGenerator.new(args)
+      generator.options = options
+      generator.destination_root = Ros.root
+      generator.invoke_all
+    end
+
+    def generate_env(args, options = {})
+      require_relative "ros/generators/env/env_generator.rb"
+      args.push('http://localhost:3000') unless args[1]
+      args.push(File.basename(Ros.root)) unless args[2]
+      args.push('')
+      generator = Ros::Generators::EnvGenerator.new(args)
+      generator.options = options
+      generator.destination_root = Ros.root
+      generator.invoke_all
+    end
+
     def ops_action(type, action, options = Config::Options.new)
       provider, infra_type = Settings.meta.components.provider.split('/')
       require "ros/ops/#{infra_type}"
@@ -91,7 +128,7 @@ module Ros
     def helm_root; root.join('devops/helm') end
     def k8s_root; root.join('devops/k8s') end
 
-    def config_dir; 'config' end
+    def config_dir; "#{Ros.root}/config" end
     def environments_dir; "#{config_dir}/environments" end
     def deployments_dir; "#{config_dir}/deployments" end
 
