@@ -1,6 +1,6 @@
   <%= name %>_worker:
     image: "${IMAGE_REPOSITORY}/<%= name %>:${IMAGE_TAG}"
-    command: ["bundle", "exec", "sidekiq", "-r", "spec/dummy"]
+    command: ["bundle", "exec", "sidekiq", "-r", "spec/dummy", "-C", "config/sidekiq.yml"]
     env_file:
       - ./platform.env<% if has_envs %><%= "\n      - ../services/#{name}.env" %><% end %>
     depends_on:
