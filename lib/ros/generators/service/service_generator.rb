@@ -15,25 +15,30 @@ module Ros
       def generate
         return unless self.behavior.eql? :invoke
         return if Dir.exists?("services/#{name}")
-        template_file = "#{File.dirname(__FILE__)}/rails/service_generator.rb"
+        rails_generator = Ros.is_ros? ? 'plugin' : 'app'
         plugin = Ros.is_ros? ? 'plugin' : ''
-        rails_options = '--api -G -S -J -C -T -M --database=postgresql --skip-active-storage'
         plugin_options = Ros.is_ros? ? '--full --dummy-path=spec/dummy' : ''
-        prefix = Ros.is_ros? ? 'ros-' : ''
-        service_name = "#{prefix}#{name}"
-        exec_system = "rails #{plugin} new #{rails_options} #{plugin_options} -m #{template_file} #{service_name}"
-        puts exec_system
-        Dir.chdir('services') do
-          system exec_system
-          FileUtils.mv(service_name, name) if Ros.is_ros?
-        end
+        template_file = "#{File.dirname(__FILE__)}/#{rails_generator}/#{rails_generator}_generator.rb"
+        rails_options = '--api -G -S -J -C -T -M --skip-turbolinks --database=postgresql --skip-active-storage'
+        exec_string = "rails #{plugin} new #{rails_options} #{plugin_options} -m #{template_file} #{name}"
+        puts exec_string
+        Dir.chdir("#{destination_root}/services") { system(exec_string) }
+      end
+
+      def revoke
+        return unless self.behavior.eql? :revoke
+        FileUtils.rm_rf("#{destination_root}/services/#{name}")
+        say "      remove  services/#{name}"
+      end
+
+      # TODO: maybe move this to plugin
+      def gemspec_content
+        return unless Ros.is_ros?
+        gemspec = "services/#{name}/#{name}.gemspec"
+        gsub_file gemspec, '  spec.name        = "', '  spec.name        = "ros-'
       end
 
       def sdk_content
-        append_file "lib/sdk/lib/#{project}_sdk/models.rb", <<~RUBY
-          require '#{project}_sdk/models/#{name}.rb'
-        RUBY
-
         create_file "lib/sdk/lib/#{project}_sdk/models/#{name}.rb", <<~RUBY
           # frozen_string_literal: true
 
@@ -46,12 +51,10 @@ module Ros
             end
           end
         RUBY
-      end
 
-      def finish_message
-        FileUtils.rm_rf(destination_root) if self.behavior.eql? :revoke
-        action = self.behavior.eql?(:invoke) ? 'Created' : 'Destroyed'
-        say "\n#{action} service at #{destination_root}"
+        append_file "lib/sdk/lib/#{project}_sdk/models.rb", <<~RUBY
+          require '#{project}_sdk/models/#{name}.rb'
+        RUBY
       end
     end
   end

@@ -53,25 +53,18 @@ module Ros
       valid_artifacts = %w(service env)
       raise Error, set_color("ERROR: invalid artifact #{artifact}. valid artifacts are: #{valid_artifacts.join(', ')}", :red) unless valid_artifacts.include? artifact
       raise Error, set_color("ERROR: must supply a name for #{artifact}", :red) if %w(service env).include?(artifact) and args[0].nil?
-      # require_relative "generators/#{artifact}/#{artifact}_generator.rb"
-      send("Ros.generate_#{artifact}", args, options)
+      Ros.send("generate_#{artifact}", args, options)
     end
 
     # TODO: refactor setting action to :destroy
     desc 'destroy TYPE NAME', 'Destroy an environment or service'
     map %w(d) => :destroy
-    def destroy(artifact, name = nil)
-      valid_artifacts = %w(service)
+    def destroy(artifact, *args)
+      raise Error, set_color("ERROR: Not a Ros project", :red) if Ros.root.nil?
+      valid_artifacts = %w(service env)
       raise Error, set_color("ERROR: invalid artifact #{artifact}. valid artifacts are: #{valid_artifacts.join(', ')}", :red) unless valid_artifacts.include? artifact
-      raise Error, set_color("ERROR: must supply a name for service", :red) if artifact.eql?('service') and name.nil?
-      require_relative "generators/#{artifact}.rb"
-      generator = Object.const_get("Ros::Generators::#{artifact.capitalize}").new
-      generator.destination_root = artifact.eql?('service') ? "services/#{name}" : "services/#{name}#{artifact.eql?('sdk') ? '_' : '-'}#{artifact}"
-      generator.options = options
-      generator.name = name
-      generator.project = File.basename(Dir.pwd)
-      generator.behavior = :revoke
-      generator.invoke_all
+      raise Error, set_color("ERROR: must supply a name for #{artifact}", :red) if %w(service env).include?(artifact) and args[0].nil?
+      Ros.send("generate_#{artifact}", args, options, :revoke)
     end
 
     # TODO Handle show and edit as well
@@ -124,6 +117,7 @@ module Ros
     option :daemon, type: :boolean, aliases: '-d'
     def up(services = nil)
       compose(:up, services)
+      %x(docker container exec #{Settings.platform.partition_name}_nginx_1 nginx -s reload)
     end
 
     desc 'stop', 'stop platform'
@@ -142,7 +136,7 @@ module Ros
       compose(:rm, service)
       compose('up -d', service)
       sleep 3
-      %x(docker container exec #{Settings.platform.environment.partition_name}_nginx_1 nginx -s reload)
+      %x(docker container exec #{Settings.platform.partition_name}_nginx_1 nginx -s reload)
     end
 
     desc 'reload all non-platform services', 'Reloads all non-platform services'
@@ -150,7 +144,12 @@ module Ros
       compose(:stop, services)
       compose('up -d', services)
       sleep 3
-      %x(docker container exec #{Settings.platform.environment.partition_name}_nginx_1 nginx -s reload)
+      %x(docker container exec #{Settings.platform.partition_name}_nginx_1 nginx -s reload)
+    end
+
+    desc 'logs', 'Tail logs of a running service'
+    def logs(service)
+      puts system("docker-compose logs -f #{service}")
     end
 
     desc 'ps', 'List running services'

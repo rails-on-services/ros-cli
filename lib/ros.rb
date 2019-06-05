@@ -40,22 +40,24 @@ module Ros
       end
     end
 
-    def generate_service(args, options = {})
-      name = args[0]
+    def generate_service(args, options = {}, behavior = nil)
       require_relative "ros/generators/service/service_generator.rb"
+      args.push(File.basename(Ros.root)) unless args[1]
       generator = Ros::Generators::ServiceGenerator.new(args)
       generator.options = options
+      generator.behavior = behavior if behavior
       generator.destination_root = Ros.root
       generator.invoke_all
     end
 
-    def generate_env(args, options = {})
+    def generate_env(args, options = {}, behavior = nil)
       require_relative "ros/generators/env/env_generator.rb"
       args.push('http://localhost:3000') unless args[1]
       args.push(File.basename(Ros.root)) unless args[2]
       args.push('')
       generator = Ros::Generators::EnvGenerator.new(args)
       generator.options = options
+      generator.behavior = behavior if behavior
       generator.destination_root = Ros.root
       generator.invoke_all
     end

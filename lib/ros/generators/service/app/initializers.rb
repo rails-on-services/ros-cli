@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+application "require 'rails-html-sanitizer'"
+
 insert_into_file @profile.config_file, before: 'require' do <<-RUBY
 require 'ros/core'
 RUBY
@@ -31,17 +33,25 @@ RUBY
 end
 
 =begin
-if app.ros.service
-  inject_into_file initializer_file, after: ".api_only = true\n" do <<-RUBY
-    config.after_initialize do
-      Settings.service['name'] = '#{app.application_name.gsub('ros-', '')}'
-      Settings.service['policy_name'] = '#{app.application_name.gsub('ros-', '').classify}'
-    end
-RUBY
-  end
-end
-=end
+   # Service values for apps, e.g. Survey
+   initializer :service_values do |app|
+     name = self.class.name.split('::').first
+     Settings.service['name'] = name.downcase
+     Settings.service['policy_name'] = name
+   end
+# =end
 
+   # Service values for engines, e.g. Iam
+inject_into_file @profile.initializer_file, after: ".api_only = true\n" do <<-RUBY
+       initializer :service_values do |app|
+         name = self.class.parent.name.demodulize.underscore
+         Settings.prepend_source!({ service: { name: name, policy_name: name.capitalize } })
+       end
+RUBY
+end
+
+
+# =begin
 # TODO: Test this with an application like Survey b/c that's not an engine.
 inject_into_file @profile.initializer_file, after: ".api_only = true\n" do <<-RUBY
       initializer :service_values do |app|
@@ -49,6 +59,6 @@ inject_into_file @profile.initializer_file, after: ".api_only = true\n" do <<-RU
         Settings.service.name = name # '#{@profile.service_name}'
         Settings.service.policy_name = name.capitalize # '#{@profile.service_name.capitalize}'
       end
-      # end if false
 RUBY
 end
+=end

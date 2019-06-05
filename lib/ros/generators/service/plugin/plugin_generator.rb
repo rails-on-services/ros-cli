@@ -24,34 +24,42 @@ gem_group :production do
   gem 'puma'
 end
 
-unless @profile.is_ros?
-  gem 'ros-core', path: "#{@profile.ros_lib_path}/core"
-  gem 'ros_sdk', path: "#{@profile.ros_lib_path}/sdk"
-  # NOTE: The empty group is to put a separator between the above gems and the ones below.
-  # Without this, rails template will put them in alphabetical order which is a problem
-  gem_group(:development) do
-  end
-end
-
 gem "#{@profile.platform_name}-core", path: '../../lib/core'
 gem "#{@profile.platform_name}_sdk", path: '../../lib/sdk'
 
 # Create Engine's namespaced classes
-if @profile.is_engine?
-  template "app/models/%namespaced_name%/application_record.rb"
-  template "app/resources/%namespaced_name%/application_resource.rb"
-  template "app/policies/%namespaced_name%//application_policy.rb"
-  template "app/controllers/%namespaced_name%//application_controller.rb"
-  template "app/jobs/%namespaced_name%//application_job.rb"
-end
+template "app/models/%namespaced_name%/application_record.rb"
+template "app/resources/%namespaced_name%/application_resource.rb"
+template "app/policies/%namespaced_name%/application_policy.rb"
+template "app/controllers/%namespaced_name%/application_controller.rb"
+template "app/jobs/%namespaced_name%/application_job.rb"
 
 # Modify spec/dummy or app Base Classes
 apply('app_classes.rb') if @profile.is_engine?
-apply('initializers.rb')
+
+# apply('initializers.rb')
+remove_file("lib/#{namespaced_name}/engine.rb")
+insert_into_file @profile.config_file, before: 'require' do <<-RUBY
+require 'ros/core'
+RUBY
+end
+template('lib/%namespaced_name%/engine.rb')
+
 apply('routes.rb')
-apply('models.rb')
+# apply('models.rb')
+template('app/models/tenant.rb')
+
+# require 'pry'
+# binding.pry
+
+# apply('seeds.rb')
 # Write seed files for tenants, etc
-apply('seeds.rb')
+create_file "#{options.dummy_path}/db/seeds.rb" # if @profile.is_engine?
+template('db/seeds/development/tenants.seeds.rb')
+template('db/seeds/development/data.seeds.rb')
+remove_file("lib/tasks/#{namespaced_name}_tasks.rake")
+template('lib/tasks/%namespaced_name%_tasks.rake')
+
 apply('rspec.rb')
 
 template 'config/sidekiq.yml'

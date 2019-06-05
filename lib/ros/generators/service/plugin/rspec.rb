@@ -13,13 +13,13 @@ copy_file 'spec/linter.rb'
 copy_file 'Guardfile'
 
 # if app.plugin?
-inject_into_file @profile.initializer_file, after: ".api_only = true\n" do <<-RUBY
-      config.generators do |g|
-        g.test_framework :rspec, fixture: true
-        g.fixture_replacement :factory_bot, dir: 'spec/factories'
-      end
-RUBY
-end
+# inject_into_file @profile.initializer_file, after: ".api_only = true\n" do <<-RUBY
+#       config.generators do |g|
+#         g.test_framework :rspec, fixture: true
+#         g.fixture_replacement :factory_bot, dir: 'spec/factories'
+#       end
+# RUBY
+# end
 
 # workaround for rails 6.0.0.beta2
 if @profile.is_engine?
