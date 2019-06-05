@@ -41,7 +41,7 @@ module Ros
         end
       end
 
-      def environment; YAML.load_file("#{Ros.root}/config/environments/#{Ros.env}.yml") end
+      def environment; YAML.load_file("#{Ros.root}/config/environments/#{Ros.env}.yml")['platform'] end
 
         def write_fluentd
           content = File.read("#{template_services_root}/fluentd/requests.conf.erb")
