@@ -8,8 +8,6 @@
     ports:
       - "3000"<% if mount %>
     volumes:
-      - "${<%= context_dir %>}/services/<%= name %>:/home/rails/app"
-      - "${<%= context_dir %>}/services/core:/home/rails/core"
-      - "${<%= context_dir %>}/services/sdk:/home/rails/sdk"<% if mount_ros %>
-      - "${ROS_CONTEXT_DIR}/services/core:/home/ros/services/core"
-      - "${ROS_CONTEXT_DIR}/services/sdk:/home/ros/services/sdk"<% end %><% end %>
+      - "${<%= context_dir %>}/services/<%= name %>:/home/rails/services/app"
+      - "${<%= context_dir %>}/lib:/home/rails/lib"<% if mount_ros %>
+      - "${ROS_CONTEXT_DIR}/lib:/home/rails/ros/lib"<% end %><% end %>

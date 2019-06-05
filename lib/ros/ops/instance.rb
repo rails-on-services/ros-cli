@@ -117,7 +117,7 @@ module Ros
         def compose_envs
           {
             compose_file: Dir["#{deploy_root}/**/*.yml"].map{ |p| p.gsub("#{Ros.root}/", '') }.sort.join(':'),
-            compose_project_name: platform.environment.partition_name,
+            compose_project_name: platform.partition_name,
             context_dir: "#{relative_path}/..",
             ros_context_dir: "#{relative_path}/../ros",
             nginx_host_port: platform.nginx_host_port,

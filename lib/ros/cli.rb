@@ -92,8 +92,9 @@ module Ros
         # binding.pry
         type = Settings.meta.components.provider.split('/').last
         if type.eql?('instance')
+          run_string = %x(docker-compose ps #{service} | grep #{service}).length.positive? ? 'exec' : 'run --rm'
           # Settings.platform.environment.partition_name}_nginx_1 nginx -s reload)
-          system("docker-compose exec #{service} rails console")
+          system("docker-compose #{run_string} #{service} rails console")
         end
         return
       else
@@ -123,6 +124,16 @@ module Ros
     option :daemon, type: :boolean, aliases: '-d'
     def up(services = nil)
       compose(:up, services)
+    end
+
+    desc 'stop', 'stop platform'
+    def stop
+      compose(:stop, '')
+    end
+
+    desc 'down', 'bring down platform'
+    def down
+      compose(:down, '')
     end
 
     desc 'restart SERVICE', 'Restart a service'

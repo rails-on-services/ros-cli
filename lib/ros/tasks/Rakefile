@@ -14,28 +14,6 @@ namespace :preflight do
   end
 end
 
-namespace :credentials do
-  desc 'Display IAM credentials for the current deployment'
-  task :show do
-    puts "Credentials for #{Ros.uri}"
-    name = Ros.uri.to_s.gsub('://', '_')
-    path = "#{Ros.ros_root}/services/iam/tmp/installations/#{name}"
-    puts File.read("#{path}/credentials/cli")
-    puts "\n\nPostman\n"
-    Dir["#{path}/credentials/postman/*"].each do |cred|
-      puts File.read(cred)
-    end
-  end
-  task :link do
-    installations_path = "#{Ros.ros_root}/services/iam/tmp/installations/*"
-    FileUtils.mkdir_p("#{Dir.home}/.ros") # unless Dir.exists?("#{Dir.home}/.ros")
-    Dir.chdir("#{Dir.home}/.ros")
-    Dir[installations_path].each do |dir|
-      FileUtils.ln_s("#{dir}/credentials/cli", dir.split('/').last)
-    end
-  end
-end
-
 namespace :deployment do
   %i(configure provision rollback).each do |action|
     desc "#{action.capitalize} #{Ros.env} deployment (#{Settings.meta.components.provider.split('/').last})"
@@ -76,57 +54,81 @@ namespace :bump do
   task patch: :env do; Bump::Bump.run('patch') end
 end
 
-namespace :apidoc do
-  desc 'Generate, convert and publish'
-  task :all do |task|
-    Ros::Exec.new.execute(task.name)
+namespace :ros do
+  namespace :iam do
+    namespace :credentials do
+      desc 'Display IAM credentials for the current deployment'
+      task :show do |task|
+        Ros::Exec.new.execute(task.name, [:iam])
+      end
+      desc 'Link IAM credentials for the current deployment'
+      task :link do |task|
+        Ros::Exec.new.execute(task.name, [:iam])
+      end
+    end
   end
 
-  desc 'Create OpenAPI V 3.0 docuementation'
-  task :generate do |task|
-    Ros::Exec.new.execute(task.name)
+  namespace :apidoc do
+    desc 'Generate, convert and publish'
+    task :all do |task|
+      Ros::Exec.new.execute(task.name)
+    end
+
+    desc 'Create OpenAPI V 3.0 docuementation'
+    task :generate do |task|
+      Ros::Exec.new.execute(task.name)
+    end
+
+    desc 'Convert OpenAPI V 3.0 docuementation to Postman'
+    task :convert do |task|
+      Ros::Exec.new.execute(task.name)
+    end
+
+    desc 'Publish docs to Postman'
+    task :publish do |task|
+      Ros::Exec.new.execute(task.name)
+    end
   end
 
-  desc 'Convert OpenAPI V 3.0 docuementation to Postman'
-  task :convert do |task|
-    Ros::Exec.new.execute(task.name)
+  namespace :erd do
+    desc 'Generate ERD'
+    task :generate  do |task|
+      Ros::Exec.new.execute(task.name, ARGV)
+    end
   end
 
-  desc 'Publish docs to Postman'
-  task :publish do |task|
-    Ros::Exec.new.execute(task.name)
-  end
-end
+  namespace :db do
+    desc 'Clean a database (removes all tenants)'
+    task :clean do |task|
+      Ros::Exec.new.execute(task.name, ARGV)
+    end
 
-namespace :erd do
-  desc 'Generate ERD'
-  task :generate  do |task|
-    Ros::Exec.new.execute(task.name)
+    namespace :clean do
+      desc 'Clean a database and seed it'
+      task :seed do |task|
+        Ros::Exec.new.execute(task.name, ARGV)
+      end
+
+      desc 'Reset a database (drop, create and run migrations)'
+      task :reset do |task|
+        Ros::Exec.new.execute(task.name, ARGV)
+      end
+    end
+
+    namespace :reset do
+      desc 'Reset a database and seed it'
+      task :seed do |task|
+        Ros::Exec.new.execute(task.name, ARGV)
+      end
+    end
   end
 end
 
 namespace :db do
-  desc 'Clean a database (removes all tenants)'
-  task :clean do |task|
-    Ros::Exec.new.execute(task.name)
-  end
-
-  namespace :clean do
-    desc 'Clean a database and seed it'
-    task :seed do |task|
-      Ros::Exec.new.execute(task.name)
-    end
-
-    desc 'Reset a database (drop, create and run migrations)'
-    task :reset do |task|
-      Ros::Exec.new.execute("ros:#{task.name}")
-    end
-  end
-
-  namespace :reset do
-    desc 'Reset a database and seed it'
-    task :seed do |task|
-      Ros::Exec.new.execute("ros:#{task.name}", ARGV)
+  namespace :migrate do
+    desc 'db migraiton status'
+    task :status do |task|
+      Ros::Exec.new.execute(task.name, ARGV)
     end
   end
 end

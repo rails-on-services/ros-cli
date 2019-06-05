@@ -33,8 +33,8 @@ unless @profile.is_ros?
   end
 end
 
-gem "#{@profile.platform_name}-core", path: '../core'
-gem "#{@profile.platform_name}_sdk", path: '../sdk'
+gem "#{@profile.platform_name}-core", path: '../../lib/core'
+gem "#{@profile.platform_name}_sdk", path: '../../lib/sdk'
 
 # Create Engine's namespaced classes
 if @profile.is_engine?
