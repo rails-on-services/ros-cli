@@ -7,7 +7,6 @@ module Ros
     class ServiceGenerator < Thor::Group
       include Thor::Actions
       argument :name
-      argument :project
 
       def self.source_paths; ["#{File.dirname(__FILE__)}/templates", File.dirname(__FILE__)] end
 
@@ -39,10 +38,10 @@ module Ros
       end
 
       def sdk_content
-        create_file "lib/sdk/lib/#{project}_sdk/models/#{name}.rb", <<~RUBY
+        create_file "#{sdk_lib_path}/models/#{name}.rb", <<~RUBY
           # frozen_string_literal: true
 
-          module #{project.split('_').collect(&:capitalize).join}
+          module #{platform_name.split('_').collect(&:capitalize).join}
             module #{name.split('_').collect(&:capitalize).join}
               class Client < Ros::Platform::Client; end
               class Base < Ros::Sdk::Base; end
@@ -52,10 +51,16 @@ module Ros
           end
         RUBY
 
-        append_file "lib/sdk/lib/#{project}_sdk/models.rb", <<~RUBY
-          require '#{project}_sdk/models/#{name}.rb'
+        append_file "#{sdk_lib_path}/models.rb", <<~RUBY
+          require '#{platform_name}_sdk/models/#{name}.rb'
         RUBY
       end
+
+      private
+
+      def platform_name; File.basename(Dir["#{lib_path.join('sdk')}/*.gemspec"].first).gsub('_sdk.gemspec', '') end
+      def lib_path; Pathname(destination_root).join('lib') end
+      def sdk_lib_path; lib_path.join("sdk/lib/#{platform_name}_sdk") end
     end
   end
 end

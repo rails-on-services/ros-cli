@@ -1,7 +1,8 @@
 # core/rails/gems.rb
 
-# TODO: remove puma from Gemfile and get a version in here
+comment_lines 'Gemfile', "gem 'tzinfo-data'"
 comment_lines 'Gemfile', "gem 'puma'"
+
 gem_group :production do
   gem 'puma'
 end

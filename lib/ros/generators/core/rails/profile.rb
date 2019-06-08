@@ -1,15 +1,17 @@
 # frozen_string_literal: true
 
 class Profile
-  attr_accessor :name, :platform_name, :service_name, :module_name, :module_string
+  attr_accessor :name, :lib_path, :platform_name, :service_name, :module_name, :module_string
   attr_accessor :app_dir, :config_file, :initializer_file, :routes_file
   attr_accessor :ros_path, :ros_lib_path
   attr_accessor :is_engine, :is_ros
 
   def initialize(name, generator, options)
     self.name = name
-    self.platform_name = generator.destination_root.split('/').pop(3).first
-    self.service_name = name.gsub('ros-', '')
+    self.lib_path = Pathname(generator.destination_root).join('../../lib')
+    self.platform_name = File.basename(Dir["#{lib_path.join('sdk')}/*.gemspec"].first).gsub('_sdk.gemspec', '')
+    # self.service_name = name.gsub('ros-', '')
+    self.service_name = name
     self.module_name = service_name.classify
     #
     self.is_ros = platform_name.eql?('ros')

@@ -3,7 +3,10 @@
 # workaround for rails 6.0.0.beta2
 application "require 'rails-html-sanitizer'"
 
-insert_into_file 'config/application.rb', before: 'require' do <<-RUBY
+remove_file 'config/master.key'
+remove_file 'config/credentials.yml.enc'
+
+insert_into_file 'config/application.rb', before: "\n# Require the gems" do <<-RUBY
 require 'ros/core'
 RUBY
 end

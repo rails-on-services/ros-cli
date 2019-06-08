@@ -26,8 +26,8 @@ gem 'ros_sdk', path: "#{@profile.ros_lib_path}/sdk"
 # Without this, rails template will put them in alphabetical order which is a problem
 gem_group(:development) do
 end
-gem "#{@profile.platform_name}-core", path: '../../lib/core'
-gem "#{@profile.platform_name}_sdk", path: '../../lib/sdk'
+gem "#{@profile.platform_name}-core", path: "#{@profile.lib_path}/core"
+gem "#{@profile.platform_name}_sdk", path: "#{@profile.lib_path}/sdk"
 
 # Modify spec/dummy or app Base Classes
 apply('app_classes.rb')
@@ -40,10 +40,13 @@ template('app/models/tenant.rb')
 template('db/seeds/development/tenants.seeds.rb')
 template('db/seeds/development/data.seeds.rb')
 
-apply('rspec.rb')
-
 template 'config/sidekiq.yml'
 template 'doc/open_api.yml'
+
+after_bundle do
+  apply('rspec.rb')
+  run 'spring stop'
+end
 
 # copy_file 'defaults/files/Procfile', 'Procfile'
 # template 'defaults/files/tmuxinator.yml', '.tmuxinator.yml'
