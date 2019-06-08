@@ -12,7 +12,7 @@ RUN gem install \
 ARG ROS_DIR=./ros
 ARG project=user
 COPY services/${project}/Gemfile* ./
-# NOTE: Dependent gems need to be copied in so that their dependencies are also installed
+# NOTE: Dependent gem's gemspecs need to be copied in so that their dependencies are also installed
 COPY ${ROS_DIR}/lib/core/*.gemspec ../../${ROS_DIR}/lib/core/
 COPY ${ROS_DIR}/lib/sdk/*.gemspec ../../${ROS_DIR}/lib/sdk/
 COPY lib/core/*.gemspec ../../lib/core/
@@ -46,7 +46,7 @@ RUN addgroup --gid ${PGID} rails \
  && useradd -ms /bin/bash -d /home/rails --uid ${PUID} --gid ${PGID} rails \
  && mkdir -p /home/rails/services/app \
  && echo 'set editing-mode vi' > /home/rails/.inputrc \
- && echo "alias rspec='spring rspec $@'\nalias src='ss; rc'\nalias ss='spring stop'\nalias rs='rails server -b 0.0.0.0'\nalias rc='spring rails console'\nalias rk='spring rake'" > /home/rails/.bash_aliases \
+ && echo "alias rspec='spring rspec $@'\nalias src='ss; rc'\nalias ss='spring stop'\nalias rs='rails server -b 0.0.0.0 --pid /tmp/server.pid'\nalias rc='spring rails console'\nalias rk='spring rake'" > /home/rails/.bash_aliases \
  && chown rails:rails /home/rails -R \
  && echo 'rails ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
 

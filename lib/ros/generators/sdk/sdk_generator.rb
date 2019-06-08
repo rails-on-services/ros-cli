@@ -20,6 +20,12 @@ module Ros
         end
       end
 
+      def revoke
+        return unless self.behavior.eql? :revoke
+        FileUtils.rm_rf("#{destination_root}/lib/sdk")
+        say '      remove  lib/sdk'
+      end
+
       def gemfile
         inside 'lib/sdk' do
           append_to_file 'Gemfile', after: "source \"https://rubygems.org\"\n" do <<~HEREDOC
@@ -63,11 +69,6 @@ module Ros
             HEREDOC
           end
         end
-      end
-
-      def finish_message
-        action = self.behavior.eql?(:invoke) ? 'Created' : 'Destroyed'
-        say "\n#{action} SDK gem at #{destination_root}/lib/sdk"
       end
     end
   end

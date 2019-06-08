@@ -12,8 +12,9 @@ def core_path; File.expand_path(File.dirname(__FILE__)) end
 require_relative 'profile'
 @profile = Profile.new(name, self, options.dup)
 
-apply('common.rb')
+apply('gemspec.rb')
+apply('gems.rb')
+apply('postgres.rb')
+apply('readme.rb')
 
-unless @profile.is_ros?
-  gem 'ros-core', path: "#{@profile.ros_lib_path}/core"
-end
+gem 'ros-core', path: "#{@profile.ros_lib_path}/core"
