@@ -1,5 +1,5 @@
 ---
-apiVersion: skaffold/v1beta10
+apiVersion: skaffold/v1beta11
 kind: Config
 build:
   artifacts:
@@ -9,9 +9,10 @@ build:
       dockerfile: <%= dockerfile_path %><% if image.build_args %>
       buildArgs:<% image.build_args.each_pair do |name, value| %>
         <%= name %>: <%= value.is_a?(Array) ? value.join(' ') : value %><% end; end %>
+        project: <%= name %>
   tagPolicy:
     envTemplate:
       template: "{{.IMAGE_NAME}}:{{.IMAGE_TAG}}"
   local:
-    useBuildkit: true
+    useDockerCLI: true
 profiles:

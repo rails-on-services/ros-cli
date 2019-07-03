@@ -3,37 +3,48 @@ require 'bump'
 
 module Ros
   class Deployment
-    attr_accessor :meta, :platform, :services, :providers, :infra, :profiles, :images
-    attr_accessor :provider, :image
+    attr_accessor :infra, :core, :platform, :devops
+    attr_accessor :provider
     attr_accessor :options # CLI options
 
     def initialize(options)
       self.options = options
-      %i(meta platform services providers infra profiles images).each do |type|
+      %i(infra core platform devops).each do |type|
         self.send("#{type}=", Settings.send(type))
       end
-      %i(provider image).each do |type|
-        self.send("#{type}=", Settings.send("#{type}s").dig(*Settings.meta.components.send(type).split('/')))
-      end
-      infra.provider = Settings.meta.components.provider.split('/').first 
-      infra.type = Settings.meta.components.provider.split('/').last
+      self.provider = Config::Options.new
+      provider.config = infra.config.providers[infra.config.provider]
     end
-
-    # def provider_name; @provider_name ||= end
-    # def provider_type; @provider_type ||= Settings.meta.components.provider.split('/').last end
-    # def image_name; @image_nmae ||= Settings.meta.components.image end
 
     def template_hash(name = '', profile = ''); template_vars(name, profile).merge(base_vars) end
     def template_vars(name, profile); {} end
-    def base_vars; { infra: infra, platform: platform, services: services, profiles: profiles, images: images } end
-    def uri; Ros.uri end
-    def api_hostname; Ros.api_hostname end
+    def base_vars; { infra: infra, platform: platform, core: core, devops: devops } end
 
-    def version; Bump::Bump.current end
-    def image; images[Settings.meta.components.image] end
-    # def image; images[platform.services.image] end
+    def uri; URI("#{infra.config.endpoints.api.scheme}://#{api_hostname}") end
+
+    def api_hostname
+      @api_hostname ||= "#{infra.config.endpoints.api.host}#{base_hostname}"
+    end
+
+    def sftp_hostname
+      @sftp_hostname ||= "#{infra.config.endpoints.sftp.host}#{base_hostname}"
+    end
+
+    def base_hostname
+      @base_hostname ||= (infra.config.dns ? "#{current_branch_name}.#{dns_domain}" : 'localhost')
+    end
+
+    def dns_domain
+      @dns_domain ||= "#{infra.config.dns.subdomain}.#{infra.config.dns.domain}"
+    end
+
+    def current_branch_name
+      @current_branch_name ||= (infra.config.branch_deployments and not branch_name.eql?(infra.config.api_branch)) ? "-#{branch_name}" : ''
+    end
+
+    def version; Dir.chdir(Ros.root) { Bump::Bump.current } end
     def image_tag; "#{version}-#{sha}#{image_suffix}" end
-    def image_suffix; image.build_args.rails_env.eql?('production') ? '' : "-#{image.build_args.rails_env}" end
+    def image_suffix; platform.config.image.build_args.rails_env.eql?('production') ? '' : "-#{platform.config.image.build_args.rails_env}" end
 
     def branch_name
       return unless system('git rev-parse --git-dir > /dev/null 2>&1')

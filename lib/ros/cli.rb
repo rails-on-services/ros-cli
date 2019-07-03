@@ -31,7 +31,7 @@ module Ros
       generator.invoke_all
       require_relative 'generators/env/env_generator.rb'
       %w(console local development production).each do |env|
-        generator = Ros::Generators::EnvGenerator.new([env, name, host, :nil])
+        generator = Ros::Generators::EnvGenerator.new([env, host, name, :nil])
         generator.destination_root = name
         generator.invoke_all
       end

@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 require 'ros/deployment'
 require 'ros/ops/infra'
+require 'ros/ops/core'
 require 'ros/ops/platform'
-require 'ros/ops/service'
 
 module Ros
   module Ops
@@ -26,13 +26,13 @@ module Ros
         # TODO: Write out the host_port_map into tf_vars
         def tf_vars_aws
           {
-            aws_region: provider.region,
-            route53_zone_main_name: infra.dns.domain,
-            route53_zone_this_name: infra.dns.subdomain,
-            ec2_instance_type: provider.instance.type,
-            ec2_key_pair: provider.instance.key_pair,
-            ec2_tags: provider.instance.tags,
-            ec2_ami_distro: provider.instance.ami_distro
+            aws_region: provider.config.region,
+            route53_zone_main_name: infra.config.dns.domain,
+            route53_zone_this_name: infra.config.dns.subdomain,
+            ec2_instance_type: provider.config.instance.type,
+            ec2_key_pair: provider.config.instance.key_pair,
+            ec2_tags: provider.config.instance.tags,
+            ec2_ami_distro: provider.config.instance.ami_distro
             # lambda_filename: infra.lambda_filename
           }
         end
@@ -43,59 +43,60 @@ module Ros
         end
       end
 
-      class Platform < Deployment
-        include Ros::Ops::Platform
+      class Core < Deployment
+        include Ros::Ops::Core
         include Ros::Ops::Instance
 
         def template_vars(name, profile_name)
           {
             name: name,
-            service_names: Settings.services.reject{|s| s.last.enabled.eql? false }.map{|s| s.first},
-            basic_service_names: Settings.platform.basic_services.reject{|s| s.last&.enabled.eql? false }.map{|s| s.first},
+            service_names: platform.services.reject{|s| s.last.enabled.eql? false }.map{|s| s.first},
+            basic_service_names: core.services.reject{|s| s.last&.enabled.eql? false }.map{|s| s.first},
             relative_path_from_root: relative_path_from_root
           }
         end
 
         def write_nginx
           content = File.read("#{template_services_root}/nginx/nginx.conf.erb")
-          keys = Settings.services.reject{|s| s.last.enabled.eql? false }.map{|s| s.first}
+          keys = platform.services.reject{|s| s.last.enabled.eql? false }.map{|s| s.first}
           content = ERB.new(content).result_with_hash({ service_names: keys })
-          content_dir = "#{platform_root}/nginx"
+          content_dir = "#{core_root}/nginx"
           FileUtils.mkdir_p(content_dir)
           File.write("#{content_dir}/nginx.conf", content)
         end
 
         # TODO: this should probably be platform agnostic code rather than instance
-        def write_sftp
-          content_dir = "#{platform_root}/sftp"
-          FileUtils.mkdir_p("#{content_dir}/host-config/authorized-keys")
-          Dir.chdir("#{content_dir}/host-config") do
-            %x(ssh-keygen -P '' -t ed25519 -f ssh_host_ed25519_key < /dev/null)
-            %x(ssh-keygen -P '' -t rsa -b 4096 -f ssh_host_rsa_key < /dev/null)
-          end
-          Dir.chdir(content_dir) { FileUtils.touch('users.conf') }
-        end
+        # def write_sftp
+        #   content_dir = "#{core_root}/sftp"
+        #   FileUtils.mkdir_p("#{content_dir}/host-config/authorized-keys")
+        #   Dir.chdir("#{content_dir}/host-config") do
+        #     %x(ssh-keygen -P '' -t ed25519 -f ssh_host_ed25519_key < /dev/null)
+        #     %x(ssh-keygen -P '' -t rsa -b 4096 -f ssh_host_rsa_key < /dev/null)
+        #   end
+        #   Dir.chdir(content_dir) { FileUtils.touch('users.conf') }
+        # end
 
         def provision; puts "provision: Nothing to do" end
         def rollback; puts "rollback: Nothing to do" end
       end
 
-      class Service < Deployment
-        include Ros::Ops::Service
+      class Platform < Deployment
+        include Ros::Ops::Platform
         include Ros::Ops::Instance
 
         def template_vars(name, profile_name)
-          has_envs = !services.dig(name, :environment).nil?
-          use_ros_context_dir = (not Ros.is_ros? and services.dig(name, :ros))
-          mount_ros = (not Ros.is_ros? and not services.dig(name, :ros))
+          has_envs = !platform.services.dig(name, :environment).nil?
+          use_ros_context_dir = (not Ros.is_ros? and platform.services.dig(name, :ros))
+          mount_ros = (not Ros.is_ros? and not platform.services.dig(name, :ros))
           {
-            relative_path: relative_path,
-            name: name,
-            has_envs: has_envs,
-            image: image,
             context_dir: use_ros_context_dir ? 'ROS_CONTEXT_DIR' : 'CONTEXT_DIR',
-            mount: services.dig(name, :mount),
-            mount_ros: mount_ros
+            has_envs: has_envs,
+            image: platform.config.image,
+            mount: platform.services.dig(name, :mount),
+            mount_ros: mount_ros,
+            name: name,
+            relative_path: relative_path,
+            storage_name: "storage#{base_hostname.gsub('.', '-')}"
           }
         end
 
@@ -104,26 +105,26 @@ module Ros
         end
 
         def write_compose_envs
-          content = compose_envs.each_with_object([]) do |kv, ary|
+          content = compose_environment.each_with_object([]) do |kv, ary|
             ary << "#{kv[0].upcase}=#{kv[1]}"
           end.join("\n")
           content = "# This file was auto generated\n# The values are used by docker-compose\n# #{Ros.env}\n#{content}"
           FileUtils.mkdir_p(compose_dir)
-          File.write("#{compose_dir}/#{Ros.env}.env", content)
+          File.write(compose_file, "#{content}\n")
         end
 
-        def compose_dir; "#{Ros.root}/tmp/compose" end
+        def compose_file; @compose_file ||= "#{compose_dir}/#{namespace}.env" end
+        def compose_dir; "#{Ros.root}/tmp/compose/#{Ros.env}" end
 
-        def compose_envs
+        def compose_environment
           {
             compose_file: Dir["#{deploy_root}/**/*.yml"].map{ |p| p.gsub("#{Ros.root}/", '') }.sort.join(':'),
-            compose_project_name: platform.partition_name,
+            compose_project_name: namespace,
             context_dir: "#{relative_path}/..",
             ros_context_dir: "#{relative_path}/../ros",
-            nginx_host_port: platform.nginx_host_port,
-            image_repository: Settings.devops.registry,
+            image_repository: platform.config.image.registry,
             image_tag: image_tag
-          }
+          }.merge(infra.environment.to_h)
         end
 
         # TODO: stop and rm are passed directly to compose and exits
@@ -131,11 +132,11 @@ module Ros
         # by changing the project name in config/app
         def provision
           FileUtils.rm_f('.env')
-          FileUtils.ln_s("#{compose_dir}/#{Ros.env}.env", '.env')
+          FileUtils.ln_s(compose_file, '.env')
           # return unless gem_version_check
           # TODO: make build its own rake task and method
           if options.build
-            services.each_pair do |name, config|
+            platform.services.each_pair do |name, config|
               next if config&.enabled.eql? false
               compose("build #{name}")
             end
@@ -143,7 +144,7 @@ module Ros
           end
           if options.initialize
             compose("up wait")
-            services.each do |name, config|
+            platform.services.each do |name, config|
               next if config&.enabled.eql? false
               prefix = config.ros ? 'app:' : ''
               compose("run --rm #{name} rails #{prefix}ros:db:reset:seed")
@@ -151,15 +152,15 @@ module Ros
           end
           compose_options = options.daemon ? '-d' : ''
           compose("up #{compose_options}")
-          if options.initialize
-            %x(cat ros/services/iam/tmp/#{Settings.platform.environment.partition_name}/postman/222_222_222-Admin_2.json)
-          end
+          # if options.initialize
+          #   %x(cat ros/services/iam/tmp/#{Settings.platform.environment.partition_name}/postman/222_222_222-Admin_2.json)
+          # end
         end
 
         # TODO: implement rake method
-        def credentials_show
-          %x(cat ros/services/iam/tmp/#{Settings.platform.environment.partition_name}/postman/222_222_222-Admin_2.json)
-        end
+        # def credentials_show
+        #   %x(cat ros/services/iam/tmp/#{Settings.platform.environment.partition_name}/postman/222_222_222-Admin_2.json)
+        # end
 
         # def provision_with_ansible
         #   puts "Deploy '#{config.name_to_s}' of type #{deploy_config.type} in #{Ros.env} environment"
@@ -181,7 +182,9 @@ module Ros
 
       def template_prefix; 'compose' end
 
-      def deploy_path; Ros.env end
+      def deploy_path; "#{Ros.env}/#{namespace}" end
+
+      def namespace; @namespace ||= (ENV['ROS_PROFILE'] ? "#{ENV['ROS_PROFILE']}-" : '') + infra.config.namespace end
     end
   end
 end

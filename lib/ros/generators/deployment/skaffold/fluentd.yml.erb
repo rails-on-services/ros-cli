@@ -1,5 +1,5 @@
 --- 
-apiVersion: skaffold/v1beta10
+apiVersion: skaffold/v1beta11
 kind: Config
 deploy:
   helm:
@@ -7,12 +7,12 @@ deploy:
       - name: fluentd-request-logger
         chartPath: <%= chart_path %>
         skipBuildDependencies: true
-        replicaCount: 2
         overrides:
+          replicaCount: 2
           fullnameOverride: fluentd-request-logger
           resources:
             requests:
               cpu: 300m
               memory: 1Gi
-        valueFiles:
+        valuesFiles:
           - ./fluentd/etc/requests.conf

@@ -1,35 +1,44 @@
-# Configuration values defined here override any values defined in deployment.yml
+# Configuration values defined here override any values defined in platform.yml
 ---
-meta:
-  components:
-    provider: aws/kubernetes
-    image: development
+infra:
+  config:
+    type: instance
+    # Uncomment and set values to a hostname that is mapped to this machine
+    # to enable public access to this installation
+    # dns:
+    #   domain: rails-on-services.org
+    #   subdomain: ros
+  environment:
+    nginx_host_port: 3000
+
+core:
+  services:
+    fluentd:
+      enabled: no
+    localstack:
+    nginx:
+    postgres:
+    redis:
+    sftp:
+      environment:
+        bucket_endpoint_url: http://localstack:4572
+        bucket_name: blah
+        aws_access_key_id: hello
+        aws_secret_access_key: hello
+    wait:
 
 platform:
-  # TODO: use the value of infra.provider to provision storage, e.g. S3 bucket
-  storage: platform # storage is provisioned at platform with a dir per service
-  # storage: service # each service provisions its own storage
   environment:
-    partition_name: perx
-    connection__host__port: 80
-  # Define the basic services that will be running on the platform and their default environment
-  basic_services:
-    # Uses custom helm chart
-    fluentd:
-    # Uses custom helm chart
-    ingress:
-    # Uses ?
-    # localstack:
-    # Uses helm stable repo chart
-    postgres:
-    # Uses helm stable repo chart
-    redis:
+    request_logging:
+      enabled: no
+    system_logging:
+      enabled: no
   services:
-    environment:
-      rails_database_host: postgres
-      redis_url: redis://redis-master:6379
-
-infra:
-  dns:
-    domain: rails-on-services.org
-    subdomain: ros
+    cognito:
+      profiles: ['server']
+    comm:
+      profiles: ['server']
+    survey:
+      profiles: ['server']
+    game:
+      profiles: ['server']

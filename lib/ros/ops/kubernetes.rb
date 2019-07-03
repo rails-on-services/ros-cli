@@ -1,10 +1,8 @@
 # frozen_string_literal: true
 require 'ros/deployment'
 require 'ros/ops/infra'
+require 'ros/ops/core'
 require 'ros/ops/platform'
-require 'ros/ops/service'
-
-# aws eks update-kubeconfig --name production --role-arn arn:aws:iam::912765489874:role/eks-admin
 
 module Ros
   module Ops
@@ -15,9 +13,9 @@ module Ros
 
         def tf_vars_aws
           {
-            aws_region: provider.region,
-            route53_zone_main_name: infra.dns.domain,
-            route53_zone_this_name: infra.dns.subdomain,
+            aws_region: provider.config.region,
+            route53_zone_main_name: infra.config.dns.domain,
+            route53_zone_this_name: infra.config.dns.subdomain,
             # name: infra.name
           }
         end
@@ -26,26 +24,33 @@ module Ros
       # provision a platform into the infrastructure, including:
       # env to secrets, support services (pg, redis, localstack, etc) and S3 bucket
       # TODO: add fluentd and grafana skaffolds
-      # TODO: provision S3 bucket
-      # TODO: implement rollback of support services and S3 bucket
-      class Platform < Deployment
+      # TODO: implement rollback of support services
+      class Core < Deployment
         include Ros::Ops::Kubernetes
-        include Ros::Ops::Platform
+        include Ros::Ops::Core
 
-        def initialize
-          super
-          infra.namespace ||= 'default'
-          infra.branch_deployments ||= false
-          infra.api_branch ||= 'master'
+        def initialize(options)
+          super(options)
+          infra.config.namespace ||= 'default'
+          infra.config.branch_deployments ||= false
+          infra.config.api_branch ||= 'master'
         end
 
         def template_vars(name, profile_name)
           {
             chart_path: "#{relative_path}/devops/helm/charts/#{name}",
+            pull_policy: 'Always',
             api_hostname: api_hostname,
-            service_names: services.keys
+            sftp_hostname: sftp_hostname,
+            storage_name: "storage#{base_hostname.gsub('.', '-')}",
+            service_names: platform.services.keys,
+            secrets_files: core.services.dig(name, :environment) ? [:platform, name.to_sym] : %i(platform)
           }
         end
+
+def relative_path
+  @x_relative_path ||= "../#{super}"
+end
 
         def fluentd_header
           "configMaps:\n  rails-audit-log.conf: |"
@@ -53,12 +58,10 @@ module Ros
 
         def provision
           return unless provision_check
-          # Dir.chdir(deploy_root) do
-            provision_namespace
-            provision_helm
-            provision_secrets
-            provision_services
-          # end
+          provision_namespace
+          provision_helm
+          provision_secrets
+          provision_services
         end
 
         def provision_namespace
@@ -72,45 +75,76 @@ module Ros
         end
 
         def provision_secrets
-          Dir["#{deploy_root}/*.env"].each { |file| sync_secret(file) }
+          Dir["#{core_root}/*.env"].each { |file| sync_secret(file) }
         end
 
         def provision_services
-          # ["#{deploy_root}/ingress.yml"].each { |file| skaffold("deploy -f #{file}") }
-          Dir["#{deploy_root}/*.yml"].each { |file| skaffold("deploy -f #{file}") }
+          Dir.chdir(core_root) { Dir['*.yml'].each { |file| skaffold("deploy -f #{file}") } }
         end
 
         def rollback; puts "TODO: rollback #{self.class.name}" end
       end
 
-      class Service < Deployment
-        include Ros::Ops::Service
+      class Platform < Deployment
+        include Ros::Ops::Platform
         include Ros::Ops::Kubernetes
+
+        def initialize(options)
+          super(options)
+          infra.config.namespace ||= 'default'
+          infra.config.branch_deployments ||= false
+          infra.config.api_branch ||= 'master'
+        end
 
         def template_vars(name, profile_name)
           {
             name: name,
-            context_path: relative_path,
-            dockerfile_path: "#{relative_path}/Dockerfile",
-            image: images[platform.services.image],
+            context_path: "#{relative_path}#{platform.services.dig(name, :ros) ? '/ros' : ''}",
+            dockerfile_path: "#{relative_path}/#{platform.services.dig(name, :ros) ? 'ros/' : ''}Dockerfile",
+            image: platform.config.image,
             chart_path: "#{relative_path}/devops/helm/charts/service",
             api_hostname: api_hostname,
-            app_command: profiles.dig(profile_name, :app_command),
-            bootstrap_enabled: profiles.dig(profile_name, :bootstrap_enabled),
-            bootstrap_command: profiles.dig(profile_name, :bootstrap_command),
+            is_ros_service: platform.services.dig(name, :ros),
             pull_policy: 'Always',
-            secrets_files: services.dig(name, :environment) ? [:platform, name.to_sym] : %i(platform)
+            pull_secret: registry_secret_name,
+            secrets_files: platform.services.dig(name, :environment) ? [:platform, name.to_sym] : %i(platform)
           }
         end
 
-        # provisions service specific infrastructure scoped to the platform:
+def relative_path
+  @x_relative_path ||= "../#{super}"
+end
+
+        # provisions platform services
         # TODO: process service env files, crete sns path on platform’s S3 bucket, etc
         def provision
-          return unless provision_check and gem_version_check
-          Dir["#{service_root}/*.env"].each { |file| sync_secret(file) }
-          Dir["#{service_root}/*.yml"].each do |file|
-            skaffold("build -f #{file}")
-            service.profiles.each { |profile| skaffold("deploy -f #{file} -p #{profile}") }
+          # return unless provision_check and gem_version_check
+          # provision_secrets
+          provision_services
+        end
+
+        def provision_secrets
+          Dir["#{platform_root}/*.env"].each { |file| sync_secret(file) }
+          kube_cmd = "create secret generic #{registry_secret_name} " \
+            "--from-file=.dockerconfigjson=#{Dir.home}/.docker/config.json --type=kubernetes.io/dockerconfigjson"
+          kube_ctl(kube_cmd)
+        end
+
+        def registry_secret_name; "registry-#{platform.config.image.registry}" end
+
+        def provision_services
+          thing = ARGV[0] || '*'
+          binding.pry
+          Dir.chdir(platform_root) do
+            Dir["#{thing}.yml"].each do |file|
+              # skaffold("build -f #{file}")
+              # TODO: Can get the profiles by loading the YAML and iterating over the list of profiles
+              # since the profiles in the file were generated from the configuration already
+              service = file.gsub('.yml', '')
+              # run does build and deploy 
+              platform.services[service].profiles.each { |profile| skaffold("run -f #{file} -p #{profile}") }
+              # platform.services[service].profiles.each { |profile| skaffold("deploy -f #{file} -p #{profile}") }
+            end
           end
         end
 
@@ -143,21 +177,22 @@ module Ros
 
       def skaffold_env
         @skaffold_env ||=
-          { 'SKAFFOLD_DEFAULT_REPO' => image.registry, 'IMAGE_TAG' => image_tag }.merge(kube_env)
+          { 'SKAFFOLD_DEFAULT_REPO' => platform.config.image.registry, 'IMAGE_TAG' => image_tag }.merge(kube_env)
       end
 
       def namespace
         @namespace ||=
-          if infra.branch_deployments
-            branch_name.eql?(infra.api_branch) ? infra.namespace : branch_name
+          if infra.config.branch_deployments
+            branch_name.eql?(infra.config.api_branch) ? infra.config.namespace : "#{branch_name}-#{infra.config.namespace}"
           else
-            infra.namespace
+            infra.config.namespace
           end
       end
 
       def kubeconfig
-        @kubeconfig ||= File.expand_path(infra.kubeconfig ||
-          "#{Ros.tf_root}/#{infra.provider}/provision/kubernetes/kubeconfig_#{name}")
+        @kubeconfig ||= File.expand_path(infra.config.kubeconfig || '~/.kube/config')
+        # @kubeconfig ||= File.expand_path(provider.kubeconfig ||
+        #   "#{Ros.tf_root}/#{infra.provider}/provision/kubernetes/kubeconfig_#{name}")
       end
     end
   end

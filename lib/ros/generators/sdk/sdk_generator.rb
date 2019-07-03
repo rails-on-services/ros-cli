@@ -35,7 +35,7 @@ module Ros
           gem 'awesome_print'
           HEREDOC
           end
-          remove_file "lib/#{name}_sdk/version.rb"
+          # remove_file "lib/#{name}_sdk/version.rb"
           remove_file 'bin/console'
           # template 'bin/console.erb', 'bin/console'
         end

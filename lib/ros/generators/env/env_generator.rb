@@ -16,14 +16,18 @@ module Ros
       def generate_secrets
         self.uri = URI(uri)
         require 'securerandom'
-        template 'environments.yml.erb', "#{Ros.environments_dir}/#{name}.yml"
+        in_root do
+          template 'environments.yml.erb', "#{Ros.environments_dir}/#{name}.yml"
+        end
       end
 
       def create_console_env
         return unless name.eql?('console')
         in_root do
           Config.load_and_set_settings("#{Ros.environments_dir}/console.yml")
-          self.content = Ros.format_envs('', Settings).join("\n")
+          self.content = Ros.format_envs('', Settings.platform.environment).join("\n")
+          # TODO: Settings.services.each
+          # self.content = Ros.format_envs('', Settings.platform.environment).join("\n")
           FileUtils.rm("#{Ros.environments_dir}/console.yml")
           template 'console.env.erb', "#{Ros.config_dir}/console.env"
         end

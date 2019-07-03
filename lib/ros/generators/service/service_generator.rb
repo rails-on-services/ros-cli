@@ -21,6 +21,7 @@ module Ros
         rails_options = '--api -G -S -J -C -T -M --skip-turbolinks --database=postgresql --skip-active-storage'
         exec_string = "rails #{plugin} new #{rails_options} #{plugin_options} -m #{template_file} #{name}"
         puts exec_string
+        FileUtils.mkdir_p("#{destination_root}/services")
         Dir.chdir("#{destination_root}/services") { system(exec_string) }
       end
 

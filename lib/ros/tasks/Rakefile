@@ -1,3 +1,10 @@
+if ARGV[0]&.include? ':'
+  action = ARGV[0].split(':')[1]
+  if ARGV[1]
+    ENV['ROS_PROFILE'] = ARGV[1] if action.eql?('configure')
+    ENV['ROS_IMAGE'] = ARGV[1] if action.eql?('provision')
+  end
+end
 require 'ros'
 require 'ros/exec'
 require 'pry'
@@ -16,7 +23,8 @@ end
 
 namespace :deployment do
   %i(configure provision rollback).each do |action|
-    desc "#{action.capitalize} #{Ros.env} deployment (#{Settings.meta.components.provider.split('/').last})"
+    # desc "#{action.capitalize} #{Ros.env} deployment (#{Settings.meta.components.provider.split('/').last})"
+    desc "#{action.capitalize} #{Ros.env} deployment (#{Settings.infra.config.type})"
     task action do |task, args|
       %i(infra platform service).each do |type|
         Ros.ops_action(type, action)
@@ -24,7 +32,7 @@ namespace :deployment do
     end
 
     namespace action do
-      %i(infra platform service).each do |namespace|
+      %i(infra core platform).each do |namespace|
         # desc "#{action.capitalize} #{namespace}"
         task namespace do |task, args|
           ns, action, type = task.name.split(':')

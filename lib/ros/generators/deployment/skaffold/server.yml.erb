@@ -4,6 +4,7 @@
         releases:
         - name: <%= name %>
           chartPath: <%= chart_path %>
+          skipBuildDependencies: true
           values:
             image: <%= name %>
           imageStrategy:
@@ -13,13 +14,15 @@
             nameOverride: <%= name %>
             image:
               pullPolicy: <%= pull_policy %>
+            imagePullSecrets:
+              - name: <%= pull_secret %>
             app:
-              command: ["<%= app_command.split.join('", "') %>"]
+              command: ["bundle", "exec", "rails", "server", "-b", "0.0.0.0"]
               envFromSecrets:<% secrets_files.each do |name| %>
                 - <%= name %><% end %>
             bootstrap:
-              enabled: <%= bootstrap_enabled %>
-              command: ["<%= bootstrap_command.split.join('", "') %>"]
+              enabled: true
+              command: ["bundle", "exec", "rails", "<% if is_ros_service %>app:<% end %>ros:db:reset", "<% if is_ros_service %>app:ros:<%= name %>:<% end %>db:seed"]
             resources:
               limits:
                 cpu: 1

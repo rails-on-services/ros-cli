@@ -6,7 +6,7 @@ require 'config'
 
 Config.setup do |config|
   config.use_env = true
-  config.env_prefix = 'PLATFORM'
+  config.env_prefix = 'ROS'
   config.env_separator = '__'
 end
 
@@ -31,8 +31,8 @@ module Ros
       if fix
         %x(git clone git@github.com:rails-on-services/ros.git) unless ros_repo
         generate_env([Ros.env]) unless env_config
+        Ros.ops_action(:core, :configure, options) unless deploy_config
         Ros.ops_action(:platform, :configure, options) unless deploy_config
-        Ros.ops_action(:service, :configure, options) unless deploy_config
       else
         puts "ros repo: #{ros_repo ? 'ok' : 'missing'}"
         puts "environment configuration: #{env_config ? 'ok' : 'missing'}"
@@ -63,7 +63,7 @@ module Ros
     end
 
     def ops_action(type, action, options = Config::Options.new)
-      provider, infra_type = Settings.meta.components.provider.split('/')
+      infra_type = Settings.infra.config.type
       require "ros/ops/#{infra_type}"
       obj = Object.const_get("Ros::Ops::#{infra_type.capitalize}::#{type.to_s.capitalize}").new(options)
       obj.send(action)
@@ -73,14 +73,13 @@ module Ros
     # If the environment has a '-' in it and an environment is defined before the '-' then use it as a base
     def load_env(env = nil)
       Ros.env = env if env
-      envs = []
-      envs.append(Ros.env.split('-').first) if Ros.env&.index('-')
-      envs.append(Ros.env)
-      files = ['./config/deployment.yml']
-      %w(deployments environments).each do |type|
-        envs.each do |env|
-          asset = "./config/#{type}/#{env}.yml"
-          files.append(asset) if File.exists?(asset)
+      files = []
+      %w(deployment environment).each do |type|
+        files.append("#{Ros.root}/config/#{type}.yml")
+        files.append("#{Ros.root}/config/#{type}s/#{Ros.env}.yml")
+        if ENV['ROS_PROFILE']
+          profile_file = "#{Ros.root}/config/#{type}s/#{Ros.env}-#{ENV['ROS_PROFILE']}.yml"
+          files.append(profile_file) if File.exists?(profile_file)
         end
       end
       Config.load_and_set_settings(files)
@@ -101,7 +100,7 @@ module Ros
     # def platform; @platform ||= Ros::Platform.descendants.first end
     def env; @env ||= StringInquirer.new(ENV['ROS_ENV'] || default_env) end
     def env=(env); @env = StringInquirer.new(env) end
-    def default_env; @default_env ||= 'local' end
+    def default_env; @default_env ||= 'development' end
 
     def root
       @root ||= (cwd = Dir.pwd
@@ -111,19 +110,25 @@ module Ros
         end)
     end
 
-    def uri; URI("#{Settings.infra.endpoint.scheme}://#{api_hostname}") end
+    # NOTE: uri and api_hostname are implemented in deployment.rb
+    # this file is not namespace aware so
+    def uri; URI("#{Settings.infra.config.endpoints.api.scheme}://#{api_hostname}") end
 
     def api_hostname
-      @api_hostname ||=
-        if Settings.infra.branch_deployments
-          branch_name.eql?(infra.api_branch) ? Settings.infra.endpoint.host : "#{branch_name}-#{Settins.infra.endpoint.host}"
-        else
-          Settings.infra.endpoint.host
-        end + ".#{Settings.infra.dns.subdomain}.#{Settings.infra.dns.domain}"
+      @api_hostname ||= "#{Settings.infra.config.endpoints.api.host}.#{Settings.infra.config.dns.subdomain}.#{Settings.infra.config.dns.domain}"
     end
 
-    def service_names_enabled; Settings.services.reject{|s| s.last.enabled.eql? false }.map{ |s| s.first } end
-    def service_names; Settings.services.keys end
+    # def api_hostname
+    #   @api_hostname ||=
+    #     if Settings.infra.branch_deployments and not branch_name.eql?(infra.api_branch)
+    #       "#{Settins.infra.endpoints.api.host}-#{branch_name}"
+    #     else
+    #       Settings.infra.endpoints.api.host
+    #     end + ".#{Settings.infra.dns.subdomain}.#{Settings.infra.dns.domain}"
+    # end
+
+    def service_names_enabled; Settings.platform.services.reject{|s| s.last.enabled.eql? false }.map{ |s| s.first } end
+    def service_names; Settings.platform.services.keys end
 
     def tf_root; root.join('devops/terraform') end
     def ansible_root; root.join('devops/ansible') end
@@ -140,7 +145,7 @@ module Ros
 
     # TODO: This is a hack in order to differentiate for purpose of templating files
     def is_ros?
-      Settings.devops.registry.eql?('railsonservices') and Settings.platform.partition_name.start_with?('ros')
+      Settings.platform.config.image.registry.eql?('railsonservices') and Settings.platform.environment.platform.partition_name.start_with?('ros')
     end
   end
 end

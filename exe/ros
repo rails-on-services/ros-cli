@@ -6,7 +6,7 @@ if ARGV[0]&.eql? '-T'
 elsif ARGV[0]&.include? ':'
   require 'rake'
   Rake.load_rakefile 'Rakefile' if File.exists? 'Rakefile'
-  Rake::Task[ARGV.shift].invoke(ARGV)
+  Rake::Task[ARGV[0]].invoke(ARGV[1..-1])
 else
   require 'bundler/setup'
   require 'ros'

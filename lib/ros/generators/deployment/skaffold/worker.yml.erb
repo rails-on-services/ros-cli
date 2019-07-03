@@ -4,6 +4,7 @@
         releases:
         - name: <%= name %>-worker
           chartPath: <%= chart_path %>
+          skipBuildDependencies: true
           values:
             image: <%= name %>
           imageStrategy:
@@ -13,8 +14,10 @@
             nameOverride: <%= name %>
             image:
               pullPolicy: <%= pull_policy %>
+            imagePullSecrets:
+              - name: <%= pull_secret %>
             app:
-              command: ["<%= app_command.split.join('", "') %>"]
+              command: ["bundle", "exec", "sidekiq"<% if is_ros_service %>, "-r", "spec/dummy"<% end %>]
               envFromSecrets:<% secrets_files.each do |name| %>
                 - <%= name %><% end %>
             bootstrap:

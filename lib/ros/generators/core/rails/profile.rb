@@ -9,7 +9,11 @@ class Profile
   def initialize(name, generator, options)
     self.name = name
     self.lib_path = Pathname(generator.destination_root).join('../../lib')
-    self.platform_name = File.basename(Dir["#{lib_path.join('sdk')}/*.gemspec"].first).gsub('_sdk.gemspec', '')
+    if File.basename(options['template']).eql?('core_generator.rb')
+      self.platform_name = name.gsub('-core', '')
+    else
+      self.platform_name = File.basename(Dir["#{lib_path.join('sdk')}/*.gemspec"].first).gsub('_sdk.gemspec', '')
+    end
     # self.service_name = name.gsub('ros-', '')
     self.service_name = name
     self.module_name = service_name.classify
