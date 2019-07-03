@@ -1,0 +1,39 @@
+---
+infra:
+  config:
+    providers:
+      aws:
+        region: ap-southeast-1
+        instance:
+          type: t3.large
+          key_pair: ''
+          tags:
+            managed_by: terraform
+          ami_distro: debian
+        datalake:
+          redshift:
+            key: value
+      azure:
+        instance:
+        kubernetes:
+      gcp:
+        instance:
+        kubernetes:
+        datalake:
+          bigquery:
+            key: value
+
+devops:
+  cicd:
+    circleci:
+      push_on_new_tag: true
+
+  provisioning:
+    terraform:
+      state:
+        type: local
+        # can be remote tf state
+        # type: s3
+        # bucket: org-rails-on-services-terraform-state
+        # key: ros-develop-ec2
+        # dynamodb_table: org-rails-on-services-terraform-lock

@@ -17,7 +17,7 @@ module Ros
         in_root do
           %x(git clone https://github.com/rails-on-services/ros.git)
           FileUtils.cp_r('ros/devops', '.')
-        end # if false
+        end if false
         directory('files', '.')
         self.ruby_version = '2.6.3'
         self.os_version = 'stretch'
@@ -32,6 +32,7 @@ module Ros
     'puma:3.12.0',
     'eventmachine:1.2.7']
         template 'Dockerfile'
+        template 'config/deployment.yml'
         # empty_directory('services')
         say "\nCreated Ros project at #{destination_root}"
       end

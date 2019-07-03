@@ -2,7 +2,7 @@
 ---
 infra:
   config:
-    namespace: changeme
+    namespace: <%= name %>
     type: kubernetes
     # type: instance
 
@@ -49,7 +49,7 @@ core:
 platform:
   config:
     image:
-      registry: your-docker-registry
+      registry: <%= name %>
       static_gems:
         bundler: 2.0.1
         eventmachine: 1.2.7

@@ -27,8 +27,8 @@ module Ros
         def tf_vars_aws
           {
             aws_region: provider.config.region,
-            route53_zone_main_name: infra.config.dns.domain,
-            route53_zone_this_name: infra.config.dns.subdomain,
+            route53_zone_main_name: infra.config.dns&.domain,
+            route53_zone_this_name: infra.config.dns&.subdomain,
             ec2_instance_type: provider.config.instance.type,
             ec2_key_pair: provider.config.instance.key_pair,
             ec2_tags: provider.config.instance.tags,
