@@ -76,7 +76,7 @@ module Ros
         #   Dir.chdir(content_dir) { FileUtils.touch('users.conf') }
         # end
 
-        def provision; puts "provision: Nothing to do" end
+        def apply; puts "provision: Nothing to do" end
         def rollback; puts "rollback: Nothing to do" end
       end
 
@@ -100,7 +100,7 @@ module Ros
           }
         end
 
-        def after_configure
+        def after_setup
           write_compose_envs
         end
 
@@ -112,9 +112,6 @@ module Ros
           FileUtils.mkdir_p(compose_dir)
           File.write(compose_file, "#{content}\n")
         end
-
-        def compose_file; @compose_file ||= "#{compose_dir}/#{namespace}.env" end
-        def compose_dir; "#{Ros.root}/tmp/compose/#{Ros.env}" end
 
         def compose_environment
           {
@@ -130,9 +127,8 @@ module Ros
         # TODO: stop and rm are passed directly to compose and exits
         # TODO: should be possible to run defaults on port 3000 and another version on 3001
         # by changing the project name in config/app
-        def provision
-          FileUtils.rm_f('.env')
-          FileUtils.ln_s(compose_file, '.env')
+        def apply
+          binding.pry
           # return unless gem_version_check
           # TODO: make build its own rake task and method
           if options.build
@@ -157,6 +153,54 @@ module Ros
           # end
         end
 
+        def console(service)
+          exec(service, 'rails console')
+          # run_string = %x(docker-compose ps #{service} | grep #{service}).length.positive? ? 'exec' : 'run --rm'
+          # system("docker-compose #{run_string} #{service} rails console")
+        end
+
+        def exec(service, command)
+          run_string = %x(docker-compose ps #{service} | grep #{service}).length.positive? ? 'exec' : 'run --rm'
+          system("docker-compose #{run_string} #{service} #{command}")
+        end
+
+        def build(services)
+          compose_services(:build, services)
+        end
+
+        def up(services)
+          services = (services.nil? ? Ros.service_names_enabled.append('nginx') : [services]).join(' ')
+          compose_services(:up, services)
+          reload_nginx
+        end
+
+        def ps; compose(:ps) end
+        def down; compose(:down) end
+
+        def reload(services)
+          compose_services(:stop, services)
+          compose_services('up -d', services)
+          sleep 3
+          reload_nginx
+        end
+
+        def reload_nginx
+          %x(docker container exec #{namespace}_nginx_1 nginx -s reload)
+        end
+
+        def compose_services(command, services = nil)
+          switch!
+          services = (services.nil? ? Ros.service_names_enabled : [services]).join(' ')
+          # TODO: needs to get the correct name of the worker, etc
+          # Settings.services.each_with_object([]) do |service, ary|
+          #   ary.concat service.profiles
+          # end
+          compose_options = options.daemon ? '-d' : ''
+          cmd_string = "docker-compose #{command} #{compose_options} #{services}"
+          puts "Running #{cmd_string}"
+          system(cmd_string)
+        end
+
         # TODO: implement rake method
         # def credentials_show
         #   %x(cat ros/services/iam/tmp/#{Settings.platform.environment.partition_name}/postman/222_222_222-Admin_2.json)
@@ -175,10 +219,18 @@ module Ros
 
         def rollback; compose(:down) end
 
-        def compose(cmd); system_cmd(compose_env, "docker-compose #{cmd}") end
+        def compose(cmd); switch!; system_cmd(compose_env, "docker-compose #{cmd}") end
 
         def compose_env; @compose_env ||= {} end
       end
+
+      def switch!
+        FileUtils.rm_f('.env')
+        FileUtils.ln_s(compose_file, '.env')
+      end
+
+      def compose_file; @compose_file ||= "#{compose_dir}/#{namespace}.env" end
+      def compose_dir; "#{Ros.root}/tmp/compose/#{Ros.env}" end
 
       def template_prefix; 'compose' end
 

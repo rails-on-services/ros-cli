@@ -31,8 +31,8 @@ module Ros
       if fix
         %x(git clone git@github.com:rails-on-services/ros.git) unless ros_repo
         generate_env([Ros.env]) unless env_config
-        Ros.ops_action(:core, :configure, options) unless deploy_config
-        Ros.ops_action(:platform, :configure, options) unless deploy_config
+        Ros.ops_action(:core, :setup, options) unless deploy_config
+        Ros.ops_action(:platform, :setup, options) unless deploy_config
       else
         puts "ros repo: #{ros_repo ? 'ok' : 'missing'}"
         puts "environment configuration: #{env_config ? 'ok' : 'missing'}"
@@ -66,6 +66,7 @@ module Ros
       infra_type = Settings.infra.config.type
       require "ros/ops/#{infra_type}"
       obj = Object.const_get("Ros::Ops::#{infra_type.capitalize}::#{type.to_s.capitalize}").new(options)
+      obj.switch!
       obj.send(action)
     end
 

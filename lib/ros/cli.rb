@@ -82,16 +82,9 @@ module Ros
     map %w(c) => :console
     def console(service = nil)
       if service
-        # binding.pry
-        type = Settings.meta.components.provider.split('/').last
-        if type.eql?('instance')
-          run_string = %x(docker-compose ps #{service} | grep #{service}).length.positive? ? 'exec' : 'run --rm'
-          # Settings.platform.environment.partition_name}_nginx_1 nginx -s reload)
-          system("docker-compose #{run_string} #{service} rails console")
-        end
-        return
+        context(options).console(service)
       else
-        # Ros.load_env(env) if (env and env != Ros.default_env)
+        context(options).switch!
         Pry.start
       end
     end
@@ -102,32 +95,37 @@ module Ros
     # option :initialize, type: :boolean, aliases: '-i'
     map %w(s) => :server
     def server
+      # context(options)
       Ros.load_env(options.environment) if options.environment != Ros.default_env
-      Ros.ops_action(:service, :provision, options)
+      Ros.ops_action(:platform, :apply, options)
     end
 
     desc 'build IMAGE', 'build one or all images'
     map %w(b) => :build
     def build(services = nil)
-      compose(:build, services)
+      context(options).build(services)
     end
 
-    # wrap docker compose commands
     desc 'up', 'bring up service(s)'
     option :daemon, type: :boolean, aliases: '-d'
     def up(services = nil)
-      compose(:up, services)
-      %x(docker container exec #{Settings.platform.partition_name}_nginx_1 nginx -s reload)
+      context(options).up(services)
+    end
+
+    desc 'exec', 'execute an interactive command on a service(s)'
+    def exec(service, command)
+      context(options).exec(service, command)
     end
 
     desc 'stop', 'stop platform'
     def stop
-      compose(:stop, '')
+      binding.pry
+      # compose(:stop, '')
     end
 
     desc 'down', 'bring down platform'
     def down
-      compose(:down, '')
+      context(options).down
     end
 
     desc 'restart SERVICE', 'Restart a service'
@@ -141,10 +139,7 @@ module Ros
 
     desc 'reload all non-platform services', 'Reloads all non-platform services'
     def reload(services = nil)
-      compose(:stop, services)
-      compose('up -d', services)
-      sleep 3
-      %x(docker container exec #{Settings.platform.partition_name}_nginx_1 nginx -s reload)
+      context(options).reload(services)
     end
 
     desc 'logs', 'Tail logs of a running service'
@@ -154,7 +149,7 @@ module Ros
 
     desc 'ps', 'List running services'
     def ps
-      puts %x(docker-compose ps)
+      context(options).ps
     end
 
     desc 'list', 'List configuration objects'
@@ -166,19 +161,12 @@ module Ros
 
     private
 
-    def compose(command, services = nil)
-      services = (services.nil? ? Ros.service_names_enabled : [services]).join(' ')
-      # TODO: needs to get the correct name of the worker, etc
-      # Settings.services.each_with_object([]) do |service, ary|
-      #   ary.concat service.profiles
-      # end
-      compose_options = options.daemon ? '-d' : ''
-      cmd_string = "docker-compose #{command} #{compose_options} #{services}"
-      puts "Running #{cmd_string}"
-      FileUtils.rm_f('.env')
-      FileUtils.ln_s("#{compose_dir}/#{Ros.env}.env", '.env')
-      system(cmd_string)
+    def context(options = {})
+      return @context if @context
+      infra_type = Settings.infra.config.type
+      type = :platform
+      require "ros/ops/#{infra_type}"
+      @context = Object.const_get("Ros::Ops::#{infra_type.capitalize}::#{type.to_s.capitalize}").new(options)
     end
-    def compose_dir; "#{Ros.root}/tmp/compose" end
   end
 end

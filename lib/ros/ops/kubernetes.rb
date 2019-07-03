@@ -56,29 +56,29 @@ end
           "configMaps:\n  rails-audit-log.conf: |"
         end
 
-        def provision
-          return unless provision_check
-          provision_namespace
-          provision_helm
-          provision_secrets
-          provision_services
+        def apply
+          return unless apply_check
+          apply_namespace
+          apply_helm
+          apply_secrets
+          apply_services
         end
 
-        def provision_namespace
+        def apply_namespace
           system_cmd(kube_env, "kubectl create ns #{namespace}") unless system_cmd(kube_env, "kubectl get ns #{namespace}")
           system_cmd(kube_env, "kubectl label namespace #{namespace} istio-injection=enabled --overwrite")
         end
 
-        def provision_helm
+        def apply_helm
           kube_ctl("apply -f #{Ros.k8s_root}/tiller-rbac")
           system_cmd(kube_env, 'helm init --upgrade --wait --service-account tiller')
         end
 
-        def provision_secrets
+        def apply_secrets
           Dir["#{core_root}/*.env"].each { |file| sync_secret(file) }
         end
 
-        def provision_services
+        def apply_services
           Dir.chdir(core_root) { Dir['*.yml'].each { |file| skaffold("deploy -f #{file}") } }
         end
 
@@ -117,13 +117,13 @@ end
 
         # provisions platform services
         # TODO: process service env files, crete sns path on platform’s S3 bucket, etc
-        def provision
-          # return unless provision_check and gem_version_check
-          # provision_secrets
-          provision_services
+        def apply 
+          # return unless apply_check and gem_version_check
+          # apply_secrets
+          apply_services
         end
 
-        def provision_secrets
+        def apply_secrets
           Dir["#{platform_root}/*.env"].each { |file| sync_secret(file) }
           kube_cmd = "create secret generic #{registry_secret_name} " \
             "--from-file=.dockerconfigjson=#{Dir.home}/.docker/config.json --type=kubernetes.io/dockerconfigjson"
@@ -132,7 +132,7 @@ end
 
         def registry_secret_name; "registry-#{platform.config.image.registry}" end
 
-        def provision_services
+        def apply_services
           thing = ARGV[0] || '*'
           binding.pry
           Dir.chdir(platform_root) do
@@ -160,7 +160,7 @@ end
         kube_ctl("create secret generic #{name} --from-env-file #{file}")
       end
 
-      def provision_check
+      def apply_check
         puts File.file?(kubeconfig) ? "Using kubeconfig file: #{kubeconfig}" : "Kubeconfig not found at #{kubeconfig}"
         File.file?(kubeconfig) 
       end

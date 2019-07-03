@@ -4,10 +4,10 @@ module Ros
   module Ops
     module Platform
       # Write a config for each of the service's profiles and a service env
-      def configure
+      def setup
         FileUtils.rm_rf(platform_root)
         FileUtils.mkdir_p(platform_root)
-        configure_env
+        setup_env
         platform.services.each_pair do |name, config|
           next if config&.enabled.eql? false
           content = service_content(name, config)
@@ -16,10 +16,10 @@ module Ros
           content = Ros.format_envs('', envs).join("\n")
           File.write("#{platform_root}/#{name}.env", "#{content}\n")
         end
-        after_configure
+        after_setup
       end
 
-      def configure_env
+      def setup_env
         envs = platform.environment.dup.merge!(environment)
         content = Ros.format_envs('', envs).join("\n")
         File.write("#{platform_root}/platform.env", "#{content}\n")
@@ -42,7 +42,7 @@ module Ros
       end
 
       # NOTE: Implemented by instance
-      def after_configure; end
+      def after_setup; end
 
       def platform_root; "#{deploy_root}/platform" end
 

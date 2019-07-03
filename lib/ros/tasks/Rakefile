@@ -1,10 +1,3 @@
-if ARGV[0]&.include? ':'
-  action = ARGV[0].split(':')[1]
-  if ARGV[1]
-    ENV['ROS_PROFILE'] = ARGV[1] if action.eql?('configure')
-    ENV['ROS_IMAGE'] = ARGV[1] if action.eql?('provision')
-  end
-end
 require 'ros'
 require 'ros/exec'
 require 'pry'
@@ -21,12 +14,11 @@ namespace :preflight do
   end
 end
 
-namespace :deployment do
-  %i(configure provision rollback).each do |action|
-    # desc "#{action.capitalize} #{Ros.env} deployment (#{Settings.meta.components.provider.split('/').last})"
+namespace :deploy do
+  %i(setup apply rollback).each do |action|
     desc "#{action.capitalize} #{Ros.env} deployment (#{Settings.infra.config.type})"
     task action do |task, args|
-      %i(infra platform service).each do |type|
+      %i(infra core platform).each do |type|
         Ros.ops_action(type, action)
       end
     end
@@ -100,33 +92,33 @@ namespace :ros do
 
   namespace :erd do
     desc 'Generate ERD'
-    task :generate  do |task|
-      Ros::Exec.new.execute(task.name, ARGV)
+    task :generate, %i(service)  do |task, args|
+      Ros::Exec.new.execute(task.name, args[:service])
     end
   end
 
   namespace :db do
     desc 'Clean a database (removes all tenants)'
-    task :clean do |task|
-      Ros::Exec.new.execute(task.name, ARGV)
+    task :clean, %i(service) do |task, args|
+      Ros::Exec.new.execute(task.name, args[:service])
     end
 
     namespace :clean do
       desc 'Clean a database and seed it'
-      task :seed do |task|
-        Ros::Exec.new.execute(task.name, ARGV)
+      task :seed, %i(service) do |task, args|
+        Ros::Exec.new.execute(task.name, args[:service])
       end
 
       desc 'Reset a database (drop, create and run migrations)'
-      task :reset do |task|
-        Ros::Exec.new.execute(task.name, ARGV)
+      task :reset, %i(service) do |task, args|
+        Ros::Exec.new.execute(task.name, args[:service])
       end
     end
 
     namespace :reset do
       desc 'Reset a database and seed it'
-      task :seed do |task|
-        Ros::Exec.new.execute(task.name, ARGV)
+      task :seed, %i(service) do |task, args|
+        Ros::Exec.new.execute(task.name, args[:service])
       end
     end
   end
@@ -134,9 +126,9 @@ end
 
 namespace :db do
   namespace :migrate do
-    desc 'db migraiton status'
-    task :status do |task|
-      Ros::Exec.new.execute(task.name, ARGV)
+    desc 'Display status of migrations'
+    task :status, %i(service) do |task, args|
+      Ros::Exec.new.execute(task.name, args[:service])
     end
   end
 end

@@ -4,7 +4,7 @@ module Ros
   module Ops
     module Core
       # Write the configuration files, e.g. skaffold, compose, etc
-      def configure
+      def setup
         FileUtils.rm_rf(core_root)
         FileUtils.mkdir_p(core_root)
         write_service_templates

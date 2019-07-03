@@ -5,8 +5,14 @@ if ARGV[0]&.eql? '-T'
   STDOUT.puts res.gsub(/^rake/, 'ros').gsub("\nrake", "\nros")
 elsif ARGV[0]&.include? ':'
   require 'rake'
-  Rake.load_rakefile 'Rakefile' if File.exists? 'Rakefile'
-  Rake::Task[ARGV[0]].invoke(ARGV[1..-1])
+  tasks = ARGV.each_with_object([]) { |arg, tasks| tasks.append(arg) if arg.index(':') }
+  args = ARGV.each_with_object([]) { |arg, args| args.append(arg) unless arg.index(':') }
+  Rake.load_rakefile('Rakefile') if File.exists?('Rakefile')
+  tasks.each { |task| Rake::Task[task].invoke(args) }
+  # if ARGV[0]
+  #   ENV['ROS_PROFILE'] = ARGV[0] # if action.eql?('setup')
+  #   ENV['ROS_IMAGE'] = ARGV[0] # if action.eql?('apply')
+  # end
 else
   require 'bundler/setup'
   require 'ros'

@@ -52,9 +52,7 @@ module Ros
     end
 
     def sha
-      return @sha if @sha
-      return unless system('git rev-parse --git-dir > /dev/null 2>&1')
-      @sha = %x(git rev-parse --short HEAD).chomp
+      @sha ||= system('git rev-parse --git-dir > /dev/null 2>&1') ? %x(git rev-parse --short HEAD).chomp : 'no-sha'
     end
 
     def deploy_root; @deploy_root ||= "#{Ros.root}/tmp/deployments/#{deploy_path}" end

@@ -4,7 +4,7 @@ module Ros
   module Ops
     module Infra
       # Write the TF files
-      def configure
+      def setup
         puts "Provision platform config '#{namespace}' of type #{infra.config.type} in #{Ros.env} environment"
         puts "Work dir: #{workdir}"
         Dir.chdir(workdir) do
@@ -31,15 +31,15 @@ module Ros
       end
 
       # Standup infra via Terraform: k8s, minikube or instance
-      def provision
+      def apply
         Dir.chdir(workdir) do
           system('terraform init')
           system('terraform apply')
         end
-        after_provision
+        after_apply
       end
 
-      def after_provision; end
+      def after_apply; end
 
       # Destroy the infrastructure
       def rollback

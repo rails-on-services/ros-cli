@@ -29,16 +29,14 @@ core:
 
 platform:
   environment:
-    request_logging:
-      enabled: no
-    system_logging:
-      enabled: no
+    redis_url: redis://redis:6379
+    platform:
+      request_logging:
+        enabled: no
+      system_logging:
+        enabled: no
   services:
     cognito:
       profiles: ['server']
     comm:
-      profiles: ['server']
-    survey:
-      profiles: ['server']
-    game:
       profiles: ['server']

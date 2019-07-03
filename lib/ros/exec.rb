@@ -4,9 +4,9 @@ module Ros
   class Exec
     def execute(task, services)
       services = Ros.service_names_enabled if services.empty?
-      exec_type = Ros.env.eql?('console') ? :console : Settings.meta.components.provider.split('/').last
+      exec_type = Ros.env.eql?('console') ? :console : Settings.infra.config.type
       services.each do |service|
-        next unless config = Settings.services[service]
+        next unless config = Settings.platform.services[service]
         next if config&.enabled.eql? false
         prefix = config.ros ? 'app:' : ''
         send(exec_type, service, "#{prefix}#{task}")
