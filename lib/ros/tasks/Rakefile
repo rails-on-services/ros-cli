@@ -14,6 +14,53 @@ namespace :preflight do
   end
 end
 
+namespace :platform do
+  namespace :infra do
+    desc 'Create the platform infrasturcture'
+    task :create do |task, args|
+    end
+    desc 'Migrate the platform infrasturcture'
+    task :migrate do |task, args|
+    end
+    desc 'Drop the platform infrasturcture'
+    task :drop do |task, args|
+    end
+  end
+
+  desc 'Deploys the platform into the target environment'
+  task :create do |task, args|
+    Ros.ops_action(:core, :setup)
+    Ros.ops_action(:platform, :setup)
+    # Ros.ops_action(:core, :apply)
+  end
+
+  desc 'Deploys (or reploys) the platform services in the target environment'
+  # brings down then up the platform services; reloads nginx if necessary
+  task :migrate do |task, args|
+    Ros.ops_action(:platform, :setup)
+    Ros.ops_action(:core, :setup)
+    Ros.ops_action(:platform, :apply)
+  end
+
+  desc 'platform status'
+  # brings down then up the platform services; reloads nginx if necessary
+  task :status do |task, args|
+    options = Config::Options.new
+      infra_type = Settings.infra.config.type
+      type = :platform
+      require "ros/ops/#{infra_type}"
+      context = Object.const_get("Ros::Ops::#{infra_type.capitalize}::#{type.to_s.capitalize}").new(options)
+      context.ps
+  end
+
+  desc 'Deploys (or reploys) the platform services in the target environment'
+  # brings down then up the platform services; reloads nginx if necessary
+  task :drop do |task, args|
+    Ros.ops_action(:platform, :rollback)
+    Ros.ops_action(:core, :rollback)
+  end
+end
+
 namespace :deploy do
   %i(setup apply rollback).each do |action|
     desc "#{action.capitalize} #{Ros.env} deployment (#{Settings.infra.config.type})"

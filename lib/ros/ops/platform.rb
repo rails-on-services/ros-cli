@@ -7,7 +7,7 @@ module Ros
       def setup
         FileUtils.rm_rf(platform_root)
         FileUtils.mkdir_p(platform_root)
-        setup_env
+        write_platform_envs
         platform.services.each_pair do |name, config|
           next if config&.enabled.eql? false
           content = service_content(name, config)
@@ -19,7 +19,7 @@ module Ros
         after_setup
       end
 
-      def setup_env
+      def write_platform_envs
         envs = platform.environment.dup.merge!(environment)
         content = Ros.format_envs('', envs).join("\n")
         File.write("#{platform_root}/platform.env", "#{content}\n")
@@ -27,7 +27,20 @@ module Ros
 
       # Override the PLATFORM_HOSTS value
       def environment
-        { platform: { hosts: api_hostname, postman: { workspace: api_hostname } } }
+        { platform: {
+          hosts: api_hostname,
+          postman: { workspace: api_hostname },
+          infra: {
+            provider: infra.config.provider,
+            credentials: provider.config.credentials,
+            account_id: provider.config.account_id,
+            feature_set: current_feature_set,
+            storage: {
+              bucket_name: bucket_name,
+              bucket_root: current_feature_set
+            }
+          }
+        } }
       end
 
       def service_content(name, service)

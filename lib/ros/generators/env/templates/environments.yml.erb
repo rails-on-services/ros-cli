@@ -4,13 +4,15 @@ platform:
     # Rails
     secret_key_base: <%= SecureRandom.hex(64) %>
     rails_master_key: <%= SecureRandom.hex %>
+    aws_access_key_id: localstack_does_not_authenticate
+    aws_secret_access_key: so_valid_credentials_are_not_necessary
 
     # Uncomment to set to a remote host
     # rails_database_host: localhost
 
     # Service
     platform:
-      partition_name: <%= partition_name %>
+      partition_name: <%= deployment.platform.environment.platform.partition_name %>
 
       # JWT
       jwt:
@@ -46,5 +48,5 @@ platform:
       environment:
         platform:
           encryption_key: <%= SecureRandom.hex %>
-          twilio_account_sid: test
-          twilio_auth_token: test2
+        twilio_account_sid: placeholder
+        twilio_auth_token: replace-with-valid-credentials

@@ -9,7 +9,8 @@ services:
     depends_on:
       - localstack<% end %>
     env_file:
-      - ./sftp.env
+      - ../core/core.env
+      - ../core/sftp.env
     privileged: true
     ports:
       - '2222:22'

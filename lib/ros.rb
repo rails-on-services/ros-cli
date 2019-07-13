@@ -75,14 +75,15 @@ module Ros
     def load_env(env = nil)
       Ros.env = env if env
       files = []
-      %w(deployment environment).each do |type|
-        files.append("#{Ros.root}/config/#{type}.yml")
-        files.append("#{Ros.root}/config/#{type}s/#{Ros.env}.yml")
-        if ENV['ROS_PROFILE']
-          profile_file = "#{Ros.root}/config/#{type}s/#{Ros.env}-#{ENV['ROS_PROFILE']}.yml"
-          files.append(profile_file) if File.exists?(profile_file)
-        end
-      end
+      files.append("#{Ros.root}/config/stack.yml")
+      # %w(deployment environment).each do |type|
+      #   files.append("#{Ros.root}/config/#{type}.yml")
+      #   files.append("#{Ros.root}/config/#{type}s/#{Ros.env}.yml")
+      #   if ENV['ROS_PROFILE']
+      #     profile_file = "#{Ros.root}/config/#{type}s/#{Ros.env}-#{ENV['ROS_PROFILE']}.yml"
+      #     files.append(profile_file) if File.exists?(profile_file)
+      #   end
+      # end
       Config.load_and_set_settings(files)
     end
 
@@ -113,11 +114,11 @@ module Ros
 
     # NOTE: uri and api_hostname are implemented in deployment.rb
     # this file is not namespace aware so
-    def uri; URI("#{Settings.infra.config.endpoints.api.scheme}://#{api_hostname}") end
+    # def uri; URI("#{Settings.infra.config.endpoints.api.scheme}://#{api_hostname}") end
 
-    def api_hostname
-      @api_hostname ||= "#{Settings.infra.config.endpoints.api.host}.#{Settings.infra.config.dns.subdomain}.#{Settings.infra.config.dns.domain}"
-    end
+    # def api_hostname
+    #   @api_hostname ||= "#{Settings.infra.config.endpoints.api.host}.#{Settings.infra.config.dns.subdomain}.#{Settings.infra.config.dns.domain}"
+    # end
 
     # def api_hostname
     #   @api_hostname ||=
@@ -146,7 +147,7 @@ module Ros
 
     # TODO: This is a hack in order to differentiate for purpose of templating files
     def is_ros?
-      Settings.platform.config.image.registry.eql?('railsonservices') and Settings.platform.environment.platform.partition_name.start_with?('ros')
+      Settings.platform.config.image_registry.eql?('railsonservices') and Settings.platform.environment.platform.partition_name.eql?('ros')
     end
   end
 end

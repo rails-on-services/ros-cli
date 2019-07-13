@@ -1,4 +1,9 @@
   <%= name %>:
+    labels:
+      stack.name: whistler
+      platform.feature_set: mounted
+      service.tier: platform
+      # service.type: ros
     image: "${IMAGE_REPOSITORY}/<%= name %>:${IMAGE_TAG}"
     command: ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "-P", "/tmp/server.pid"]
     env_file:

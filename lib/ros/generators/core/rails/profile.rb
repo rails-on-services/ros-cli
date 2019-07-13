@@ -8,7 +8,8 @@ class Profile
 
   def initialize(name, generator, options)
     self.name = name
-    self.lib_path = Pathname(generator.destination_root).join('../../lib')
+    # self.lib_path = Pathname(generator.destination_root).join('../../lib')
+    self.lib_path = '../../lib'
     if File.basename(options['template']).eql?('core_generator.rb')
       self.platform_name = name.gsub('-core', '')
     else

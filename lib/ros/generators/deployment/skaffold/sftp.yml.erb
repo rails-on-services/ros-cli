@@ -1,0 +1,26 @@
+---
+apiVersion: skaffold/v1beta11
+kind: Config
+deploy:
+  helm:
+    releases:
+      - name: sftp
+        chartPath: <%= chart_path %>
+        skipBuildDependencies: true
+        overrides:
+          envFromSecrets:<% secrets_files.each do |name| %>
+            - <%= name %><% end %>
+          image:
+            pullPolicy: <%= pull_policy %>
+          service:
+            type: LoadBalancer
+            annotations:
+              service.beta.kubernetes.io/aws-load-balancer-type: nlb
+              external-dns.alpha.kubernetes.io/hostname: <%= sftp_hostname %>
+          resources: 
+            limits:
+              cpu: 100m
+              memory: 128Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi

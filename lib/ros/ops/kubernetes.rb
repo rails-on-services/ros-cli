@@ -43,8 +43,10 @@ module Ros
             api_hostname: api_hostname,
             sftp_hostname: sftp_hostname,
             storage_name: "storage#{base_hostname.gsub('.', '-')}",
+            storage_region: provider.region,
             service_names: platform.services.keys,
-            secrets_files: core.services.dig(name, :environment) ? [:platform, name.to_sym] : %i(platform)
+            secrets_files: core.services.dig(name, :environment) ? [:core, name.to_sym] : %i(core)
+            # secrets_files: File.exists?("#{core_root}/#{name}.env") ? [:core, name.to_sym] : %i(core)
           }
         end
 
@@ -58,8 +60,9 @@ end
 
         def apply
           return unless apply_check
-          apply_namespace
-          apply_helm
+          thing = ARGV[1] || '*'
+          apply_namespace unless thing.eql?('*')
+          apply_helm unless thing.eql?('*')
           apply_secrets
           apply_services
         end
@@ -75,14 +78,20 @@ end
         end
 
         def apply_secrets
-          Dir["#{core_root}/*.env"].each { |file| sync_secret(file) }
+          thing = ARGV[1] || '*'
+          Dir["#{core_root}/#{thing}.env"].each { |file| sync_secret(file) }
         end
 
         def apply_services
-          Dir.chdir(core_root) { Dir['*.yml'].each { |file| skaffold("deploy -f #{file}") } }
+          thing = ARGV[1] || '*'
+          Dir.chdir(core_root) { Dir["#{thing}.yml"].each { |file| skaffold("deploy -f #{file}") } }
         end
 
-        def rollback; puts "TODO: rollback #{self.class.name}" end
+        # def rollback; puts "TODO: rollback #{self.class.name}" end
+        def rollback
+          string = "kubectl delete ns #{namespace}"
+          system(string)
+        end
       end
 
       class Platform < Deployment
@@ -97,11 +106,13 @@ end
         end
 
         def template_vars(name, profile_name)
+          image_type = platform.services.dig(name, :type) || 'rails'
+          image = platform.config.images[image_type]
           {
             name: name,
             context_path: "#{relative_path}#{platform.services.dig(name, :ros) ? '/ros' : ''}",
             dockerfile_path: "#{relative_path}/#{platform.services.dig(name, :ros) ? 'ros/' : ''}Dockerfile",
-            image: platform.config.image,
+            image: image,
             chart_path: "#{relative_path}/devops/helm/charts/service",
             api_hostname: api_hostname,
             is_ros_service: platform.services.dig(name, :ros),
@@ -119,22 +130,23 @@ end
         # TODO: process service env files, crete sns path on platform’s S3 bucket, etc
         def apply 
           # return unless apply_check and gem_version_check
-          # apply_secrets
+          apply_secrets
           apply_services
         end
 
         def apply_secrets
-          Dir["#{platform_root}/*.env"].each { |file| sync_secret(file) }
+          thing = ARGV[1] || '*'
+          Dir["#{platform_root}/#{thing}.env"].each { |file| sync_secret(file) }
           kube_cmd = "create secret generic #{registry_secret_name} " \
             "--from-file=.dockerconfigjson=#{Dir.home}/.docker/config.json --type=kubernetes.io/dockerconfigjson"
-          kube_ctl(kube_cmd)
+          kube_ctl(kube_cmd) if thing.eql?('*')
         end
 
-        def registry_secret_name; "registry-#{platform.config.image.registry}" end
+        def registry_secret_name; "registry-#{platform.config.image_registry}" end
 
         def apply_services
-          thing = ARGV[0] || '*'
-          binding.pry
+          thing = ARGV[1] || '*'
+          # binding.pry
           Dir.chdir(platform_root) do
             Dir["#{thing}.yml"].each do |file|
               # skaffold("build -f #{file}")
@@ -150,6 +162,34 @@ end
 
         # TODO Destroy a service using skaffold and remove secrets
         def rollback; puts "rollback #{self.class.name}" end
+
+        # Common commands for compose/kubectl
+        def ps; kube_ctl('get pods') end
+
+        def console(service)
+          kube_ctl("exec -it #{pod(service)} -c #{service} rails console")
+        end
+
+        def exec(service, command)
+          kube_ctl("exec -it #{pod(service)} -c #{service} #{command}")
+        end
+
+        def logs(service)
+          trap("SIGINT") { throw StandardError } if options.tail
+          kube_ctl("#{command('logs')} #{pod(service)} -c #{service}")
+        rescue StandardError
+        end
+
+        def command(cmd); "#{cmd}#{options.tail ? ' -f' : ''}" end
+
+        # Compose specific commands
+        def pod(service)
+          result = kube_ctl_x("get pod -l app=#{service} -l app.kubernetes.io/instance=#{service}")
+          result.split("\n").each do |res|
+            pod, count, status, restarts, age = res.split
+            break pod if status.eql?('Running')
+          end
+        end
       end
 
       def sync_secret(file)
@@ -167,9 +207,10 @@ end
 
       def template_prefix; 'skaffold' end
 
-      def deploy_path; "#{Ros.env}/#{namespace}" end
+      def deploy_path; "#{Ros.env}/#{current_feature_set}" end
 
       def kube_ctl(cmd); system_cmd(kube_env, "kubectl -n #{namespace} #{cmd}") end
+      def kube_ctl_x(cmd); %x(kubectl -n #{namespace} #{cmd}) end
 
       def kube_env; @kube_env ||= { 'KUBECONFIG' => kubeconfig, 'TILLER_NAMESPACE' => namespace } end
 
@@ -177,17 +218,19 @@ end
 
       def skaffold_env
         @skaffold_env ||=
-          { 'SKAFFOLD_DEFAULT_REPO' => platform.config.image.registry, 'IMAGE_TAG' => image_tag }.merge(kube_env)
+          { 'SKAFFOLD_DEFAULT_REPO' => platform.config.image_registry, 'IMAGE_TAG' => image_tag }.merge(kube_env)
       end
 
       def namespace
-        @namespace ||=
-          if infra.config.branch_deployments
-            branch_name.eql?(infra.config.api_branch) ? infra.config.namespace : "#{branch_name}-#{infra.config.namespace}"
-          else
-            infra.config.namespace
-          end
+        @namespace ||= "#{current_feature_set}-#{core.config.name}"
+          # if infra.config.branch_deployments
+          #   branch_name.eql?(infra.config.api_branch) ? infra.config.namespace : "#{branch_name}-#{infra.config.namespace}"
+          # else
+          #   infra.config.namespace
+          # end
       end
+
+      def switch!; end
 
       def kubeconfig
         @kubeconfig ||= File.expand_path(infra.config.kubeconfig || '~/.kube/config')

@@ -10,10 +10,12 @@ module Ros
     def self.exit_on_failure?; true end
 
     check_unknown_options!
-    class_option :verbose, type: :boolean, default: false
+    # class_option :verbose, type: :boolean, default: false, alias: '-v'
+    class_option :v, type: :boolean, default: false
+    class_option :n, type: :boolean, default: false
 
     desc 'version', 'Display version'
-    map %w(-v --version) => :version
+    # map %w(--version) => :version
     def version; say "Ros #{VERSION}" end
 
     desc 'new NAME HOST', "Create a new Ros platform project. \"ros new my_project\" creates a\n" \
@@ -113,6 +115,7 @@ module Ros
     end
 
     desc 'exec', 'execute an interactive command on a service(s)'
+    map %w(e) => :exec
     def exec(service, command)
       context(options).exec(service, command)
     end
@@ -124,8 +127,8 @@ module Ros
     end
 
     desc 'down', 'bring down platform'
-    def down
-      context(options).down
+    def down(services = nil)
+      context(options).down(services)
     end
 
     desc 'restart SERVICE', 'Restart a service'
@@ -143,8 +146,10 @@ module Ros
     end
 
     desc 'logs', 'Tail logs of a running service'
+    option :tail, type: :boolean, aliases: '-f'
+    # option :tail, aliases: '-f'
     def logs(service)
-      puts system("docker-compose logs -f #{service}")
+      context(options).logs(service)
     end
 
     desc 'ps', 'List running services'
@@ -163,7 +168,7 @@ module Ros
 
     def context(options = {})
       return @context if @context
-      infra_type = Settings.infra.config.type
+      infra_type = 'instance' # Settings.infra.config.type
       type = :platform
       require "ros/ops/#{infra_type}"
       @context = Object.const_get("Ros::Ops::#{infra_type.capitalize}::#{type.to_s.capitalize}").new(options)

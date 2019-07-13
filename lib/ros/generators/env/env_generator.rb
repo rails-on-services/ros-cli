@@ -8,13 +8,17 @@ module Ros
       include Thor::Actions
       argument :name
       argument :uri
-      argument :partition_name
+      # argument :partition_name
+      argument :deployment
       argument :content
 
       def self.source_paths; ["#{File.dirname(__FILE__)}/templates", File.dirname(__FILE__)] end
 
       def generate_secrets
-        self.uri = URI(uri)
+        Ros.load_env(name)
+        require 'ros/deployment'
+        self.deployment = Deployment.new({})
+        self.uri = URI("#{deployment.core.config.endpoints.api.scheme}://#{deployment.api_hostname}")
         require 'securerandom'
         in_root do
           template 'environments.yml.erb', "#{Ros.environments_dir}/#{name}.yml"

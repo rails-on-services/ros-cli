@@ -56,15 +56,6 @@ module Ros
           }
         end
 
-        def write_nginx
-          content = File.read("#{template_services_root}/nginx/nginx.conf.erb")
-          keys = platform.services.reject{|s| s.last.enabled.eql? false }.map{|s| s.first}
-          content = ERB.new(content).result_with_hash({ service_names: keys })
-          content_dir = "#{core_root}/nginx"
-          FileUtils.mkdir_p(content_dir)
-          File.write("#{content_dir}/nginx.conf", content)
-        end
-
         # TODO: this should probably be platform agnostic code rather than instance
         # def write_sftp
         #   content_dir = "#{core_root}/sftp"
@@ -76,7 +67,13 @@ module Ros
         #   Dir.chdir(content_dir) { FileUtils.touch('users.conf') }
         # end
 
-        def apply; puts "provision: Nothing to do" end
+        # def apply; puts "provision: Nothing to do" end
+        def apply
+          write_compose_envs
+          compose_options = options.daemon ? '-d' : ''
+          compose("up #{compose_options}")
+        end
+
         def rollback; puts "rollback: Nothing to do" end
       end
 
@@ -85,13 +82,15 @@ module Ros
         include Ros::Ops::Instance
 
         def template_vars(name, profile_name)
+          image_type = platform.services.dig(name, :type) || 'rails'
+          image = platform.config.images[image_type]
           has_envs = !platform.services.dig(name, :environment).nil?
           use_ros_context_dir = (not Ros.is_ros? and platform.services.dig(name, :ros))
           mount_ros = (not Ros.is_ros? and not platform.services.dig(name, :ros))
           {
             context_dir: use_ros_context_dir ? 'ROS_CONTEXT_DIR' : 'CONTEXT_DIR',
             has_envs: has_envs,
-            image: platform.config.image,
+            image: image,
             mount: platform.services.dig(name, :mount),
             mount_ros: mount_ros,
             name: name,
@@ -104,31 +103,11 @@ module Ros
           write_compose_envs
         end
 
-        def write_compose_envs
-          content = compose_environment.each_with_object([]) do |kv, ary|
-            ary << "#{kv[0].upcase}=#{kv[1]}"
-          end.join("\n")
-          content = "# This file was auto generated\n# The values are used by docker-compose\n# #{Ros.env}\n#{content}"
-          FileUtils.mkdir_p(compose_dir)
-          File.write(compose_file, "#{content}\n")
-        end
-
-        def compose_environment
-          {
-            compose_file: Dir["#{deploy_root}/**/*.yml"].map{ |p| p.gsub("#{Ros.root}/", '') }.sort.join(':'),
-            compose_project_name: namespace,
-            context_dir: "#{relative_path}/..",
-            ros_context_dir: "#{relative_path}/../ros",
-            image_repository: platform.config.image.registry,
-            image_tag: image_tag
-          }.merge(infra.environment.to_h)
-        end
-
         # TODO: stop and rm are passed directly to compose and exits
         # TODO: should be possible to run defaults on port 3000 and another version on 3001
         # by changing the project name in config/app
         def apply
-          binding.pry
+          # binding.pry
           # return unless gem_version_check
           # TODO: make build its own rake task and method
           if options.build
@@ -138,14 +117,18 @@ module Ros
             end
             return
           end
-          if options.initialize
-            compose("up wait")
+          # if options.initialize
+            # compose("up wait")
             platform.services.each do |name, config|
               next if config&.enabled.eql? false
               prefix = config.ros ? 'app:' : ''
-              compose("run --rm #{name} rails #{prefix}ros:db:reset:seed")
+              migration_file = "#{compose_dir}/#{current_feature_set}-#{name}-migrated"
+              unless File.exists?(migration_file)
+                compose("run --rm #{name} rails #{prefix}ros:db:reset:seed")
+                FileUtils.touch(migration_file)
+              end
             end
-          end
+          # end
           compose_options = options.daemon ? '-d' : ''
           compose("up #{compose_options}")
           # if options.initialize
@@ -153,10 +136,41 @@ module Ros
           # end
         end
 
+        # Common commands for compose/kubectl
+        def psxj; compose(:ps) end
+        def ps
+          puts services
+          st = services
+          # puts st
+          binding.pry
+          nil
+        end
+
+        def services(status: nil, tier: nil)
+          status ||= 'running'
+          filters = []
+          filters.append("--filter 'status=#{status}'")
+          filters.append("--filter 'label=stack.name=#{core.config.name}'")
+          filters.append("--filter 'label=service.tier=#{tier}'") if tier
+          filters.append("--filter 'label=platform.feature_set=#{current_feature_set}'")
+          filters.append("--format '{{.Names}}'")
+          cmd = "docker ps #{filters.join(' ')}"
+          ar = %x(#{cmd})
+          ar.split("\n").map{|a| a.gsub("#{current_feature_set}_", '').chomp("_1") }
+        end
+
+        # def xrunning_services
+        #   @running_services ||= compose_x('ps --filter "status=running" --services').split("\n")
+        #   # @running_services ||= (
+        #   #   raw = compose_x(:ps)
+        #   #   raw.split("\n").each_with_object([]) do |a, o|
+        #   #     o.append(a.split()[0].split('_')[1].to_sym) unless a.start_with?(' ') or a.start_with?('-')
+        #   #   end.uniq
+        #   # )
+        # end
+
         def console(service)
           exec(service, 'rails console')
-          # run_string = %x(docker-compose ps #{service} | grep #{service}).length.positive? ? 'exec' : 'run --rm'
-          # system("docker-compose #{run_string} #{service} rails console")
         end
 
         def exec(service, command)
@@ -164,6 +178,12 @@ module Ros
           system("docker-compose #{run_string} #{service} #{command}")
         end
 
+        def logs(service)
+          compose_options = options.tail ? '-f' : ''
+          compose("logs #{compose_options} #{service}")
+        end
+
+        # Compose specific commands
         def build(services)
           compose_services(:build, services)
         end
@@ -171,11 +191,17 @@ module Ros
         def up(services)
           services = (services.nil? ? Ros.service_names_enabled.append('nginx') : [services]).join(' ')
           compose_services(:up, services)
+          write_nginx(platform_services(:running))
           reload_nginx
         end
 
-        def ps; compose(:ps) end
-        def down; compose(:down) end
+        # def down; compose(:down) end
+        def down(services)
+          services = (services.nil? ? Ros.service_names_enabled.append('nginx') : [services]).join(' ')
+          compose_services(:stop, services)
+          write_nginx(platform_services(:running))
+          reload_nginx
+        end
 
         def reload(services)
           compose_services(:stop, services)
@@ -218,25 +244,57 @@ module Ros
         # end
 
         def rollback; compose(:down) end
+      end
+
+        def write_nginx(keys = platform.services.reject{|s| s.last.enabled.eql? false }.map{|s| s.first})
+          content = File.read("#{template_services_root}/nginx/nginx.conf.erb")
+          # keys = platform.services.reject{|s| s.last.enabled.eql? false }.map{|s| s.first}
+          content = ERB.new(content).result_with_hash({ service_names: keys })
+          binding.pry
+          content_dir = "#{core_root}/nginx"
+          FileUtils.mkdir_p(content_dir)
+          File.write("#{content_dir}/nginx.conf", content)
+        end
+      def core_root; "#{deploy_root}/core" end
 
         def compose(cmd); switch!; system_cmd(compose_env, "docker-compose #{cmd}") end
+        def compose_x(cmd); switch!; %x(docker-compose #{cmd}) end
 
         def compose_env; @compose_env ||= {} end
-      end
+
+        def write_compose_envs
+          content = compose_environment.each_with_object([]) do |kv, ary|
+            ary << "#{kv[0].upcase}=#{kv[1]}"
+          end.join("\n")
+          content = "# This file was auto generated\n# The values are used by docker-compose\n# #{Ros.env}\n#{content}"
+          FileUtils.mkdir_p(compose_dir)
+          File.write(compose_file, "#{content}\n")
+        end
+
+        def compose_environment
+          {
+            compose_file: Dir["#{deploy_root}/**/*.yml"].map{ |p| p.gsub("#{Ros.root}/", '') }.sort.join(':'),
+            compose_project_name: current_feature_set, # "#{current_feature_set}-#{core.config.name}", # namespace,
+            context_dir: "#{relative_path}/..",
+            ros_context_dir: "#{relative_path}/../ros",
+            image_repository: platform.config.image_registry,
+            image_tag: image_tag
+          }.merge(infra.environment.to_h)
+        end
 
       def switch!
         FileUtils.rm_f('.env')
         FileUtils.ln_s(compose_file, '.env')
       end
 
-      def compose_file; @compose_file ||= "#{compose_dir}/#{namespace}.env" end
+      def compose_file; @compose_file ||= "#{compose_dir}/#{current_feature_set}.env" end
       def compose_dir; "#{Ros.root}/tmp/compose/#{Ros.env}" end
 
       def template_prefix; 'compose' end
 
-      def deploy_path; "#{Ros.env}/#{namespace}" end
+      def deploy_path; "#{Ros.env}/#{current_feature_set}" end
 
-      def namespace; @namespace ||= (ENV['ROS_PROFILE'] ? "#{ENV['ROS_PROFILE']}-" : '') + infra.config.namespace end
+      def namespace; @namespace ||= (ENV['ROS_PROFILE'] ? "#{ENV['ROS_PROFILE']}-" : '') + current_feature_set end
     end
   end
 end
