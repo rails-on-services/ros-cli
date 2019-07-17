@@ -21,7 +21,6 @@ module Ros
             def stack_name; Stack.name end
             def current_feature_set; Stack.current_feature_set end
 
-
             # skaffold only methods
             def relative_path; @relative_path ||= ('../' * deploy_path.split('/').size).chomp('/') end
             def chart_path; "#{relative_path}/devops/helm/charts/application/services" end
@@ -39,32 +38,14 @@ module Ros
               })
             end
 
-            # Common environment for core services
-            def self.common_environment
-              Config::Options.new().merge!({
-                services: {
-                  infra: {
-                    provider: Settings.components.be.config.provider
-                  },
-                  feature_set: Stack.current_feature_set,
-                  # services: {
-                  #   storage: {
-                  #     # bucket_endpoint_url: 'http://localstack:4572',
-                  bucket_name: Application.bucket_name,
-                  #    bucket_root: Stack.current_feature_set
-                  #   }
-                  # }
-                }
-              }).merge!(send("#{Settings.components.be.config.provider}_environment"))
-            end
 
-            def self.aws_environment
-              {
-                aws_access_key_id: Ros::Generators::Be::Cluster.provider.credentials.access_key_id,
-                aws_secret_access_key: Ros::Generators::Be::Cluster.provider.credentials.secret_access_key,
-                aws_default_region: Ros::Generators::Be::Cluster.provider.credentials.region
-              }
-            end
+            # def self.aws_environment
+            #   {
+            #     aws_access_key_id: Ros::Generators::Be::Cluster.provider.credentials.access_key_id,
+            #     aws_secret_access_key: Ros::Generators::Be::Cluster.provider.credentials.secret_access_key,
+            #     aws_default_region: Ros::Generators::Be::Cluster.provider.credentials.region
+            #   }
+            # end
 
             # Configuration values for fluentd request logging config file
             def fluentd
@@ -92,13 +73,10 @@ module Ros
             # unless the name of the service to template was passed in
 
             # TODO: Add an override to source paths
-            def self.source_paths; ["#{File.dirname(__FILE__)}/templates"] end # , File.dirname(__FILE__)] end
+            def self.source_paths; ["#{File.dirname(__FILE__)}/templates"] end
 
             def environment_file
-              # envs = core.environment.dup.merge!(environment)
-              # @service = Service.new(components.first[0], components.first[1])
-              # envs = @service.environment_x
-              content = Ros.format_envs('', envs).join("\n")
+              content = Ros.format_envs('', environment).join("\n")
               create_file("#{destination_root}/#{deploy_path}/services.env", "#{content}\n")
             end
 
@@ -127,11 +105,12 @@ module Ros
              
             def nginx_services; @nginx_services ||= (args[0] || platform_service_names) end
 
-            # def envs; @envs ||= settings.environment.dup.merge!(random_service.environment_x) end
-            def envs; @envs ||= Service.common_environment end
-
             def deploy_path
               "#{Application.deploy_path}/#{Stack.current_feature_set}/services"
+            end
+
+            def environment
+              @environment ||= Application.environment.dup.merge!(settings.environment.to_h)
             end
 
             def service_names; components.keys  end

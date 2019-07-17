@@ -97,7 +97,7 @@ module Ros
             # end compose only methods
 
             def environment
-              @environment ||= Stack.environment.dup.merge!(Application.environment.dup.merge!(settings.environment.to_h).to_h)
+              @environment ||= Application.environment.dup.merge!(settings.environment.to_h)
             end
 
             def config

@@ -22,15 +22,18 @@ module Ros
           generate_config if stale_config
           compose_options = options.daemon ? '-d' : ''
           services.each do |service|
-            next unless ref = Settings.components.be.components.application.components.platform.components.dig(service)
-            config = ref.dig(:config) || Config::Options.new
-            if database_check(service, config)
-              compose("up #{compose_options} #{service}")
+            # if the service name is without a profile extension, e.g. 'iam' then load config and check db migration
+            # If the database check is ok then bring up the service and trigger a reload of nginx
+            if ref = Settings.components.be.components.application.components.platform.components.dig(service)
+              config = ref.dig(:config) || Config::Options.new
+              if database_check(service, config)
+                compose("up #{compose_options} #{service}")
+              end
             else
               compose("up #{compose_options} #{service}")
             end
           end
-          reload_nginx
+          reload_nginx(services)
         end
 
         def ps
@@ -46,9 +49,7 @@ module Ros
         def exec(service, command)
           generate_config if stale_config
           run_string = services.include?(service) ? 'exec' : 'run --rm'
-          # run_string = %x(docker-compose ps #{service} | grep #{service}).length.positive? ? 'exec' : 'run --rm'
-          # binding.pry
-          system("docker-compose #{run_string} #{service} #{command}")
+          compose("#{run_string} #{service} #{command}")
         end
 
         def logs(service)
@@ -63,12 +64,12 @@ module Ros
           compose("stop #{services.join(' ')}")
           compose("up -d #{services.join(' ')}")
           sleep 3
-          reload_nginx
+          reload_nginx(services)
         end
 
         def stop(services)
           compose("stop #{services.join(' ')}")
-          reload_nginx
+          reload_nginx(services)
         end
 
         def down; compose(:down) end
@@ -95,7 +96,12 @@ module Ros
           $stdout = rs
         end
 
-        def reload_nginx
+        def reload_nginx(services)
+          nginx_reload = false
+          services.each do |service|
+            nginx_reload = true if Settings.components.be.components.application.components.platform.components.dig(service)
+          end
+          return unless nginx_reload
           running_services = services(application_component: 'platform')
           rs = $stdout
           $stdout = StringIO.new

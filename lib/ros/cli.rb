@@ -100,17 +100,18 @@ module Ros
     end
 
     desc 'up SERVICE', 'bring up service(s)'
-    option :daemon, type: :boolean, aliases: '-d'
-    option :seed, type: :boolean, aliases: '--seed'
+    option :daemon, type: :boolean, aliases: '-d', desc: 'Run in the background'
+    option :seed, type: :boolean, aliases: '--seed', desc: 'Seed the database before starting the service'
     def up(*services)
       context(options).up(services)
     end
 
     desc 'server PROFILE', 'Start all services (short-cut alias: "s")'
     option :daemon, type: :boolean, aliases: '-d'
-    option :environment, type: :string, aliases: '-e', default: 'local'
+    option :environment, type: :string, aliases: '-e', default: 'development'
     map %w(s) => :server
     def server
+      # TODO: Test this
       Ros.load_env(options.environment) if options.environment != Ros.default_env
       context(options).up
       # Ros.ops_action(:platform, :apply, options)
@@ -132,19 +133,19 @@ module Ros
       end
     end
 
-    desc 'exec SERVICE COMMAND', 'execute an interactive command on a service(s)'
+    desc 'exec SERVICE COMMAND', 'execute an interactive command on a service (short-cut alias: "e")'
     map %w(e) => :exec
     def exec(service, command)
       context(options).exec(service, command)
     end
 
-    desc 'rails SERVICE COMMAND', 'execute a rails command on a service(s)'
+    desc 'rails SERVICE COMMAND', 'execute a rails command on a service (short-cut alias: "r")'
     map %w(r) => :rails
     def rails(service, command)
       context(options).exec(service, "rails #{command}")
     end
 
-    desc 'shell SERVICE', 'execute an interactive shell on a service(s)'
+    desc 'shell SERVICE', 'execute an interactive shell on a service (short-cut alias: "sh")'
     def sh(service)
       context(options).exec(service, 'bash')
     end
