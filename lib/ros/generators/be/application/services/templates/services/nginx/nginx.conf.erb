@@ -3,7 +3,7 @@ server {
 
   location /healthz {
     return 200 'no content';
-  }<% service_names.each do |name| %>
+  }<% nginx_services.each do |name| %>
 
   location /<%= name %>/ {
     add_header Access-Control-Expose-Headers 'Authorization';

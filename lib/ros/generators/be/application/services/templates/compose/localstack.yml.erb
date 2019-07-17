@@ -1,6 +1,12 @@
 version: '3'
 services:
   localstack:
+    labels:
+      stack.name: <%= @service.stack_name %>
+      stack.component: be
+      be.component: application
+      application.component: services
+      platform.feature_set: <%= @service.current_feature_set %>
     image: localstack/localstack
     environment:
       SERVICES: s3:4572,lambda:4574,sqs:4576

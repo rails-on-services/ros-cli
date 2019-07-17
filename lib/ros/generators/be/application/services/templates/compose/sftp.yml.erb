@@ -1,16 +1,22 @@
 version: '3'
 services:
   sftp:
+    labels:
+      stack.name: <%= @service.stack_name %>
+      stack.component: be
+      be.component: application
+      application.component: services
+      platform.feature_set: <%= @service.current_feature_set %>
     image: railsonservices/sftp
     # volumes:
       # NOTE: sshd_config looks for host keys in /etc/sshx
       # - "./sftp/host-config:/etc/sshx"
-      # - "./sftp/users.conf:/etc/sftp/users.conf:ro"<% if basic_service_names.include? :localstack %>
+      # - "./sftp/users.conf:/etc/sftp/users.conf:ro"<% if service_names.include? :localstack %>
     depends_on:
       - localstack<% end %>
     env_file:
-      - ../core/core.env
-      - ../core/sftp.env
+      - ../services/services.env
+      # - ../services/sftp.env
     privileged: true
     ports:
       - '2222:22'

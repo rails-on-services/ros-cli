@@ -47,16 +47,29 @@ module Ros
       generator.invoke_all
     end
 
-    desc 'generate TYPE NAME', 'Generate a new environment or service'
+    class Generate < Thor
+      desc 'service', 'Generates a new service'
+      def service(name)
+        test_for_project
+        Ros.generate_service(args, options)
+      end
+
+      desc 'env', 'Generates a new environment'
+      def env(*args)
+        test_for_project
+        Ros.generate_env(args, options)
+      end
+
+      private
+      def test_for_project
+        raise Error, set_color("ERROR: Not a Ros project", :red) if Ros.root.nil?
+      end
+    end
+
+    desc 'generate SUBCOMMAND', 'Some Parent Command'
     map %w(g) => :generate
     option :force, type: :boolean, default: false, aliases: '-f'
-    def generate(artifact, *args)
-      raise Error, set_color("ERROR: Not a Ros project", :red) if Ros.root.nil?
-      valid_artifacts = %w(service env)
-      raise Error, set_color("ERROR: invalid artifact #{artifact}. valid artifacts are: #{valid_artifacts.join(', ')}", :red) unless valid_artifacts.include? artifact
-      raise Error, set_color("ERROR: must supply a name for #{artifact}", :red) if %w(service env).include?(artifact) and args[0].nil?
-      Ros.send("generate_#{artifact}", args, options)
-    end
+    subcommand 'generate', Generate
 
     # TODO: refactor setting action to :destroy
     desc 'destroy TYPE NAME', 'Destroy an environment or service'
@@ -80,6 +93,34 @@ module Ros
       %x(lpass add --non-interactive --notes #{lpass_name} < app.env)
     end
 
+    desc 'build IMAGE', 'build one or all images'
+    map %w(b) => :build
+    def build(*services)
+      context(options).build(services)
+    end
+
+    desc 'up SERVICE', 'bring up service(s)'
+    option :daemon, type: :boolean, aliases: '-d'
+    option :seed, type: :boolean, aliases: '--seed'
+    def up(*services)
+      context(options).up(services)
+    end
+
+    desc 'server PROFILE', 'Start all services (short-cut alias: "s")'
+    option :daemon, type: :boolean, aliases: '-d'
+    option :environment, type: :string, aliases: '-e', default: 'local'
+    map %w(s) => :server
+    def server
+      Ros.load_env(options.environment) if options.environment != Ros.default_env
+      context(options).up
+      # Ros.ops_action(:platform, :apply, options)
+    end
+
+    desc 'ps', 'List running services'
+    def ps
+      context(options).ps
+    end
+
     desc 'console', 'Start the Ros console (short-cut alias: "c")'
     map %w(c) => :console
     def console(service = nil)
@@ -91,87 +132,60 @@ module Ros
       end
     end
 
-    desc 'server PROFILE', 'Start all services (short-cut alias: "s")'
-    option :daemon, type: :boolean, aliases: '-d'
-    option :environment, type: :string, aliases: '-e', default: 'local'
-    # option :initialize, type: :boolean, aliases: '-i'
-    map %w(s) => :server
-    def server
-      # context(options)
-      Ros.load_env(options.environment) if options.environment != Ros.default_env
-      Ros.ops_action(:platform, :apply, options)
-    end
-
-    desc 'build IMAGE', 'build one or all images'
-    map %w(b) => :build
-    def build(services = nil)
-      context(options).build(services)
-    end
-
-    desc 'up', 'bring up service(s)'
-    option :daemon, type: :boolean, aliases: '-d'
-    def up(services = nil)
-      context(options).up(services)
-    end
-
-    desc 'exec', 'execute an interactive command on a service(s)'
+    desc 'exec SERVICE COMMAND', 'execute an interactive command on a service(s)'
     map %w(e) => :exec
     def exec(service, command)
       context(options).exec(service, command)
     end
 
-    desc 'stop', 'stop platform'
-    def stop
-      binding.pry
-      # compose(:stop, '')
+    desc 'rails SERVICE COMMAND', 'execute a rails command on a service(s)'
+    map %w(r) => :rails
+    def rails(service, command)
+      context(options).exec(service, "rails #{command}")
     end
 
-    desc 'down', 'bring down platform'
-    def down(services = nil)
-      context(options).down(services)
-    end
-
-    desc 'restart SERVICE', 'Restart a service'
-    def restart(service)
-      compose(:stop, service)
-      compose(:rm, service)
-      compose('up -d', service)
-      sleep 3
-      %x(docker container exec #{Settings.platform.partition_name}_nginx_1 nginx -s reload)
-    end
-
-    desc 'reload all non-platform services', 'Reloads all non-platform services'
-    def reload(services = nil)
-      context(options).reload(services)
+    desc 'shell SERVICE', 'execute an interactive shell on a service(s)'
+    def sh(service)
+      context(options).exec(service, 'bash')
     end
 
     desc 'logs', 'Tail logs of a running service'
     option :tail, type: :boolean, aliases: '-f'
-    # option :tail, aliases: '-f'
     def logs(service)
       context(options).logs(service)
     end
 
-    desc 'ps', 'List running services'
-    def ps
-      context(options).ps
+    desc 'restart SERVICE', 'Start and stop one or more services'
+    def restart(*services)
+      context(options).restart(services)
+    end
+
+    desc 'stop SERVICE', 'Stop a service'
+    def stop(*services)
+      context(options).stop(services)
+    end
+
+    desc 'down', 'bring down platform'
+    def down
+      context(options).down
     end
 
     desc 'list', 'List configuration objects'
     map %w(ls) => :list
     def list(what = nil)
-      STDOUT.puts 'Options: services, profiles, images' if what.nil?
-      STDOUT.puts "#{Settings.send(what).keys.join("\n")}" unless what.nil?
+      STDOUT.puts 'Options: infra, services, platform' if what.nil?
+      STDOUT.puts "#{Settings.components.be.components.application.components[what].components.keys.join("\n")}" unless what.nil?
     end
 
     private
 
     def context(options = {})
       return @context if @context
-      infra_type = 'instance' # Settings.infra.config.type
-      type = :platform
+      infra_type = Settings.components.be.components.cluster.config.type
+      type = :cli
       require "ros/ops/#{infra_type}"
       @context = Object.const_get("Ros::Ops::#{infra_type.capitalize}::#{type.to_s.capitalize}").new(options)
+      @context
     end
   end
 end

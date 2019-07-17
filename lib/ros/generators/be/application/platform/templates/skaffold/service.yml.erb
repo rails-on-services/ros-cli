@@ -1,18 +1,58 @@
 ---
-apiVersion: skaffold/v1beta11
+apiVersion: <%= @service.skaffold_version %>
 kind: Config
 build:
   artifacts:
-  - image: <%= name %>
-    context: <%= context_path %>
+  - image: <%= @service.name %>
+    context: <%= @service.context_path %>
     docker:
-      dockerfile: <%= dockerfile_path %><% if image.build_args %>
-      buildArgs:<% image.build_args.each_pair do |name, value| %>
+      dockerfile: <%= @service.dockerfile_path %><% if @service.image.build_args %>
+      buildArgs:<% @service.image.build_args.each_pair do |name, value| %>
         <%= name %>: <%= value.is_a?(Array) ? value.join(' ') : value %><% end; end %>
-        project: <%= name %>
+        project: <%= @service.name %>
   tagPolicy:
     envTemplate:
       template: "{{.IMAGE_NAME}}:{{.IMAGE_TAG}}"
   local:
     useDockerCLI: true
-profiles:
+profiles:<% @service.profiles.each do |profile| %>
+  <% xname = profile.eql?('server') ? '' : "_#{profile}" %>
+  - name: <%= profile %>
+    deploy:
+      helm:
+        releases:
+        - name: <%= @service.name %><%= xname %>
+          chartPath: <%= @service.chart_path %>
+          skipBuildDependencies: true
+          values:
+            image: <%= @service.name %>
+          imageStrategy:
+            helm: {}
+          wait: false
+          overrides:
+            nameOverride: <%= @service.name %><%= xname %>
+            image:
+              pullPolicy: <%= @service.pull_policy %>
+            imagePullSecrets:
+              - name: <%= @service.pull_secret %>
+            app:<% if profile.eql?('server') %>
+              command: ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "-P", "/tmp/server.pid"]
+              <% elsif profile.eql?('worker') %>
+              command: ["bundle", "exec", "sidekiq", "-r", "spec/dummy", "-C", "config/sidekiq.yml"]
+              <% elsif profile.eql?('sqs_worker') %>
+              command: ["bundle", "exec", "shoryuken", "-r", "./app/workers", "-C", "config/shoryuken.yml"]<% end %>
+              envFromSecrets:<% @service.secrets_files.each do |name| %>
+                - <%= name %><% end %>
+            bootstrap:<% if profile.eql?('server') %>
+              enabled: true
+              command: ["bundle", "exec", "rails", "<% if @service.is_ros_service %>app:<% end %>ros:db:reset", "<% if @service.is_ros_service %>app:ros:<%= @service.name %>:<% end %>db:seed"]
+              <% else %>
+              enabled: false<% end %>
+            resources:
+              limits:
+                cpu: 1
+                memory: 2Gi
+              requests:
+                cpu: 0.5
+                memory: 1.5Gi
+<% end %>

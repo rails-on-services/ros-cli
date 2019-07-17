@@ -41,10 +41,11 @@ module Ros
     end
 
     def generate_service(args, options = {}, behavior = nil)
-      require_relative "ros/generators/service/service_generator.rb"
+      require 'ros/generators/service/service_generator'
+      # require_relative "ros/generators/service/service_generator.rb"
       args.push(File.basename(Ros.root)) unless args[1]
-      generator = Ros::Generators::ServiceGenerator.new(args)
-      generator.options = options
+      generator = Ros::Generators::ServiceGenerator.new(args, options)
+      # generator.options = options
       generator.behavior = behavior if behavior
       generator.destination_root = Ros.root
       generator.invoke_all
@@ -62,7 +63,34 @@ module Ros
       generator.invoke_all
     end
 
-    def ops_action(type, action, options = Config::Options.new)
+    # def ops_action(stack_component, action, options = Config::Options.new)
+    def generate(options = {}, *stack)
+      require 'ros/generators/stack'
+      # require "ros/generators/be/#{stack.last(2).first}"
+      require 'ros/generators/be/cluster'
+      require 'ros/generators/be/application'
+      require "ros/generators/#{stack.join('/')}/#{stack.last}_generator"
+      g_string = "Ros::Generators::#{stack.map{ |s| s.capitalize }.join('::')}::#{stack.last.capitalize}Generator"
+      generator = Object.const_get(g_string).new
+      # TODO: invoke as an option and pass that option when invoking from the CLI
+      generator.options = options
+      generator.behavior = options[:behavior] || :invoke
+      generator.destination_root = Ros.root
+      generator.invoke_all
+    end
+
+    def ops(options = {}, *stack)
+      require 'ros/generators/stack'
+      # require "ros/generators/be/gt
+      what = Settings.components.be.components.cluster.config.type.eql?('kubernetes') ? 'kubernetes' : 'instance'
+      require "ros/ops/#{what}"
+      g_string = "Ros::Ops::#{what.capitalize}::#{stack.last.capitalize}"
+      generator = Object.const_get(g_string).new
+      generator.invoke
+      # binding.pry
+    end
+
+    def x_ops_action(type, action, options = Config::Options.new)
       infra_type = Settings.infra.config.type
       require "ros/ops/#{infra_type}"
       obj = Object.const_get("Ros::Ops::#{infra_type.capitalize}::#{type.to_s.capitalize}").new(options)
@@ -75,15 +103,14 @@ module Ros
     def load_env(env = nil)
       Ros.env = env if env
       files = []
-      files.append("#{Ros.root}/config/stack.yml")
-      # %w(deployment environment).each do |type|
-      #   files.append("#{Ros.root}/config/#{type}.yml")
-      #   files.append("#{Ros.root}/config/#{type}s/#{Ros.env}.yml")
-      #   if ENV['ROS_PROFILE']
-      #     profile_file = "#{Ros.root}/config/#{type}s/#{Ros.env}-#{ENV['ROS_PROFILE']}.yml"
-      #     files.append(profile_file) if File.exists?(profile_file)
-      #   end
-      # end
+      %w(deployment environment).each do |type|
+        files.append("#{Ros.root}/config/#{type}.yml")
+        files.append("#{Ros.root}/config/#{type}s/#{Ros.env}.yml")
+        if ENV['ROS_PROFILE']
+          profile_file = "#{Ros.root}/config/#{type}s/#{Ros.env}-#{ENV['ROS_PROFILE']}.yml"
+          files.append(profile_file) if File.exists?(profile_file)
+        end
+      end
       Config.load_and_set_settings(files)
     end
 
@@ -147,7 +174,8 @@ module Ros
 
     # TODO: This is a hack in order to differentiate for purpose of templating files
     def is_ros?
-      Settings.platform.config.image_registry.eql?('railsonservices') and Settings.platform.environment.platform.partition_name.eql?('ros')
+      false
+      # Settings.platform.config.image_registry.eql?('railsonservices') and Settings.platform.environment.platform.partition_name.eql?('ros')
     end
   end
 end

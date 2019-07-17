@@ -1,6 +1,12 @@
 version: '3'
 services:
   redis:
+    labels:
+      stack.name: <%= @service.stack_name %>
+      stack.component: be
+      be.component: application
+      application.component: services
+      platform.feature_set: <%= @service.current_feature_set %>
     image: redis:5-alpine
     ports:
       - "6379"

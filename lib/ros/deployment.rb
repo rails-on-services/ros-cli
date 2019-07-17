@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+=begin
 require 'bump'
 
 module Ros
@@ -79,3 +80,4 @@ module Ros
     end
   end
 end
+=end

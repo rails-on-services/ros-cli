@@ -1,6 +1,13 @@
+---
 version: '3'
 services:
   postgres:
+    labels:
+      stack.name: <%= @service.stack_name %>
+      stack.component: be
+      be.component: application
+      application.component: services
+      platform.feature_set: <%= @service.current_feature_set %>
     image: mdillon/postgis:9.6
     ports:
       - "5432" # - "5432:5432"

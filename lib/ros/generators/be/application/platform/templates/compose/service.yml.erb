@@ -1,3 +1,42 @@
 ---
 version: '3'
 services:
+<% @service.profiles.each do |profile| %>
+  <% xname = profile.eql?('server') ? '' : "_#{profile}" %>
+  <%= @service.name %><%= xname %>:
+    labels:
+      stack.name: <%= @service.stack_name %>
+      stack.component: be
+      be.component: application
+      application.component: platform
+      platform.feature_set: <%= @service.current_feature_set %>
+      service.type: <%= profile %>
+      # service.type: ros
+    image: "${IMAGE_REPOSITORY}/<%= @service.name %>:${IMAGE_TAG}"
+    <% if profile.eql?('server') %>
+    command: ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "-P", "/tmp/server.pid"]
+    <% elsif profile.eql?('worker') %>
+    command: ["bundle", "exec", "sidekiq", "-r", "spec/dummy", "-C", "config/sidekiq.yml"]
+    <% elsif profile.eql?('sqs_worker') %>
+    command: ["bundle", "exec", "shoryuken", "-r", "./app/workers", "-C", "config/shoryuken.yml"]
+  <% end %>
+    env_file:
+      - ../platform/platform.env<% if @service.has_envs %><%= "\n      - ../platform/#{@service.name}.env" %><% end %>
+    depends_on:
+      - wait
+    ports:
+      # - "1234:1234"
+      # - "9394:9394"
+      - "3000"<% if @service.config.mount %>
+    volumes:
+      - "${<%= @service.context_dir %>}/services/<%= @service.name %>:/home/rails/services/app"
+      - "${<%= @service.context_dir %>}/lib:/home/rails/lib"<% if @service.mount_ros %>
+      - "${ROS_CONTEXT_DIR}/lib:/home/rails/ros/lib"<% end %><% end %>
+    build:
+      context: "${<%= @service.context_dir %>}"
+      args:<% @service.image.build_args.each_pair do |name, value| %>
+        <%= name %>: <%= value.is_a?(Array) ? value.join(' ') : value %><% end %>
+        project: <%= @service.name %>
+        PUID: "${PUID:-1000}"
+        PGID: "${PGID:-1000}"
+<% end %>

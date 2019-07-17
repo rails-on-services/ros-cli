@@ -1,6 +1,13 @@
+---
 version: '3'
 services:
   fluentd:
+    labels:
+      stack.name: <%= @service.stack_name %>
+      stack.component: be
+      be.component: application
+      application.component: services
+      platform.feature_set: <%= @service.current_feature_set %>
     image: railsonservices/fluentd
     ports:
       - "24224:24224"

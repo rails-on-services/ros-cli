@@ -1,7 +1,7 @@
 # request logging is a platform concern
 # ETL of records is based on format of logs as configured in rack-fluentd configuration in core lib
-<%= header %>
-    <filter <%= log_tag %>>
+<%= @service.fluentd.header %>
+    <filter <%= @service.fluentd.log_tag %>>
       @type record_modifier
       # write a temporary field _unix_time
       <record>
@@ -9,21 +9,21 @@
       </record>
     </filter>
 
-    <filter <%= log_tag %>>
+    <filter <%= @service.fluentd.log_tag %>>
       @type record_transformer
       enable_ruby true
       renew_time_key _unix_time
       remove_keys _unix_time
     </filter>
 
-    <match <%= log_tag %>><% if provider.eql? 'aws' %>
+    <match <%= @service.fluentd.log_tag %>><% if @service.fluentd.provider.eql? 'aws' %>
       @type s3
       <instance_profile_credentials>
       </instance_profile_credentials>
-      s3_bucket <%= storage_name %>
-      s3_region <%= storage_region  %>
+      s3_bucket <%= @service.fluentd.storage_name %>
+      s3_region <%= @service.fluentd.storage_region  %>
       store_as json
-      s3_object_key_format "<%= current_feature_set %>/fluentd/<%= fluent_code_from_duan %>/dt=%Y-%m-%d-%H-%M/%{index}.%{file_extension}"<% end %>
+      s3_object_key_format "<%= @service.fluentd.current_feature_set %>/fluentd/<%= @service.fluentd.fluent_code_from_duan %>/dt=%Y-%m-%d-%H-%M/%{index}.%{file_extension}"<% end %>
       <buffer tag,time>
         @type file
         path /var/log/fluent/s3

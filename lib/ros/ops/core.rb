@@ -83,8 +83,8 @@ module Ros
       end
 
       def write_fluentd
-        content = File.read("#{template_services_root}/fluentd/requests.conf.erb")
-        content = ERB.new(content).result_with_hash(fluentd_env)
+        # content = File.read("#{template_services_root}/fluentd/requests.conf.erb")
+        # content = ERB.new(content).result_with_hash(fluentd_env)
         content_dir = "#{core_root}/fluentd"
         FileUtils.mkdir_p("#{content_dir}/log")
         FileUtils.chmod('+w', "#{content_dir}/log")
@@ -92,20 +92,20 @@ module Ros
         File.write("#{content_dir}/etc/requests.conf", content)
       end
 
-      def fluentd_env
-        {
-          header: fluentd_header,
-          # log_tag: "#{api_hostname}.rack-traffic-log",
-          log_tag: "**.rack-traffic-log",
-          fluent_code_from_duan: 'test',
-          provider: infra.config.provider,
-          # storage_name: "storage#{base_hostname.gsub('.', '-')}",
-          storage_name: bucket_name,
-          storage_region: provider.config.region,
-          current_feature_set: current_feature_set
-        }
-      end
-      def fluentd_header; '' end
+      # def fluentd_env
+      #   {
+      #     header: fluentd_header,
+      #     # log_tag: "#{api_hostname}.rack-traffic-log",
+      #     log_tag: "**.rack-traffic-log",
+      #     fluent_code_from_duan: 'test',
+      #     provider: infra.config.provider,
+      #     # storage_name: "storage#{base_hostname.gsub('.', '-')}",
+      #     storage_name: bucket_name,
+      #     storage_region: provider.config.region,
+      #     current_feature_set: current_feature_set
+      #   }
+      # end
+      # def fluentd_header; '' end
     end
   end
 end
