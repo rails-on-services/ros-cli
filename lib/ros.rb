@@ -52,7 +52,7 @@ module Ros
     end
 
     def generate_env(args, options = {}, behavior = nil)
-      require_relative "ros/generators/env/env_generator.rb"
+      require_relative "ros/generators/be/env/env_generator.rb"
       args.push('http://localhost:3000') unless args[1]
       args.push(File.basename(Ros.root)) unless args[2]
       args.push('')

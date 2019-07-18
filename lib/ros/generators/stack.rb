@@ -20,8 +20,8 @@ module Ros
           @branch_name ||= %x(git rev-parse --abbrev-ref HEAD).strip.gsub(/[^A-Za-z0-9-]/, '-')
         end
         def settings; Settings.components.be end
-        def config; settings.config || {} end
-        def environment; settings.environment || {} end
+        def config; settings.config || Config::Options.new end
+        def environment; settings.environment || Config::Options.new end
         def skaffold_version; config.skaffold_version end
         def registry_secret_name; "registry-#{Settings.platform.config.image_registry}" end
 

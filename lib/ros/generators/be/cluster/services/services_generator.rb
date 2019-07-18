@@ -39,11 +39,11 @@ module Ros
 
             private
             def environment
-              @environment ||= Stack.environment.dup.merge!(Cluster.environment.dup.merge!(settings.environment.to_h).to_h)
+              @environment ||= Stack.environment.dup.merge!(Cluster.environment.dup.merge!(settings.environment.to_hash).to_hash)
             end
 
             def config
-              @config ||= Stack.config.dup.merge!(Cluster.config.dup.merge!(settings.config.to_h).to_h)
+              @config ||= Stack.config.dup.merge!(Cluster.config.dup.merge!(settings.config.to_hash).to_hash)
             end
 
             def deploy_path

@@ -42,6 +42,7 @@ module Ros
 
           class PlatformGenerator < Thor::Group
             include Thor::Actions
+            add_runtime_options!
 
             def self.source_paths; ["#{File.dirname(__FILE__)}/templates", File.dirname(__FILE__)] end
 
@@ -90,18 +91,18 @@ module Ros
                 ros_context_dir: "#{relative_path}/ros",
                 image_repository: Settings.platform.config.image_registry,
                 image_tag: Stack.image_tag
-              } # .merge(infra.environment.to_h)
+              }
             end
 
             def relative_path; @relative_path ||= ('../' * deploy_path.split('/').size).chomp('/') end
             # end compose only methods
 
             def environment
-              @environment ||= Application.environment.dup.merge!(settings.environment.to_h)
+              @environment ||= Application.environment.dup.merge!(settings.environment.to_hash)
             end
 
             def config
-              @config ||= Stack.config.dup.merge!(Application.config.dup.merge!(settings.config.to_h).to_h)
+              @config ||= Stack.config.dup.merge!(Application.config.dup.merge!(settings.config.to_hash).to_hash)
             end
 
             def deploy_path
@@ -119,7 +120,6 @@ module Ros
             end
 
             def settings; Settings.components.be.components.application.components.platform end
-            # def environment; settings.environment || {} end
 
             def template_dir
               Settings.components.be.components.cluster.config.type.eql?('kubernetes') ? 'skaffold' : 'compose'

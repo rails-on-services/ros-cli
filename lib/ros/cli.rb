@@ -27,21 +27,21 @@ module Ros
       args.push(:nil, :nil, :nil)
       FileUtils.rm_rf(name) if Dir.exists?(name) and options.force
       raise Error, set_color("ERROR: #{name} already exists. Use -f to force", :red) if Dir.exists?(name)
-      require_relative 'generators/project/project_generator.rb'
+      require_relative 'generators/be/project/project_generator.rb'
       generator = Ros::Generators::ProjectGenerator.new(args)
       generator.destination_root = name
       generator.invoke_all
-      require_relative 'generators/env/env_generator.rb'
+      require_relative 'generators/be/env/env_generator.rb'
       %w(console local development production).each do |env|
         generator = Ros::Generators::EnvGenerator.new([env, host, name, :nil])
         generator.destination_root = name
         generator.invoke_all
       end
-      require_relative 'generators/core/core_generator.rb'
+      require_relative 'generators/be/core/core_generator.rb'
       generator = Ros::Generators::CoreGenerator.new(args)
       generator.destination_root = name
       generator.invoke_all
-      require_relative 'generators/sdk/sdk_generator.rb'
+      require_relative 'generators/be/sdk/sdk_generator.rb'
       generator = Ros::Generators::SdkGenerator.new(args)
       generator.destination_root = name
       generator.invoke_all
@@ -66,7 +66,7 @@ module Ros
       end
     end
 
-    desc 'generate SUBCOMMAND', 'Some Parent Command'
+    desc 'generate TYPE', 'Generate a new asset of type TYPE (short-cut alias: "g")'
     map %w(g) => :generate
     option :force, type: :boolean, default: false, aliases: '-f'
     subcommand 'generate', Generate
@@ -102,6 +102,7 @@ module Ros
     desc 'up SERVICE', 'bring up service(s)'
     option :daemon, type: :boolean, aliases: '-d', desc: 'Run in the background'
     option :seed, type: :boolean, aliases: '--seed', desc: 'Seed the database before starting the service'
+    option :force, type: :boolean, default: false, aliases: '-f', desc: 'Force cluster creation'
     def up(*services)
       context(options).up(services)
     end

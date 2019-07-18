@@ -1,17 +1,12 @@
 # frozen_string_literal: true
 require 'ros/generators/stack'
-require 'ros/generators/be/application/services/services_generator'
-require 'ros/generators/be/application/platform/platform_generator'
+require 'ros/ops/cli_common'
 
 module Ros
   module Ops
     module Instance
       class Cli
-        attr_accessor :options
-
-        def initialize(options = {})
-          @options = options
-        end
+        include Ros::Ops::CliCommon
 
         def build(services)
           generate_config if stale_config
@@ -19,6 +14,7 @@ module Ros
         end
 
         def up(services)
+          services = enabled_services if services.empty?
           generate_config if stale_config
           compose_options = options.daemon ? '-d' : ''
           services.each do |service|
@@ -61,6 +57,7 @@ module Ros
         end
 
         def restart(services)
+          generate_config if stale_config
           compose("stop #{services.join(' ')}")
           compose("up -d #{services.join(' ')}")
           sleep 3
@@ -68,6 +65,7 @@ module Ros
         end
 
         def stop(services)
+          generate_config if stale_config
           compose("stop #{services.join(' ')}")
           reload_nginx(services)
         end
@@ -75,27 +73,6 @@ module Ros
         def down; compose(:down) end
 
         # Supporting methods
-        def stale_config
-          return true unless File.exists?(Ros::Generators::Stack.compose_file)
-          mtime = File.mtime(Ros::Generators::Stack.compose_file)
-          # Check config files
-          Dir["#{Ros.root}/config/**/*.yml"].each { |f| return true if mtime < File.mtime(f) }
-          # Check template files
-          # TODO: Add path to custom templates
-          Dir["#{Pathname.new(File.dirname(__FILE__)).join('../generators')}/be/{application,cluster}/**/templates/**/*"].each { |f| return true if mtime < File.mtime(f) }
-          false
-        end
-
-        def generate_config
-          rs = $stdout
-          $stdout = StringIO.new
-          Ros::Generators::Be::Application::Services::ServicesGenerator.new([], {}, {behavior: :revoke}).invoke_all
-          Ros::Generators::Be::Application::Services::ServicesGenerator.new.invoke_all
-          Ros::Generators::Be::Application::Platform::PlatformGenerator.new([], {}, {behavior: :revoke}).invoke_all
-          Ros::Generators::Be::Application::Platform::PlatformGenerator.new.invoke_all
-          $stdout = rs
-        end
-
         def reload_nginx(services)
           nginx_reload = false
           services.each do |service|
@@ -109,6 +86,7 @@ module Ros
           $stdout = rs
           compose('stop nginx')
           compose('up -d nginx')
+          # NOTE: nginx seems not to notice changes in the mounted file (at least on NFS share) so can't just reload
           # compose('up -d nginx') unless system("docker container exec #{namespace}_nginx_1 nginx -s reload")
         end
 
@@ -151,17 +129,6 @@ module Ros
         end
 
         def namespace; @namespace ||= (ENV['ROS_PROFILE'] ? "#{ENV['ROS_PROFILE']}-" : '') + Ros::Generators::Stack.compose_project_name end
-
-def system_cmd(env, cmd)
-  options = Config::Options.new
-  puts cmd if options.v
-  system(env, cmd) unless options.n
-end
-
-        # TODO: implement rake method
-        # def credentials_show
-        #   %x(cat ros/services/iam/tmp/#{Settings.platform.environment.partition_name}/postman/222_222_222-Admin_2.json)
-        # end
 
         # def provision_with_ansible
         #   puts "Deploy '#{config.name_to_s}' of type #{deploy_config.type} in #{Ros.env} environment"

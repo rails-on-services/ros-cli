@@ -68,6 +68,7 @@ module Ros
 
           class ServicesGenerator < Thor::Group
             include Thor::Actions
+            add_runtime_options!
             # Depending on the deployment type, use either compose or skaffold
             # Write out all the service templates that are in that directory
             # unless the name of the service to template was passed in
@@ -110,7 +111,7 @@ module Ros
             end
 
             def environment
-              @environment ||= Application.environment.dup.merge!(settings.environment.to_h)
+              @environment ||= Application.environment.dup.merge!(settings.environment&.to_hash)
             end
 
             def service_names; components.keys  end

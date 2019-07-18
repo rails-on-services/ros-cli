@@ -7,25 +7,34 @@ module Ros
       module Application
         class << self
           def settings; Settings.components.be.components.application end
-          def config; settings.config || {} end
+          def config; settings.config || Config::Options.new end
+          def c_environment; settings.environment || Config::Options.new end
           def deploy_path; "tmp/deployments/#{Ros.env}/be/application" end
 
           def environment
-            @environment ||= Stack.environment.dup.merge!(settings.environment.merge!(calculated_envs.to_h).to_h)
+            @environment ||= Stack.environment.dup.merge!(c_environment.merge!(application_environment).to_hash)
           end
 
           # Common environment for application services
-          def calculated_envs
-            Config::Options.new({
+          def application_environment
+            {
               infra: {
                 provider: Settings.components.be.config.provider,
-                bucket_name: Application.bucket_name
               },
               platform: {
                 feature_set: Stack.current_feature_set,
+                infra: {
+                  resources: {
+                    storage: {
+                      primary: {
+                        bucket_name: bucket_name
+                      }
+                    }
+                  }
+                }
               },
-              bucket_name: Application.bucket_name
-            }) # .merge!(send("#{Settings.components.be.config.provider}_environment"))
+              bucket_name: bucket_name
+            }
           end
 
           def api_hostname

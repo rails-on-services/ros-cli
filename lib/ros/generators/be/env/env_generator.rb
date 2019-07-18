@@ -8,18 +8,13 @@ module Ros
       include Thor::Actions
       argument :name
       argument :uri
-      # argument :partition_name
-      argument :deployment
-      argument :content
 
       def self.source_paths; ["#{File.dirname(__FILE__)}/templates", File.dirname(__FILE__)] end
 
       def generate_secrets
         Ros.load_env(name)
-        require 'ros/deployment'
-        self.deployment = Deployment.new({})
-        self.uri = URI("#{deployment.core.config.endpoints.api.scheme}://#{deployment.api_hostname}")
         require 'securerandom'
+        # TODO: See if override of URI is really necessary
         in_root do
           template 'environments.yml.erb', "#{Ros.environments_dir}/#{name}.yml"
         end
@@ -36,6 +31,13 @@ module Ros
           template 'console.env.erb', "#{Ros.config_dir}/console.env"
         end
       end
+
+      private
+
+      def app; Settings.components.be.components.application end
+      def partition_name; app.components.platform.environment.platform.partition_name end
+      def dns; app.config.dns end
+      def uri; URI("#{app.config.endpoints.api.scheme}://#{app.config.endpoints.api.host}.#{dns.subdomain}.#{dns.domain}") end
     end
   end
 end

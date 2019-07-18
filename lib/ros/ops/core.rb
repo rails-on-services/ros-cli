@@ -78,7 +78,7 @@ module Ros
           bucket_name: bucket_name,
           bucket_prefix: "#{current_feature_set}/storage/"
         })
-        envs.merge!(core.services.sftp.environment.to_h) if core.services.sftp&.environment
+        envs.merge!(core.services.sftp.environment.to_hash) if core.services.sftp&.environment
         envs
       end
 
