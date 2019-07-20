@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'thor/group'
+require 'ros/generators/common_generator'
 
 module Ros
   module Generators
@@ -9,7 +10,7 @@ module Ros
         module Services
 
           class Service
-            attr_accessor :name, :config, :environment #, :stack, :application
+            attr_accessor :name, :config, :environment
             def initialize(name, definition)
               @name = name
               @config = definition&.dig(:config)
@@ -17,11 +18,11 @@ module Ros
             end
           end
 
-
           class ServicesGenerator < Thor::Group
             include Thor::Actions
+            extend CommonGenerator
 
-            def self.source_paths; ["#{File.dirname(__FILE__)}/templates", File.dirname(__FILE__)] end
+            def self.a_path; File.dirname(__FILE__) end
 
             def generate_service_files
               empty_directory("#{destination_root}/#{deploy_path}")

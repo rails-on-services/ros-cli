@@ -2,6 +2,7 @@
 
 require 'thor/group'
 require 'ros/generators/be/application'
+require 'ros/generators/common_generator'
 
 module Ros
   module Generators
@@ -38,7 +39,6 @@ module Ros
               })
             end
 
-
             # def self.aws_environment
             #   {
             #     aws_access_key_id: Ros::Generators::Be::Cluster.provider.credentials.access_key_id,
@@ -66,15 +66,15 @@ module Ros
             end
           end
 
+          # Depending on the deployment type, use either compose or skaffold
+          # Write out all the service templates that are in that directory
+          # unless the name of the service to template was passed in
           class ServicesGenerator < Thor::Group
             include Thor::Actions
+            extend CommonGenerator
             add_runtime_options!
-            # Depending on the deployment type, use either compose or skaffold
-            # Write out all the service templates that are in that directory
-            # unless the name of the service to template was passed in
 
-            # TODO: Add an override to source paths
-            def self.source_paths; ["#{File.dirname(__FILE__)}/templates"] end
+            def self.a_path; File.dirname(__FILE__) end
 
             def environment_file
               content = Ros.format_envs('', environment).join("\n")

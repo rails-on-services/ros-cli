@@ -2,15 +2,10 @@ require 'ros'
 require 'ros/exec'
 require 'pry'
 
-namespace :preflight do
-  desc 'Check that platform requirements are present'
-  task :check do
-    Ros.preflight_check
-  end
-
-  desc 'Auto fix any missing platform requirements'
-  task :fix do
-    Ros.preflight_check(fix: true)
+namespace :install do
+  desc 'Copy templates'
+  task :templates do
+    Ros.install_templates
   end
 end
 

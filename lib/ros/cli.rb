@@ -32,7 +32,7 @@ module Ros
       generator.destination_root = name
       generator.invoke_all
       require_relative 'generators/be/env/env_generator.rb'
-      %w(console local development production).each do |env|
+      %w(development test production).each do |env|
         generator = Ros::Generators::EnvGenerator.new([env, host, name, :nil])
         generator.destination_root = name
         generator.invoke_all
@@ -51,13 +51,14 @@ module Ros
       desc 'service', 'Generates a new service'
       def service(name)
         test_for_project
-        Ros.generate_service(args, options)
+        Ros.generate_service(args, options, current_command_chain.first)
+        Ros.generate_env(args, options, current_command_chain.first.eql?(:destroy) ? :revoke : :invoke)
       end
 
       desc 'env', 'Generates a new environment'
       def env(*args)
         test_for_project
-        Ros.generate_env(args, options)
+        Ros.generate_env(args, options, current_command_chain.first.eql?(:destroy) ? :revoke : :invoke)
       end
 
       private
@@ -72,14 +73,14 @@ module Ros
     subcommand 'generate', Generate
 
     # TODO: refactor setting action to :destroy
-    desc 'destroy TYPE NAME', 'Destroy an environment or service'
+    desc 'destroy TYPE', 'Destroy an asset (environment or service)'
     map %w(d) => :destroy
-    def destroy(artifact, *args)
-      raise Error, set_color("ERROR: Not a Ros project", :red) if Ros.root.nil?
-      valid_artifacts = %w(service env)
-      raise Error, set_color("ERROR: invalid artifact #{artifact}. valid artifacts are: #{valid_artifacts.join(', ')}", :red) unless valid_artifacts.include? artifact
-      raise Error, set_color("ERROR: must supply a name for #{artifact}", :red) if %w(service env).include?(artifact) and args[0].nil?
-      Ros.send("generate_#{artifact}", args, options, :revoke)
+    subcommand 'destroy', Generate
+
+    desc 'preflight', 'Prepare a project'
+    def preflight
+      Ros.preflight_check(fix: true)
+      Ros.preflight_check
     end
 
     # TODO Handle show and edit as well
@@ -115,7 +116,6 @@ module Ros
       # TODO: Test this
       Ros.load_env(options.environment) if options.environment != Ros.default_env
       context(options).up
-      # Ros.ops_action(:platform, :apply, options)
     end
 
     desc 'ps', 'List running services'

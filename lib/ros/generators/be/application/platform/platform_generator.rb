@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'thor/group'
+require 'ros/generators/common_generator'
 
 module Ros
   module Generators
@@ -42,9 +43,10 @@ module Ros
 
           class PlatformGenerator < Thor::Group
             include Thor::Actions
+            extend CommonGenerator
             add_runtime_options!
 
-            def self.source_paths; ["#{File.dirname(__FILE__)}/templates", File.dirname(__FILE__)] end
+            def self.a_path; File.dirname(__FILE__) end
 
             def service_files
               empty_directory("#{destination_root}/#{deploy_path}")

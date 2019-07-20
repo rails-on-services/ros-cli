@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'thor/group'
+require 'ros/generators/common_generator'
 
 module Ros
   module Generators
@@ -36,8 +37,9 @@ module Ros
 
           class InfraGenerator < Thor::Group
             include Thor::Actions
+            extend CommonGenerator
 
-            def self.source_paths; ["#{File.dirname(__FILE__)}/templates", File.dirname(__FILE__)] end
+            def self.a_path; File.dirname(__FILE__) end
 
             def generate
               create_file("#{workdir}/state.tf.json", "#{JSON.pretty_generate(tf_state)}")

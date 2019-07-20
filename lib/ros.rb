@@ -11,6 +11,11 @@ Config.setup do |config|
 end
 
 module Ros
+
+  def self.gem_root
+    File.expand_path '../..', __FILE__
+  end
+
   # Copied from ActiveSupport::StringInquirer
   class StringInquirer < String
     def method_missing(method_name, *arguments)
@@ -23,20 +28,29 @@ module Ros
   end
 
   class << self
+    def install_templates
+      %w(platform services).each do |type|
+        require "ros/generators/be/application/#{type}/#{type}_generator"
+        klass = Object.const_get("Ros::Generators::Be::Application::#{type.capitalize}::#{type.capitalize}Generator")
+        klass.install_templates
+      end
+      %w(infra services).each do |type|
+        require "ros/generators/be/cluster/#{type}/#{type}_generator"
+        klass = Object.const_get("Ros::Generators::Be::Cluster::#{type.capitalize}::#{type.capitalize}Generator")
+        klass.install_templates
+      end
+    end
+
     def preflight_check(fix: false)
       options = {}
       ros_repo = Dir.exists?(Ros.ros_root)
       env_config = File.exists?("#{environments_dir}/#{Ros.env}.yml")
-      deploy_config = Dir.exists?("tmp/deployments/#{Ros.env}")
       if fix
         %x(git clone git@github.com:rails-on-services/ros.git) unless ros_repo
         generate_env([Ros.env]) unless env_config
-        Ros.ops_action(:core, :setup, options) unless deploy_config
-        Ros.ops_action(:platform, :setup, options) unless deploy_config
       else
         puts "ros repo: #{ros_repo ? 'ok' : 'missing'}"
         puts "environment configuration: #{env_config ? 'ok' : 'missing'}"
-        puts "deployment configuration: #{deploy_config ? 'ok' : 'missing'}"
       end
     end
 
@@ -174,8 +188,7 @@ module Ros
 
     # TODO: This is a hack in order to differentiate for purpose of templating files
     def is_ros?
-      false
-      # Settings.platform.config.image_registry.eql?('railsonservices') and Settings.platform.environment.platform.partition_name.eql?('ros')
+      Settings.platform.config.image_registry.eql?('railsonservices') and Settings.components.be.components.application.components.platform.environment.platform.partition_name.eql?('ros')
     end
   end
 end
