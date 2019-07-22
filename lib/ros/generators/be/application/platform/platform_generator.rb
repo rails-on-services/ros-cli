@@ -87,7 +87,7 @@ module Ros
             # continue compose only methods
             def compose_environment
               {
-                compose_file: Dir["#{Application.deploy_path}/#{Stack.current_feature_set}/**/*.yml"].map{ |p| p.gsub("#{Ros.root}/", '') }.sort.join(':'),
+                compose_file: Dir["#{Application.deploy_path}//**/*.yml"].map{ |p| p.gsub("#{Ros.root}/", '') }.sort.join(':'),
                 compose_project_name: Stack.compose_project_name,
                 context_dir: relative_path,
                 ros_context_dir: "#{relative_path}/ros",
@@ -108,7 +108,7 @@ module Ros
             end
 
             def deploy_path
-              "#{Application.deploy_path}/#{Stack.current_feature_set}/platform"
+              "#{Application.deploy_path}/platform"
             end
 
             def services_components

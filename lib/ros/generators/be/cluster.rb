@@ -8,7 +8,7 @@ module Ros
           def settings; Settings.components.be.components.cluster end
           def config; settings.config || {} end
           def environment; settings.environment || {} end
-          def deploy_path; "tmp/deployments/#{Ros.env}/be/cluster" end
+          def deploy_path; "#{Stack.deploy_path}/be/cluster" end
           def provider; Settings.infra.config.providers[Settings.components.be.config.provider] end
           def name; config.name end
         end

@@ -16,20 +16,24 @@ module Ros
         def up(services)
           services = enabled_services if services.empty?
           generate_config if stale_config
-          compose_options = options.daemon ? '-d' : ''
+          compose_options = ''
+          if options.daemon or options.console or options.shell
+            compose_options = '-d'
+          end
           services.each do |service|
             # if the service name is without a profile extension, e.g. 'iam' then load config and check db migration
             # If the database check is ok then bring up the service and trigger a reload of nginx
             if ref = Settings.components.be.components.application.components.platform.components.dig(service)
               config = ref.dig(:config) || Config::Options.new
-              if database_check(service, config)
-                compose("up #{compose_options} #{service}")
-              end
-            else
-              compose("up #{compose_options} #{service}")
+              next unless database_check(service, config)
             end
+            compose("build #{service}") if options.build
+            compose("up #{compose_options} #{service}")
           end
           reload_nginx(services)
+          return unless services.size.eql? 1
+          console(service) if options.console
+          exec(service, 'bash') if options.shell
         end
 
         def ps
@@ -60,8 +64,11 @@ module Ros
           generate_config if stale_config
           compose("stop #{services.join(' ')}")
           compose("up -d #{services.join(' ')}")
-          sleep 3
+          # sleep 3
           reload_nginx(services)
+          return unless services.size.eql? 1
+          console(services[0]) if options.console
+          exec(services[0], 'bash') if options.shell
         end
 
         def stop(services)

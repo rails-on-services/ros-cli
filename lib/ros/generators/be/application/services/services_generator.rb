@@ -21,6 +21,7 @@ module Ros
 
             def stack_name; Stack.name end
             def current_feature_set; Stack.current_feature_set end
+            def has_envs; !environment.nil? end
 
             # skaffold only methods
             def relative_path; @relative_path ||= ('../' * deploy_path.split('/').size).chomp('/') end
@@ -93,6 +94,9 @@ module Ros
                     template(template_file, "#{destination_root}/#{deploy_path}/#{service}/#{File.basename(template_file).gsub('.erb', '')}")
                   end
                 end
+                next unless envs = @service.environment
+                content = Ros.format_envs('', envs).join("\n")
+                create_file("#{destination_root}/#{deploy_path}/#{service}.env", "#{content}\n")
               end
             end
 
@@ -107,7 +111,7 @@ module Ros
             def nginx_services; @nginx_services ||= (args[0] || platform_service_names) end
 
             def deploy_path
-              "#{Application.deploy_path}/#{Stack.current_feature_set}/services"
+              "#{Application.deploy_path}/services"
             end
 
             def environment

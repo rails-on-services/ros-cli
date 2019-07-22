@@ -9,22 +9,6 @@ namespace :install do
   end
 end
 
-namespace :ops do
-  namespace :be do
-    namespace :application do
-      %i(services platform).each do |thing|
-        task thing do |task, args|
-          Ros.send(task.name.split(':').first, { behavior: :invoke }, *(task.name.split(':')[1..-1]))
-        end
-        desc "#{thing} rollback"
-        task "#{thing}:rollback" do |task, args|
-          Ros.send(task.name.split(':').first, { behavior: :revoke }, *(task.name.split(':')[1..-2]))
-        end
-      end
-    end
-  end
-end
-
 namespace :generate do
   namespace :be do
     namespace :cluster do
@@ -39,6 +23,7 @@ namespace :generate do
         end
       end
     end
+
     namespace :application do
       %i(platform services).each do |thing|
         desc "#{thing}"
@@ -53,11 +38,13 @@ namespace :generate do
     end
   end
 end
+
 # ros be:app:prepare (infra, services, platform)
 # ros be:app:deploy
 # ros be:app:deploy:status
 # ros be:app:rollback
 
+=begin
 namespace :platform do
   namespace :infra do
     desc 'Create the platform infrasturcture'
@@ -105,7 +92,6 @@ namespace :platform do
   end
 end
 
-=begin
 namespace :deploy do
   %i(setup apply rollback).each do |action|
     desc "#{action.capitalize} #{Ros.env} deployment (#{Settings.infra.config.type})"

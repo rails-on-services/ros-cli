@@ -9,7 +9,7 @@ module Ros
           def settings; Settings.components.be.components.application end
           def config; settings.config || Config::Options.new end
           def c_environment; settings.environment || Config::Options.new end
-          def deploy_path; "tmp/deployments/#{Ros.env}/be/application" end
+          def deploy_path; "#{Stack.deploy_path}/be/application" end
 
           def environment
             @environment ||= Stack.environment.dup.merge!(c_environment.merge!(application_environment).to_hash)

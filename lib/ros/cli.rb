@@ -10,41 +10,20 @@ module Ros
     def self.exit_on_failure?; true end
 
     check_unknown_options!
-    # class_option :verbose, type: :boolean, default: false, alias: '-v'
-    class_option :v, type: :boolean, default: false
-    class_option :n, type: :boolean, default: false
+    class_option :v, type: :boolean, default: false, desc: 'verbose output'
+    class_option :n, type: :boolean, default: false, desc: "run but don't execute action"
 
     desc 'version', 'Display version'
-    # map %w(--version) => :version
     def version; say "Ros #{VERSION}" end
 
-    desc 'new NAME HOST', "Create a new Ros platform project. \"ros new my_project\" creates a\n" \
+    desc 'new NAME', "Create a new Ros platform project. \"ros new my_project\" creates a\n" \
       'new project called MyProject in "./my_project"'
     option :force, type: :boolean, default: false, aliases: '-f'
     def new(*args)
       name = args[0]
-      host = URI(args[1] || 'http://localhost:3000')
-      args.push(:nil, :nil, :nil)
       FileUtils.rm_rf(name) if Dir.exists?(name) and options.force
       raise Error, set_color("ERROR: #{name} already exists. Use -f to force", :red) if Dir.exists?(name)
-      require_relative 'generators/be/project/project_generator.rb'
-      generator = Ros::Generators::ProjectGenerator.new(args)
-      generator.destination_root = name
-      generator.invoke_all
-      require_relative 'generators/be/env/env_generator.rb'
-      %w(development test production).each do |env|
-        generator = Ros::Generators::EnvGenerator.new([env, host, name, :nil])
-        generator.destination_root = name
-        generator.invoke_all
-      end
-      require_relative 'generators/be/core/core_generator.rb'
-      generator = Ros::Generators::CoreGenerator.new(args)
-      generator.destination_root = name
-      generator.invoke_all
-      require_relative 'generators/be/sdk/sdk_generator.rb'
-      generator = Ros::Generators::SdkGenerator.new(args)
-      generator.destination_root = name
-      generator.invoke_all
+      Ros.generate_project(args)
     end
 
     class Generate < Thor
@@ -83,16 +62,37 @@ module Ros
       Ros.preflight_check
     end
 
-    # TODO Handle show and edit as well
-    desc 'lpass ACTION', 'Transfer the contents of app.env to/from a Lastpass account'
-    option :username, aliases: '-u'
-    def lpass(action)
-      raise Error, set_color("ERROR: invalid action #{action}. valid actions are: add, show, edit", :red) unless %w(add show edit).include? action
-      raise Error, set_color("ERROR: Not a Ros project", :red) unless File.exists?('app.env')
-      lpass_name = "#{File.basename(Dir.pwd)}/development"
-      %x(lpass login #{options.username}) if options.username
-      %x(lpass add --non-interactive --notes #{lpass_name} < app.env)
+    # TODO: Get this working again
+    class Lpass < Thor
+      desc 'add', "Add #{Ros.env} environment to Lastpass"
+      def add
+        test_for_project
+        lpass_name = "#{Ros.root}/config/environments/#{Ros.env}.yml"
+        %x(lpass login #{options.username}) if options.username
+        binding.pry
+        %x(lpass add --non-interactive --notes #{Ros.env} < #{lpass_name})
+      end
+
+      desc 'show', "Displays #{Ros.env} environment from Lastpass"
+      def show
+        test_for_project
+        %x(lpass show --notes #{Ros.env})
+      end
+
+      desc 'update', "Updates #{Ros.env} environment in Lastpass"
+      def update
+        test_for_project
+      end
+
+      private
+      def test_for_project
+        raise Error, set_color("ERROR: Not a Ros project", :red) if Ros.root.nil?
+      end
     end
+
+    desc 'lpass ACTION', "Transfer the contents of #{Ros.env} to/from a Lastpass account"
+    option :username, aliases: '-u'
+    subcommand 'lpass', Lpass
 
     desc 'build IMAGE', 'build one or all images'
     map %w(b) => :build
@@ -101,9 +101,12 @@ module Ros
     end
 
     desc 'up SERVICE', 'bring up service(s)'
+    option :build, type: :boolean, aliases: '-b', desc: 'Build image before run'
+    option :console, type: :boolean, aliases: '-c', desc: 'Connect to service console after starting'
     option :daemon, type: :boolean, aliases: '-d', desc: 'Run in the background'
-    option :seed, type: :boolean, aliases: '--seed', desc: 'Seed the database before starting the service'
     option :force, type: :boolean, default: false, aliases: '-f', desc: 'Force cluster creation'
+    option :seed, type: :boolean, aliases: '--seed', desc: 'Seed the database before starting the service'
+    option :shell, type: :boolean, aliases: '-s', desc: 'Connect to service shell after starting'
     def up(*services)
       context(options).up(services)
     end
@@ -157,6 +160,8 @@ module Ros
       context(options).logs(service)
     end
 
+    option :console, type: :boolean, aliases: '-c', desc: 'Connect to service console after starting'
+    option :shell, type: :boolean, aliases: '-s', desc: 'Connect to service shell after starting'
     desc 'restart SERVICE', 'Start and stop one or more services'
     def restart(*services)
       context(options).restart(services)
@@ -183,6 +188,8 @@ module Ros
 
     def context(options = {})
       return @context if @context
+      raise Error, set_color("ERROR: Not a Ros project", :red) if Ros.root.nil?
+      infra_type = 'instance'
       infra_type = Settings.components.be.components.cluster.config.type
       type = :cli
       require "ros/ops/#{infra_type}"

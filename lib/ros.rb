@@ -28,17 +28,40 @@ module Ros
   end
 
   class << self
-    def install_templates
-      %w(platform services).each do |type|
-        require "ros/generators/be/application/#{type}/#{type}_generator"
-        klass = Object.const_get("Ros::Generators::Be::Application::#{type.capitalize}::#{type.capitalize}Generator")
-        klass.install_templates
+    def generate_project(args)
+      name = args[0]
+      # host = URI(args[1] || 'http://localhost:3000')
+      # args.push(:nil, :nil, :nil)
+      require_relative 'generators/be/project/project_generator.rb'
+      generator = Ros::Generators::ProjectGenerator.new(args)
+      generator.destination_root = name
+      generator.invoke_all
+      require_relative 'generators/be/env/env_generator.rb'
+      %w(development test production).each do |env|
+        generator = Ros::Generators::EnvGenerator.new([env, nil, name, nil])
+        generator.destination_root = name
+        generator.invoke_all
       end
-      %w(infra services).each do |type|
-        require "ros/generators/be/cluster/#{type}/#{type}_generator"
-        klass = Object.const_get("Ros::Generators::Be::Cluster::#{type.capitalize}::#{type.capitalize}Generator")
-        klass.install_templates
-      end
+      require_relative 'generators/be/core/core_generator.rb'
+      generator = Ros::Generators::CoreGenerator.new(args)
+      generator.destination_root = name
+      generator.invoke_all
+      require_relative 'generators/be/sdk/sdk_generator.rb'
+      generator = Ros::Generators::SdkGenerator.new(args)
+      generator.destination_root = name
+      generator.invoke_all
+    end
+
+    def generate_env(args, options = {}, behavior = nil)
+      require_relative "ros/generators/be/env/env_generator.rb"
+      args.push('http://localhost:3000') unless args[1]
+      args.push(File.basename(Ros.root)) unless args[2]
+      args.push('')
+      generator = Ros::Generators::EnvGenerator.new(args)
+      generator.options = options
+      generator.behavior = behavior if behavior
+      generator.destination_root = Ros.root
+      generator.invoke_all
     end
 
     def preflight_check(fix: false)
@@ -55,7 +78,7 @@ module Ros
     end
 
     def generate_service(args, options = {}, behavior = nil)
-      require 'ros/generators/service/service_generator'
+      require 'ros/generators/be/service/service_generator'
       # require_relative "ros/generators/service/service_generator.rb"
       args.push(File.basename(Ros.root)) unless args[1]
       generator = Ros::Generators::ServiceGenerator.new(args, options)
@@ -65,19 +88,7 @@ module Ros
       generator.invoke_all
     end
 
-    def generate_env(args, options = {}, behavior = nil)
-      require_relative "ros/generators/be/env/env_generator.rb"
-      args.push('http://localhost:3000') unless args[1]
-      args.push(File.basename(Ros.root)) unless args[2]
-      args.push('')
-      generator = Ros::Generators::EnvGenerator.new(args)
-      generator.options = options
-      generator.behavior = behavior if behavior
-      generator.destination_root = Ros.root
-      generator.invoke_all
-    end
-
-    # def ops_action(stack_component, action, options = Config::Options.new)
+    # Generates deployment artifacts
     def generate(options = {}, *stack)
       require 'ros/generators/stack'
       # require "ros/generators/be/#{stack.last(2).first}"
@@ -93,24 +104,19 @@ module Ros
       generator.invoke_all
     end
 
-    def ops(options = {}, *stack)
-      require 'ros/generators/stack'
-      # require "ros/generators/be/gt
-      what = Settings.components.be.components.cluster.config.type.eql?('kubernetes') ? 'kubernetes' : 'instance'
-      require "ros/ops/#{what}"
-      g_string = "Ros::Ops::#{what.capitalize}::#{stack.last.capitalize}"
-      generator = Object.const_get(g_string).new
-      generator.invoke
-      # binding.pry
+    def install_templates
+      %w(platform services).each do |type|
+        require "ros/generators/be/application/#{type}/#{type}_generator"
+        klass = Object.const_get("Ros::Generators::Be::Application::#{type.capitalize}::#{type.capitalize}Generator")
+        klass.install_templates
+      end
+      %w(infra services).each do |type|
+        require "ros/generators/be/cluster/#{type}/#{type}_generator"
+        klass = Object.const_get("Ros::Generators::Be::Cluster::#{type.capitalize}::#{type.capitalize}Generator")
+        klass.install_templates
+      end
     end
 
-    def x_ops_action(type, action, options = Config::Options.new)
-      infra_type = Settings.infra.config.type
-      require "ros/ops/#{infra_type}"
-      obj = Object.const_get("Ros::Ops::#{infra_type.capitalize}::#{type.to_s.capitalize}").new(options)
-      obj.switch!
-      obj.send(action)
-    end
 
     # load deployments/env and environments/env
     # If the environment has a '-' in it and an environment is defined before the '-' then use it as a base

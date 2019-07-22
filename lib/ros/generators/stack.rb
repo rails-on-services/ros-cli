@@ -28,7 +28,9 @@ module Ros
         def version; Dir.chdir(Ros.root) { Bump::Bump.current } end
         def image_tag; "#{version}-#{sha}" end
         # image_suffix is specific to the image_type
+        # TODO: Update to handle more than just rails
         def image_suffix; Settings.platform.config.image.build_args.rails_env.eql?('production') ? '' : "-#{Settings.platform.config.image.build_args.rails_env}" end
+        def deploy_path; "tmp/deployments/#{Ros.env}/#{current_feature_set}" end
 
         def sha
           @sha ||= system('git rev-parse --git-dir > /dev/null 2>&1') ? %x(git rev-parse --short HEAD).chomp : 'no-sha'
