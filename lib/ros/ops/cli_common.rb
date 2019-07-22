@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+require 'ros/generators/stack'
 require 'ros/generators/be/application/services/services_generator'
 require 'ros/generators/be/application/platform/platform_generator'
 require 'ros/ops/rails'
@@ -12,30 +13,14 @@ module Ros
         @options = options
       end
 
+      def show_endpoint
+        STDOUT.puts "\n*** Services available at #{Ros::Generators::Be::Application.api_uri} ***\n\n"
+      end
+
       def enabled_services
         Settings.components.be.components.application.components.platform.components.to_hash.select do |k, v|
           v.nil? || v.dig(:config, :enabled).nil? || v.dig(:config, :enabled)
         end.keys
-      end
-
-      # Standup infra via Terraform: k8s, minikube or instance
-      # TODO: Define the workdir; this is where tfvars files are written and from where the commands will be applied
-      # NOTE: The TF infra code will live in a different (generated) directory
-      def apply
-        Dir.chdir(workdir) do
-          system('terraform init')
-          system('terraform apply')
-        end
-        after_apply
-      end
-
-      def after_apply; end
-
-      # Destroy the infrastructure
-      def destroy
-        Dir.chdir(workdir) do
-          system_cmd('terraform destroy')
-        end
       end
 
       def system_cmd(env = {}, cmd)

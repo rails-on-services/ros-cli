@@ -106,6 +106,14 @@ module Ros
               template("services/nginx/nginx.conf.erb", "#{destination_root}/#{deploy_path}/nginx/nginx.conf")
             end
 
+            def write_fluentd
+              return unless components.keys.include?(:fluentd)
+              content_dir = "#{core_root}/fluentd"
+              FileUtils.mkdir_p("#{content_dir}/log")
+              FileUtils.chmod('+w', "#{content_dir}/log")
+              FileUtils.mkdir_p("#{content_dir}/etc")
+            end
+
             private
              
             def nginx_services; @nginx_services ||= (args[0] || platform_service_names) end

@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-require 'ros/generators/stack'
 require 'ros/ops/cli_common'
 
 module Ros
@@ -7,6 +6,10 @@ module Ros
     module Kubernetes
       class Cli
         include Ros::Ops::CliCommon
+
+        def init
+          Ros::Generators::Be::Cluster.send("init_#{Settings.components.be.config.provider}", self)
+        end
 
         def up(services)
           return unless check
@@ -19,7 +22,8 @@ module Ros
             STDOUT.puts 'Namespace exists. skipping create. Use -f to force'
           end
           services = enabled_services if services.empty?
-          binding.pry
+          show_endpoint
+          # binding.pry
           thing = ARGV[1] || '*'
           # binding.pry
         end
@@ -36,8 +40,8 @@ module Ros
 
         def deploy_application_services
           thing = ARGV[1] || '*'
-          Dir["#{core_root}/#{thing}.env"].each { |file| sync_secret(file) }
-          Dir.chdir(core_root) { Dir["#{thing}.yml"].each { |file| skaffold("deploy -f #{file}") } }
+          Dir["#{services_root}/#{thing}.env"].each { |file| sync_secret(file) }
+          Dir.chdir(services_root) { Dir["#{thing}.yml"].each { |file| skaffold("deploy -f #{file}") } }
         end
 
         def deploy_platform_services
@@ -144,11 +148,8 @@ module Ros
           File.file?(kubeconfig)
         end
 
-require 'ros/generators/be/application'
-def core_root; "#{Ros::Generators::Be::Application.deploy_path}/#{Ros::Generators::Stack.current_feature_set}/services" end
-
-require 'ros/generators/be/application'
-def platform_root; "#{Ros::Generators::Be::Application.deploy_path}/#{Ros::Generators::Stack.current_feature_set}/platform" end
+        def platform_root; "#{Ros::Generators::Be::Application.deploy_path}/platform" end
+        def services_root; "#{Ros::Generators::Be::Application.deploy_path}/services" end
       end
     end
   end

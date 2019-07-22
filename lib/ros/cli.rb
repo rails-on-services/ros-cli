@@ -30,14 +30,20 @@ module Ros
       desc 'service', 'Generates a new service'
       def service(name)
         test_for_project
-        Ros.generate_service(args, options, current_command_chain.first)
-        Ros.generate_env(args, options, current_command_chain.first.eql?(:destroy) ? :revoke : :invoke)
+        Ros.generate_service(args, options, current_command_chain.first.eql?(:destroy) ? :revoke : :invoke)
       end
 
       desc 'env', 'Generates a new environment'
       def env(*args)
         test_for_project
         Ros.generate_env(args, options, current_command_chain.first.eql?(:destroy) ? :revoke : :invoke)
+      end
+
+      desc 'infra', 'Run terraform to create/destroy infrastructure'
+      option :apply, type: :boolean, default: false, aliases: '-a'
+      def infra(*args)
+        require 'ros/ops/infra'
+        Ros::Ops::Infra::Cli.new(options).send(current_command_chain.first)
       end
 
       private
@@ -94,6 +100,12 @@ module Ros
     option :username, aliases: '-u'
     subcommand 'lpass', Lpass
 
+    desc 'init', 'Initialize the cluster'
+    option :long, type: :boolean, aliases: '-l', desc: 'Run the long form of the command'
+    def init
+      context(options).init
+    end
+
     desc 'build IMAGE', 'build one or all images'
     map %w(b) => :build
     def build(*services)
@@ -106,7 +118,7 @@ module Ros
     option :daemon, type: :boolean, aliases: '-d', desc: 'Run in the background'
     option :force, type: :boolean, default: false, aliases: '-f', desc: 'Force cluster creation'
     option :seed, type: :boolean, aliases: '--seed', desc: 'Seed the database before starting the service'
-    option :shell, type: :boolean, aliases: '-s', desc: 'Connect to service shell after starting'
+    option :shell, type: :boolean, aliases: '--sh', desc: 'Connect to service shell after starting'
     def up(*services)
       context(options).up(services)
     end
@@ -149,7 +161,8 @@ module Ros
       context(options).exec(service, "rails #{command}")
     end
 
-    desc 'shell SERVICE', 'execute an interactive shell on a service (short-cut alias: "sh")'
+    desc 'sh SERVICE', 'execute an interactive shell on a service (short-cut alias: "sh")'
+    # NOTE: shell is a reserved word
     def sh(service)
       context(options).exec(service, 'bash')
     end
@@ -161,7 +174,7 @@ module Ros
     end
 
     option :console, type: :boolean, aliases: '-c', desc: 'Connect to service console after starting'
-    option :shell, type: :boolean, aliases: '-s', desc: 'Connect to service shell after starting'
+    option :shell, type: :boolean, aliases: '--sh', desc: 'Connect to service shell after starting'
     desc 'restart SERVICE', 'Start and stop one or more services'
     def restart(*services)
       context(options).restart(services)

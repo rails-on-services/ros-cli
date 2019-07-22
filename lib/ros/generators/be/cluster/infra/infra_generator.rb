@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require 'thor/group'
 require 'ros/generators/common_generator'
 
 module Ros
@@ -52,8 +51,10 @@ module Ros
             def generate
               create_file("#{deploy_path}/state.tf.json", "#{JSON.pretty_generate(tf_state)}")
               create_file("#{deploy_path}/terraform.tfvars", "#{JSON.pretty_generate(tf_vars)}")
-              # Copy over the provider+type files only
-              directory("terraform/#{Settings.components.be.config.provider}/provision/#{cluster.config.type}", deploy_path)
+              # Copies over the provider+type files only
+              directory("../files/terraform/#{Settings.components.be.config.provider}/provision/#{cluster.config.type}", deploy_path)
+              # TODO: If templates are required then place them in 'templates' dir with a path that is idenitcal to the generated path
+              # template('config/deployments/development.yml')
             end
 
             private

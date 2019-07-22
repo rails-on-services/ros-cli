@@ -176,11 +176,11 @@ module Ros
     #     end + ".#{Settings.infra.dns.subdomain}.#{Settings.infra.dns.domain}"
     # end
 
-    def service_names_enabled; Settings.platform.services.reject{|s| s.last.enabled.eql? false }.map{ |s| s.first } end
-    def service_names; Settings.platform.services.keys end
+    # def service_names_enabled; Settings.platform.services.reject{|s| s.last.enabled.eql? false }.map{ |s| s.first } end
+    # def service_names; Settings.platform.services.keys end
 
-    def tf_root; root.join('devops/terraform') end
-    def ansible_root; root.join('devops/ansible') end
+    # def tf_root; root.join('devops/terraform') end
+    # def ansible_root; root.join('devops/ansible') end
     def helm_root; root.join('devops/helm') end
     def k8s_root; root.join('devops/k8s') end
 

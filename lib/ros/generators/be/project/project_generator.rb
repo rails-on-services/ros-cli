@@ -19,25 +19,28 @@ module Ros
           FileUtils.cp_r('ros/devops', '.')
         end # if false
         directory('files', '.')
-        self.ruby_version = '2.6.3'
-        self.os_version = 'stretch'
-        self.static_gems = [
-    'bundler:2.0.1',
-    'nokogiri:1.10.3',
-    'ffi:1.10.0',
-    'mini_portile2:2.3.0',
-    'msgpack:1.2.9',
-    'pg:1.1.4',
-    'nio4r:2.3.1',
-    'puma:3.12.0',
-    'eventmachine:1.2.7']
         template 'Dockerfile'
         template 'config/deployment.yml'
         # empty_directory('services')
-        say "\nCreated Ros project at #{destination_root}"
+        # say "\nCreated Ros project at #{destination_root}"
       end
 
       private
+
+      # TODO: Fix these hard coded values to dynamic
+      def ruby_version; '2.6.3' end
+      def os_version; 'stretch' end
+      def static_gems
+        ['bundler:2.0.1',
+        'nokogiri:1.10.3',
+        'ffi:1.10.0',
+        'mini_portile2:2.3.0',
+        'msgpack:1.2.9',
+        'pg:1.1.4',
+        'nio4r:2.3.1',
+        'puma:3.12.0',
+        'eventmachine:1.2.7']
+      end
 
       def create_ros_services
         # TODO for each ros service gem, generate a rails application in ./services that includes that gem

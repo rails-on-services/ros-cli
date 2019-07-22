@@ -37,6 +37,10 @@ module Ros
             }
           end
 
+          def api_uri
+            URI("#{config.endpoints.api.scheme}://#{api_hostname}").to_s
+          end
+
           def api_hostname
             @api_hostname ||= "#{config.endpoints.api.host}#{base_hostname}"
           end

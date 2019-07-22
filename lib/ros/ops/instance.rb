@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-require 'ros/generators/stack'
 require 'ros/ops/cli_common'
 
 module Ros
@@ -7,6 +6,8 @@ module Ros
     module Instance
       class Cli
         include Ros::Ops::CliCommon
+
+        def init; end
 
         def build(services)
           generate_config if stale_config
@@ -31,9 +32,9 @@ module Ros
             compose("up #{compose_options} #{service}")
           end
           reload_nginx(services)
-          return unless services.size.eql? 1
-          console(service) if options.console
-          exec(service, 'bash') if options.shell
+          show_endpoint
+          console(services.last) if options.console
+          exec(services.last, 'bash') if options.shell
         end
 
         def ps
