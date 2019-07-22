@@ -9,8 +9,8 @@ module Ros
       module Cluster
         module Infra
 
-          class Instance
-            def self.tf_vars_aws(provider)
+          class Aws
+            def self.tf_vars_instance(provider)
               {
                 aws_region: provider.region,
                 route53_zone_main_name: Settings.components.be.components.cluster.config.dns.domain,
@@ -22,16 +22,24 @@ module Ros
                 # lambda_filename: infra.lambda_filename
               }
             end
-          end
 
-          class Kubernetes
-            def self.tf_vars_aws(provider)
+            def self.tf_vars_kubernetes(provider)
               {
                 aws_region: provider.region,
                 route53_zone_main_name: Settings.components.be.components.cluster.config.dns.domain,
                 route53_zone_this_name: Settings.components.be.components.cluster.config.dns.subdomain,
                 # name: infra.name
               }
+            end
+          end
+
+          class Gcp
+            def self.tf_vars_instance(provider)
+              {}
+            end
+
+            def self.tf_vars_kubernetes(provider)
+              {}
             end
           end
 
@@ -42,14 +50,17 @@ module Ros
             def self.a_path; File.dirname(__FILE__) end
 
             def generate
-              create_file("#{workdir}/state.tf.json", "#{JSON.pretty_generate(tf_state)}")
-              create_file("#{workdir}/terraform.tfvars", "#{JSON.pretty_generate(tf_vars)}")
+              create_file("#{deploy_path}/state.tf.json", "#{JSON.pretty_generate(tf_state)}")
+              create_file("#{deploy_path}/terraform.tfvars", "#{JSON.pretty_generate(tf_vars)}")
+              # Copy over the provider+type files only
+              directory("terraform/#{Settings.components.be.config.provider}/provision/#{cluster.config.type}", deploy_path)
             end
 
             private
+
             def tf_vars
-              obj = Object.const_get("Ros::Generators::Be::Cluster::Infra::#{cluster.config.type.capitalize}")
-              obj.send("tf_vars_#{Settings.components.be.config.provider}", Ros::Generators::Be::Cluster.provider)
+              obj = Object.const_get("Ros::Generators::Be::Cluster::Infra::#{Settings.components.be.config.provider.capitalize}")
+              obj.send("tf_vars_#{cluster.config.type}", Ros::Generators::Be::Cluster.provider)
             end
 
             def tf_state
@@ -62,7 +73,9 @@ module Ros
               }
             end
 
-            def workdir; "#{Ros.tf_root}/#{Settings.components.be.config.provider}/provision/#{Settings.components.be.components.cluster.config.type}" end
+            def deploy_path
+              "#{Cluster.deploy_path}/infra"
+            end
 
             def cluster; Settings.components.be.components.cluster end
             def settings; cluster.components.infra end
