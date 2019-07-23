@@ -1,42 +1,110 @@
 # Configuration values defined here override any values defined in platform.yml
+# naming and segmenting nginx for compose multi deploys
+# writing out IAM credentials in a namespace aware way
+# if feature_set is an ENV var then IAM can use that
+# postman generating api docs for a feature set aware endpoint
+# WORKSPACE is api_endpoint
+# tmp/deployments/development/feature_set
+# tmp/deployments/development/mounted
+# tmp/deployments/development/no-mount
+# tmp/deployments/development/production-image
 ---
-infra:
-  config:
-    type: instance
-    # Uncomment and set values to a hostname that is mapped to this machine
-    # to enable public access to this installation
-    # dns:
-    #   domain: rails-on-services.org
-    #   subdomain: ros
-  environment:
-    nginx_host_port: 3000
+components:
+  be:
+    config:
+      feature_set: mounted
+      feature_from_branch: no
+    environment:
+      nginx_host_port: 3000
+    components:
+      cluster:
+        config:
+          # this creates a CNAME hello.ros.rails-on-services.org
+          # which is how to access the running instance
+          name: titan
+          type: instance
+          dns:
+            domain: rails-on-services.org
+            subdomain: titan
+        components:
+          services:
+            components:
+              fluentd:
+                config:
+                  enabled: no
+              grafana:
+                config:
+                  enabled: no
+              prometheus:
+                config:
+                  enabled: no
+      application:
+        # Uncomment and set values to a hostname that is mapped to this machine
+        # to enable public access to this installation
+        # config:
+        #   dns:
+        #     domain: rails-on-services.org
+        #     subdomain: demo
+        environment:
+          bucket_endpoint_url: http://localstack:4572
+          aws_access_key_id: this_key_from_development_yml
+          aws_secret_access_key: this_key_from_development_yml
+          aws_default_region: ap-southeast-1
+          aws_account_id: 123456789
+        components:
+          services:
+            components:
+              fluentd:
+                config:
+                  enabled: no
+              localstack:
+              nginx:
+              postgres:
+              redis:
+              wait:
 
-core:
-  services:
-    fluentd:
-      enabled: no
-    localstack:
-    nginx:
-    postgres:
-    redis:
-    sftp:
-      environment:
-        bucket_endpoint_url: http://localstack:4572
-        bucket_name: blah
-        aws_access_key_id: hello
-        aws_secret_access_key: hello
-    wait:
-
-platform:
-  environment:
-    redis_url: redis://redis:6379
-    platform:
-      request_logging:
-        enabled: no
-      system_logging:
-        enabled: no
-  services:
-    cognito:
-      profiles: ['server']
-    comm:
-      profiles: ['server']
+          platform:
+            environment:
+              redis_url: redis://redis:6379
+              platform:
+                request_logging:
+                  enabled: no
+                  config:
+                    host: fluentd
+                infra:
+                  services:
+                    storage:
+                      aws:
+                        endpoint: http://localstack:4572
+                        force_path_style: yes
+                    mq:
+                      aws:
+                        endpoint: http://localstack:4576
+                        verify_checksums: no
+                  resources:
+                    storage:
+                      primary:
+                        provider: aws
+                        enabled: yes
+                    mq:
+                      primary:
+                        provider: aws
+            components:
+              storage:
+                environment:
+                  platform:
+                    infra:
+                      resources:
+                        mq:
+                          primary:
+                            enabled: yes
+              cognito:
+                config:
+                  profiles: ['server']
+              comm:
+                config:
+                  profiles: ['server']
+              iam:
+                config:
+                  profiles: ['server']
+                  # command: ["tail", "-F", "log/development.log"]

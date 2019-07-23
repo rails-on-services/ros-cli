@@ -9,13 +9,23 @@ elsif ARGV[0]&.include? ':'
   args = ARGV.each_with_object([]) { |arg, args| args.append(arg) unless arg.index(':') }
   Rake.load_rakefile('Rakefile') if File.exists?('Rakefile')
   tasks.each { |task| Rake::Task[task].invoke(args) }
-  # if ARGV[0]
-  #   ENV['ROS_PROFILE'] = ARGV[0] # if action.eql?('setup')
-  #   ENV['ROS_IMAGE'] = ARGV[0] # if action.eql?('apply')
-  # end
 else
   require 'bundler/setup'
   require 'ros'
-  require 'ros/cli'
-  Ros::Cli.start
+  # cli_loaded = false
+  dir = Dir.pwd.split('/').last
+  arg = ARGV[0]
+    # if %w(be fe data).include?(Dir.pwd.split('/').last) or %w(be fe data).include?(ARGV[0])
+  # if %w(be fe data).include?(dir)
+  #   require "ros/cli/#{dir}"
+  #   Object.const_get("Ros::#{dir.capitalize}::Cli").start
+  # elsif %w(be fe data).include?(arg)
+  #   require "ros/cli/#{arg}"
+  #   ARGV.shift
+  #   Object.const_get("Ros::#{arg.capitalize}::Cli").start
+  # else
+    # require 'ros/cli'
+    require 'ros/cli/be'
+    Ros::Be::Cli.start
+  # end
 end

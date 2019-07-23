@@ -1,8 +1,9 @@
 # frozen_string_literal: true
+require 'thor'
 require 'ros/generators/stack'
 require 'ros/generators/be/application/services/services_generator'
 require 'ros/generators/be/application/platform/platform_generator'
-require 'ros/ops/rails'
+require 'ros/cli/be/rails'
 
 module Ros
   module Ops

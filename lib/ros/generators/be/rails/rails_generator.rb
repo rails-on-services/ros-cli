@@ -4,7 +4,8 @@ require 'thor/group'
 
 module Ros
   module Generators
-    class ProjectGenerator < Thor::Group
+    module Be
+    class RailsGenerator < Thor::Group
       include Thor::Actions
       argument :name
 
@@ -14,13 +15,25 @@ module Ros
         in_root do
           %x(git clone https://github.com/rails-on-services/ros.git)
           FileUtils.cp_r('ros/devops', '.')
-        end if false
-        directory('files', '.')
+        end # if false
+        # directory('files', '.')
         # TODO: move to be specific
         # template 'Dockerfile'
-        template 'config/deployment.yml'
         # empty_directory('services')
-        # say "\nCreated Ros project at #{destination_root}"
+      end
+
+      def core
+        require 'ros/generators/be/rails/core/core_generator.rb'
+        generator = Ros::Generators::CoreGenerator.new([name])
+        generator.destination_root = "#{name}/be"
+        generator.invoke_all
+      end
+
+      def sdk
+        require 'ros/generators/be/rails/sdk/sdk_generator.rb'
+        generator = Ros::Generators::SdkGenerator.new([name])
+        generator.destination_root = "#{name}/be"
+        generator.invoke_all
       end
 
       private
@@ -60,6 +73,7 @@ module Ros
           EOF
         end
       end
+    end
 	  end
   end
 end

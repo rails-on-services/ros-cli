@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-require 'ros/ops/cli_common'
 
 module Ros
   module Ops

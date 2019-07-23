@@ -32,28 +32,24 @@ module Ros
       name = args[0]
       # host = URI(args[1] || 'http://localhost:3000')
       # args.push(:nil, :nil, :nil)
-      require_relative 'generators/be/project/project_generator.rb'
+      require 'ros/generators/stack/project/project_generator.rb'
       generator = Ros::Generators::ProjectGenerator.new(args)
       generator.destination_root = name
       generator.invoke_all
-      require_relative 'generators/be/env/env_generator.rb'
-      %w(development test production).each do |env|
-        generator = Ros::Generators::EnvGenerator.new([env, nil, name, nil])
-        generator.destination_root = name
-        generator.invoke_all
-      end
-      require_relative 'generators/be/core/core_generator.rb'
-      generator = Ros::Generators::CoreGenerator.new(args)
-      generator.destination_root = name
-      generator.invoke_all
-      require_relative 'generators/be/sdk/sdk_generator.rb'
-      generator = Ros::Generators::SdkGenerator.new(args)
-      generator.destination_root = name
+      # require 'ros/generators/stack/env/env_generator.rb'
+      # %w(development test production).each do |env|
+      #   generator = Ros::Generators::EnvGenerator.new([env, nil, name, nil])
+      #   generator.destination_root = name
+      #   generator.invoke_all
+      # end
+      require 'ros/generators/be/rails/rails_generator.rb'
+      generator = Ros::Generators::Be::RailsGenerator.new(args)
+      generator.destination_root = "#{name}/be"
       generator.invoke_all
     end
 
     def generate_env(args, options = {}, behavior = nil)
-      require_relative "ros/generators/be/env/env_generator.rb"
+      require "ros/generators/be/env/env_generator.rb"
       args.push('http://localhost:3000') unless args[1]
       args.push(File.basename(Ros.root)) unless args[2]
       args.push('')
