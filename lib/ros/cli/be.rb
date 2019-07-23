@@ -163,11 +163,9 @@ module Ros
       def context(options = {})
         return @context if @context
         raise Error, set_color("ERROR: Not a Ros project", :red) if Ros.root.nil?
-        infra_type = 'instance'
-        infra_type = Settings.components.be.components.cluster.config.type
-        type = :cli
+        infra_type = Settings.components.be.components.infra.components.cluster.config.type
         require "ros/cli/be/#{infra_type}"
-        @context = Object.const_get("Ros::Ops::#{infra_type.capitalize}::#{type.to_s.capitalize}").new(options)
+        @context = Ros::Cli::Be.const_get(infra_type.capitalize).new(options)
         @context
       end
     end

@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'thor/group'
-
 module Ros
   module Generators
     module CommonGenerator

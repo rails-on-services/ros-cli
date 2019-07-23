@@ -15,7 +15,7 @@ module Ros
       end
 
       def show_endpoint
-        STDOUT.puts "\n*** Services available at #{Ros::Generators::Be::Application.api_uri} ***\n\n"
+        STDOUT.puts "\n*** Services available at #{application.api_uri} ***\n\n"
       end
 
       def enabled_services
@@ -30,8 +30,8 @@ module Ros
       end
 
       def stale_config
-        return true unless File.exists?(Ros::Generators::Stack.compose_file)
-        mtime = File.mtime(Ros::Generators::Stack.compose_file)
+        return true unless File.exists?(application.compose_file)
+        mtime = File.mtime(application.compose_file)
         # Check config files
         Dir["#{Ros.root}/config/**/*.yml"].each { |f| return true if mtime < File.mtime(f) }
         # Check template files
@@ -40,6 +40,8 @@ module Ros
         Dir["#{Ros.root.join('lib/generators')}/be/{application,cluster}/**/templates/**/*"].each { |f| return true if mtime < File.mtime(f) }
         false
       end
+
+      def application; Ros::Generators::Be::Application end
 
       def generate_config
         unless options.v

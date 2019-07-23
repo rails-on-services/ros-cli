@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
 module Ros
-  module Ops
-    module Kubernetes
-      class Cli
+  module Cli
+    module Be
+      class Kubernetes
         include Ros::Ops::CliCommon
 
         def init
-          Ros::Generators::Be::Cluster.send("init_#{Settings.components.be.config.provider}", self)
+          Ros::Generators::Be::Cluster.init(self)
         end
 
         def up(services)

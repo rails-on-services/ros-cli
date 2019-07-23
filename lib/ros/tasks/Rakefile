@@ -9,30 +9,28 @@ namespace :install do
   end
 end
 
-namespace :generate do
-  namespace :be do
-    namespace :cluster do
-      %i(infra services).each do |thing|
-        desc "#{thing}"
-        task thing do |task, args|
-          Ros.send(task.name.split(':').first, { behavior: :invoke }, *(task.name.split(':')[1..-1]))
-        end
-        desc "#{thing} rollback"
-        task "#{thing}:rollback" do |task, args|
-          Ros.send(task.name.split(':').first, { behavior: :revoke }, *(task.name.split(':')[1..-2]))
-        end
+%i(generate destroy).each do |action|
+  namespace action do
+    Settings.components.keys.each do |item1|
+      desc "#{action} #{item1}"
+      task item1 do |task, args|
+        Ros.from_rake(task, args)
       end
-    end
-
-    namespace :application do
-      %i(platform services).each do |thing|
-        desc "#{thing}"
-        task thing do |task, args|
-          Ros.send(task.name.split(':').first, { behavior: :invoke }, *(task.name.split(':')[1..-1]))
-        end
-        desc "#{thing} rollback"
-        task "#{thing}:rollback" do |task, args|
-          Ros.send(task.name.split(':').first, { behavior: :revoke }, *(task.name.split(':')[1..-2]))
+      namespace item1 do
+        Settings.components[item1].components.keys.each do |item2|
+          desc "#{action} #{item2}"
+          task item2 do |task, args|
+            Ros.from_rake(task, args)
+          end
+          namespace item2 do
+            ar = Settings.components[item1].components[item2]&.components&.keys
+            Settings.components[item1].components[item2].components.keys.each do |item3|
+              desc "#{action} #{item3}"
+              task item3 do |task, args|
+                Ros.from_rake(task, args)
+              end
+            end if ar
+          end
         end
       end
     end

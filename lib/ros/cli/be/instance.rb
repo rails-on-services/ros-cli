@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
 module Ros
-  module Ops
-    module Instance
-      class Cli
+  module Cli
+    module Be
+      class Instance
         include Ros::Ops::CliCommon
 
-        def init; end
+        def init; STDOUT.puts 'init is not used/necessary for compose. only kubernetes' end
 
         def build(services)
           generate_config if stale_config
@@ -109,18 +109,18 @@ module Ros
           filters.append("--filter 'status=#{status}'")
           filters.append("--filter 'label=stack.name=#{Settings.config.name}'")
           filters.append("--filter 'label=application.component=#{application_component}'") if application_component
-          filters.append("--filter 'label=platform.feature_set=#{Ros::Generators::Stack.current_feature_set}'")
+          filters.append("--filter 'label=platform.feature_set=#{application.current_feature_set}'")
           filters.append("--format '{{.Names}}'")
           cmd = "docker ps #{filters.join(' ')}"
           ar = %x(#{cmd})
           # TODO: _server is only one profile; fix
           # TODO: _1 is assumed; there could be > 1
-          ar.split("\n").map{ |a| a.gsub("#{Ros::Generators::Stack.compose_project_name}_", '').chomp('_1') }
+          ar.split("\n").map{ |a| a.gsub("#{application.compose_project_name}_", '').chomp('_1') }
         end
 
         def database_check(name, config)
           prefix = config.ros ? 'app:' : ''
-          migration_file = "#{Ros::Generators::Stack.compose_dir}/#{name}-migrated"
+          migration_file = "#{application.compose_dir}/#{name}-migrated"
           return true if File.exists?(migration_file) unless options.seed
           FileUtils.rm(migration_file) if File.exists?(migration_file)
           success = compose("run --rm #{name} rails #{prefix}ros:db:reset:seed")
@@ -132,10 +132,12 @@ module Ros
 
         def switch!
           FileUtils.rm_f('.env')
-          FileUtils.ln_s(Ros::Generators::Stack.compose_file, '.env')
+          FileUtils.ln_s(application.compose_file, '.env')
         end
 
         def namespace; @namespace ||= (ENV['ROS_PROFILE'] ? "#{ENV['ROS_PROFILE']}-" : '') + Ros::Generators::Stack.compose_project_name end
+
+        def application; Ros::Generators::Be::Application end
 
         # def provision_with_ansible
         #   puts "Deploy '#{config.name_to_s}' of type #{deploy_config.type} in #{Ros.env} environment"

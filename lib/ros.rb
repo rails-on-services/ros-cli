@@ -84,18 +84,12 @@ module Ros
       generator.invoke_all
     end
 
-    # Generates deployment artifacts
-    def generate(options = {}, *stack)
+    def from_rake(task, args)
+      behavior, *stack = task.name.split(':')
       require 'ros/generators/stack'
-      # require "ros/generators/be/#{stack.last(2).first}"
-      require 'ros/generators/be/cluster'
-      require 'ros/generators/be/application'
-      require "ros/generators/#{stack.join('/')}/#{stack.last}_generator"
-      g_string = "Ros::Generators::#{stack.map{ |s| s.capitalize }.join('::')}::#{stack.last.capitalize}Generator"
-      generator = Object.const_get(g_string).new
-      # TODO: invoke as an option and pass that option when invoking from the CLI
-      generator.options = options
-      generator.behavior = options[:behavior] || :invoke
+      g_string = "#{stack.map{ |s| s.capitalize }.join('::')}::#{stack.last.capitalize}Generator"
+      generator = Ros::Generators.const_get(g_string).new
+      generator.behavior = behavior.eql?('destroy') ? :revoke : :invoke
       generator.destination_root = Ros.root
       generator.invoke_all
     end
@@ -190,7 +184,7 @@ module Ros
 
     # TODO: This is a hack in order to differentiate for purpose of templating files
     def is_ros?
-      Settings.platform.config.image_registry.eql?('railsonservices') and Settings.components.be.components.application.components.platform.environment.platform.partition_name.eql?('ros')
+      Settings.config.platform.image_registry.eql?('railsonservices') and Settings.components.be.components.application.components.platform.environment.platform.partition_name.eql?('ros')
     end
   end
 end

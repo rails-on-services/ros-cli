@@ -1,13 +1,10 @@
 # frozen_string_literal: true
 
-require 'thor/group'
-require 'ros/generators/common_generator'
-
 module Ros
   module Generators
     module Be
-      module Cluster
-        module Services
+      module Infra
+        module Cluster
 
           class Service
             attr_accessor :name, :config, :environment
@@ -49,7 +46,6 @@ module Ros
 
             def deploy_path
               # TODO: For fluentd, grafana and prometheus, where do the templates go?
-              # def workdir; "#{Ros.tf_root}/#{Settings.components.be.config.provider}/provision/#{Settings.components.be.components.cluster.config.type}" end
               "#{Cluster.deploy_path}/services"
             end
 
@@ -57,11 +53,10 @@ module Ros
               settings.components.to_h.select{|k, v| v.nil? || v.dig(:config, :enabled).nil? || v.dig(:config, :enabled) }
             end
 
-            def cluster; Settings.components.be.components.cluster end
-            def settings; cluster.components.services end
+            def settings; Cluster.settings.components&.services || Config::Options.new end
             # def environment ; settings.environment end
             def template_dir
-              Settings.components.be.components.cluster.config.type.eql?('kubernetes') ? 'skaffold' : 'compose'
+              Cluster.config.type.eql?('kubernetes') ? 'skaffold' : 'compose'
             end
           end
         end

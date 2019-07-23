@@ -12,20 +12,21 @@ elsif ARGV[0]&.include? ':'
 else
   require 'bundler/setup'
   require 'ros'
-  # cli_loaded = false
+=begin
   dir = Dir.pwd.split('/').last
   arg = ARGV[0]
-    # if %w(be fe data).include?(Dir.pwd.split('/').last) or %w(be fe data).include?(ARGV[0])
-  # if %w(be fe data).include?(dir)
-  #   require "ros/cli/#{dir}"
-  #   Object.const_get("Ros::#{dir.capitalize}::Cli").start
-  # elsif %w(be fe data).include?(arg)
-  #   require "ros/cli/#{arg}"
-  #   ARGV.shift
-  #   Object.const_get("Ros::#{arg.capitalize}::Cli").start
-  # else
-    # require 'ros/cli'
-    require 'ros/cli/be'
-    Ros::Be::Cli.start
-  # end
+  if %w(be fe data).include?(dir)
+    require "ros/cli/#{dir}"
+    Ros.const_get("#{dir.capitalize}::Cli").start
+  elsif %w(be fe data).include?(arg)
+    require "ros/cli/#{arg}"
+    ARGV.shift
+    Ros.const_get("#{arg.capitalize}::Cli").start
+  else
+    require 'ros/cli'
+    Ros::Cli.start
+  end
+=end
+  require 'ros/cli/be'
+  Ros::Be::Cli.start
 end

@@ -1,9 +1,5 @@
 # frozen_string_literal: true
 
-require 'thor/group'
-require 'ros/generators/be/application'
-require 'ros/generators/common_generator'
-
 module Ros
   module Generators
     module Be
@@ -20,7 +16,7 @@ module Ros
             end
 
             def stack_name; Stack.name end
-            def current_feature_set; Stack.current_feature_set end
+            def current_feature_set; Application.current_feature_set end
             def has_envs; !environment.nil? end
 
             # skaffold only methods
@@ -29,7 +25,7 @@ module Ros
             # api_hostname is for ingress controller
             def api_hostname; Application.api_hostname end
             # def bucket_name; stack.current_feature_set end
-            def skaffold_version; Stack.skaffold_version end
+            def skaffold_version; Stack.config.skaffold_version end
 
             # skaffold sftp only methods
             def sftp
@@ -54,17 +50,18 @@ module Ros
               # If type is kubernetes, then value of header is:
               # "configMaps:\n  rails-audit-log.conf: |"
               @fluentd ||= Config::Options.new({
-                header: Settings.components.be.components.cluster.config.type.eql?('kubernetes') ? "configMaps:\n  rails-audit-log.conf: |" : '',
+                header: cluster.config.type.eql?('kubernetes') ? "configMaps:\n  rails-audit-log.conf: |" : '',
                 # log_tag: "#{api_hostname}.rack-traffic-log",
                 log_tag: "**.rack-traffic-log",
                 fluent_code_from_duan: 'fluent_code_from_duan',
                 provider: Settings.components.be.config.provider, # infra.config.provider,
                 # storage_name: "storage#{base_hostname.gsub('.', '-')}",
-                storage_name: 'xabc', # bucket_name,
+                storage_name: Application.bucket_name,
                 storage_region: 'abc', # provider.config.region,
-                current_feature_set: 'abc' # current_feature_set
+                current_feature_set: Application.current_feature_set
               })
             end
+            def cluster; Ros::Generators::Be::Infra::Cluster end
           end
 
           # Depending on the deployment type, use either compose or skaffold
@@ -127,21 +124,26 @@ module Ros
             end
 
             def service_names; components.keys  end
+
             def platform_service_names; platform_components.keys end
 
             def platform_components
               platform_settings.components.to_h.select{|k, v| v.nil? || v.dig(:config, :enabled).nil? || v.dig(:config, :enabled) }
             end
 
-            def platform_settings; Settings.components.be.components.application.components.platform end
+            def platform_settings; Application.settings.components.platform end
 
             def components
               settings.components.to_h.select{|k, v| v.nil? || v.dig(:config, :enabled).nil? || v.dig(:config, :enabled) }
             end
-            def settings; Settings.components.be.components.application.components.services end
+
+            def settings; Application.settings.components.services end
+
             def template_dir
-              Settings.components.be.components.cluster.config.type.eql?('kubernetes') ? 'skaffold' : 'compose'
+              cluster.config.type.eql?('kubernetes') ? 'skaffold' : 'compose'
             end
+
+            def cluster; Ros::Generators::Be::Infra::Cluster end
           end
         end
       end
