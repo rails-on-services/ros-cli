@@ -170,7 +170,7 @@ resource "aws_lb_listener" "https" {
 }
 
 resource "aws_route53_record" "lb" {
-  count   = var.route53_zone_id != "" && length(var.lb_dns_hostnames) != 0 ? length(var.lb_dns_hostnames) : 0
+  count   = length(var.lb_dns_hostnames) != 0 ? length(var.lb_dns_hostnames) : 0
   zone_id = var.route53_zone_id
   name    = var.lb_dns_hostnames[count.index]
   type    = "CNAME"

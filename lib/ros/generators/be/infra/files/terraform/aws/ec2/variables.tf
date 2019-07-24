@@ -61,5 +61,5 @@ variable "lb_dns_hostnames" {
 variable "route53_zone_id" {
   default     = ""
   type        = string
-  description = "Optional, Route53 hosted zone ID to add records into"
+  description = "Optional, Route53 hosted zone ID to add records into, mandatory if lb_dns_hostnames is specified"
 }
