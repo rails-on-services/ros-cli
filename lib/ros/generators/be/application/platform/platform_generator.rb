@@ -5,6 +5,10 @@ module Ros
     module Be
       module Application
         module Platform
+          class << self
+            def settings; Settings.components.be.components.application.components.platform end
+            def config; settings.config end
+          end
 
           class Service
             attr_accessor :name, :config, :environment, :deploy_path
@@ -19,7 +23,7 @@ module Ros
             def context_dir; use_ros_context_dir ? 'ROS_CONTEXT_DIR' : 'CONTEXT_DIR' end
             def has_envs; !environment.nil? end
             # NOTE: Update image_type
-            def image; Settings.config.platform.images.rails end
+            def image; Stack.config.platform.config.images.rails end
             def mount_ros; (not Ros.is_ros? and not config.ros) end
             def profiles; config.profiles || [] end
 
@@ -63,7 +67,7 @@ module Ros
 
             # Compose only methods
             def write_compose_envs
-              return unless cluster.config.type.eql?('instance')
+              return unless Infra.cluster_type.eql?('instance')
               content = compose_environment.each_with_object([]) do |kv, ary|
                 ary << "#{kv[0].upcase}=#{kv[1]}"
               end.join("\n")
@@ -82,11 +86,11 @@ module Ros
             # continue compose only methods
             def compose_environment
               {
-                compose_file: Dir["#{Application.deploy_path}//**/*.yml"].map{ |p| p.gsub("#{Ros.root}/", '') }.sort.join(':'),
+                compose_file: Dir["#{Application.deploy_path}/**/*.yml"].map{ |p| p.gsub("#{Ros.root}/", '') }.sort.join(':'),
                 compose_project_name: Application.compose_project_name,
                 context_dir: relative_path,
                 ros_context_dir: "#{relative_path}/ros",
-                image_repository: Settings.platform.config.image_registry,
+                image_repository: Stack.config.platform.image_registry,
                 image_tag: Stack.image_tag
               }
             end

@@ -12,10 +12,11 @@ module Ros
           def config; settings.config || Config::Options.new end
           def environment; settings.environment || Config::Options.new end
           def deploy_path; "#{Stack.deploy_path}/be/infra" end
+          def cluster_type; config.cluster.type end
           # def skaffold_version; config.skaffold_version end
 
           def tf_vars
-            (components.keys - %i(kubernetes instance) + [config.cluster.type]).each do |name|
+            (components.keys - %i(kubernetes instance) + [cluster_type]).each do |name|
               klass = const_get(components[name].config.provider.capitalize)
               # puts JSON.pretty_generate(klass.send(name, components[name]))
             end
@@ -81,7 +82,7 @@ module Ros
             create_file("#{deploy_path}/terraform.tfvars", "#{JSON.pretty_generate(tf_vars)}")
             # Copies over the provider+type files only
             infra.components.each_pair do |component, config|
-              next if %i(kubernetes instance).include?(component) and Infra.config.cluster.type != component.to_s
+              next if %i(kubernetes instance).include?(component) and Infra.cluster_type != component.to_s
               provider = config.config.provider
               module_name = send(provider, component)
               module_path = "../files/terraform/#{provider}/#{module_name}"
