@@ -1,35 +1,35 @@
 module "vpc" {
-  source = "./vpc"
-  name   = "duan-vpc"
-  cidr   = "10.100.0.0/16"
+  source = "./aws/vpc"
+  name   = "<%= tf.vpc.config.name %>"
+  cidr   = "<%= tf.vpc.config.cidr %>"
 }
 
 module "route53" {
-  source                         = "./route53"
-  root_domain                    = "perxtech.io"
-  sub_domain                     = "duan"
+  source                         = "./aws/route53"
+  root_domain                    = "<%= tf.dns.config.root_domain %>"
+  sub_domain                     = "<%= tf.dns.config.sub_domain %>"
   root_domain_managed_in_route53 = true
 }
 
 
 module "acm_cert" {
-  source                    = "./acm"
-  domain_name               = "duan.perxtech.org"
-  route53_domain_name       = "perxtech.org"
+  source                    = "./aws/acm"
+  domain_name               = "<%= tf.cert.config.domain_name %>"
+  route53_domain_name       = "<%= tf.cert.config.route53_domain_name %>"
   route53_dns_record_count  = 1
-  subject_alternative_names = ["*.duan.perxtech.org"]
+  subject_alternative_names = ["<%= tf.cert.config.subject_alternative_names.join(", ") %>"]
 }
 
 
 module "instance" {
-  source           = "./instance"
-  name_prefix      = "duan"
+  source           = "./aws/instance"
+  name_prefix      = "<%= tf.instance.config.name_prefix %>"
   vpc_id           = module.vpc.this.vpc_id
   subnet_ids       = module.vpc.this.public_subnets
   aws_cert_arn     = module.acm_cert.this.arn
-  lb_dns_hostnames = ["api.duan.perxtech.org"]
+  lb_dns_hostnames = ["<%= tf.instance.config.lb_dns_hostnames.join(", ") %>"]
   route53_zone_id  = module.route53.this.zone_id
-  ec2_key_pair     = null
+  ec2_key_pair     = "<%= tf.instance.config.ec2_key_pair %>"
 }
 
 output "vpc" {

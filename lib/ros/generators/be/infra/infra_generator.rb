@@ -86,11 +86,10 @@ module Ros
               provider = config.config.provider
               module_name = send(provider, component)
               module_path = "../files/terraform/#{provider}/#{module_name}"
-              directory(module_path, "#{deploy_path}/#{provider}-#{module_name}")
+              directory(module_path, "#{deploy_path}/#{provider}/#{module_name}")
             end
-            create_file("#{deploy_path}/main.tf", '')
-            # TODO: If templates are required then place them in 'templates' dir with a path that is idenitcal to the generated path
-            # template('config/deployments/development.yml')
+            # TODO: 'aws' is hardcoded at the moment
+            template("terraform/aws/#{Infra.cluster_type}.tf.erb", "#{deploy_path}/main.tf")
           end
 
           def execute
@@ -103,12 +102,13 @@ module Ros
           end
 
           private
-
+          def tf; infra.components end
           def aws(type)
             {
-              kubernetes: 'eks',
+              cert: 'acm',
               dns: 'route53',
               instance: 'ec2',
+              kubernetes: 'eks',
               vpc: 'vpc'
             }[type]
           end
