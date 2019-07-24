@@ -62,6 +62,21 @@ module Ros
             }[type]
           end
 
+          def gcp(type)
+            {
+            }[type]
+          end
+
+          def azure(type)
+            {
+            }[type]
+          end
+
+          def oracle(type)
+            {
+            }[type]
+          end
+
           def tf_state
             {
               terraform: {

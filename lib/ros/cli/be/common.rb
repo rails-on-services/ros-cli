@@ -42,14 +42,19 @@ module Ros
       end
 
       def stale_config
+        # TODO: make this also work for skaffold/kubernetes by using a skaffold specific file
         return true unless File.exists?(application.compose_file)
         mtime = File.mtime(application.compose_file)
         # Check config files
         Dir["#{Ros.root}/config/**/*.yml"].each { |f| return true if mtime < File.mtime(f) }
         # Check template files
-        Dir["#{Pathname.new(File.dirname(__FILE__)).join('../generators')}/be/{application,cluster}/**/templates/**/*"].each { |f| return true if mtime < File.mtime(f) }
+        Dir["#{Ros.gem_root.join('lib/ros/generators')}/be/**/templates/**/*"].each do |f|
+          return true if mtime < File.mtime(f)
+        end
         # Check custom templates
-        Dir["#{Ros.root.join('lib/generators')}/be/{application,cluster}/**/templates/**/*"].each { |f| return true if mtime < File.mtime(f) }
+        Dir["#{Ros.root.join('lib/generators')}/be/**/templates/**/*"].each do |f|
+          return true if mtime < File.mtime(f)
+        end
         false
       end
 
