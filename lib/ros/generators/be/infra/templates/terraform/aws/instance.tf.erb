@@ -22,7 +22,7 @@ module "acm_cert" {
 
 
 module "instance" {
-  source           = "./aws/instance"
+  source           = "./aws/ec2"
   name_prefix      = "<%= tf.instance.config.name_prefix %>"
   vpc_id           = module.vpc.this.vpc_id
   subnet_ids       = module.vpc.this.public_subnets
@@ -45,5 +45,5 @@ output "acm_cert" {
 }
 
 output "instance" {
-  value = module.instance.ec2
+  value = module.instance.this
 }

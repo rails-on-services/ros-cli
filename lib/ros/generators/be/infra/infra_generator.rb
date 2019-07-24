@@ -79,7 +79,7 @@ module Ros
 
           def generate
             create_file("#{deploy_path}/state.tf.json", "#{JSON.pretty_generate(tf_state)}")
-            create_file("#{deploy_path}/terraform.tfvars", "#{JSON.pretty_generate(tf_vars)}")
+            # create_file("#{deploy_path}/terraform.tfvars", "#{JSON.pretty_generate(tf_vars)}")
             # Copies over the provider+type files only
             infra.components.each_pair do |component, config|
               next if %i(kubernetes instance).include?(component) and Infra.cluster_type != component.to_s
