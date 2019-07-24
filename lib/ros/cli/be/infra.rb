@@ -1,14 +1,14 @@
 # frozen_string_literal: true
-require 'ros/generators/be/cluster'
+require 'ros/generators/be/infra/infra_generator'
 
 module Ros
-  module Ops
+  module Be
     module Infra
       class Cli
-        include Ros::Ops::CliCommon
+        include Ros::Be::Common::Cli
 
         def generate
-          Dir.chdir("#{Ros::Generators::Be::Cluster.deploy_path}/infra") do
+          Dir.chdir(infra.deploy_path) do
             # TODO: Refactor to do a check to generate the infrastructure templates
             # generate_config if stale_config
             system_cmd({}, 'terraform init')
@@ -18,10 +18,13 @@ module Ros
         end
 
         def destroy
-          Dir.chdir("#{Ros::Generators::Be::Cluster.deploy_path}/infra") do
+          Dir.chdir(infra.deploy_path) do
             system_cmd({}, 'terraform destroy')
           end
         end
+
+        private
+        def infra; Ros::Generators::Be::Infra end
       end
     end
   end

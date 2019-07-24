@@ -39,8 +39,8 @@ module Ros
         option :apply, type: :boolean, default: false, aliases: '-a'
         def infra(*args)
           require 'ros/cli/be/infra'
-          # binding.pry
-          Ros::Ops::Infra::Cli.new(options).send(current_command_chain[1])
+          # TODO: When using 'be' prefix for ros project then switch index from '0' to '1'
+          Ros::Be::Infra::Cli.new(options).send(current_command_chain[0])
         end
 
         private

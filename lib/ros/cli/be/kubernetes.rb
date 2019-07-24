@@ -4,7 +4,7 @@ module Ros
   module Cli
     module Be
       class Kubernetes
-        include Ros::Ops::CliCommon
+        include Ros::Be::Common::Cli
 
         def init
           Ros::Generators::Be::Cluster.init(self)

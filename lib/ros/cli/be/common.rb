@@ -6,8 +6,9 @@ require 'ros/generators/be/application/platform/platform_generator'
 require 'ros/cli/be/rails'
 
 module Ros
-  module Ops
-    module CliCommon
+  module Be
+    module Common
+    module Cli
       attr_accessor :options
 
       def initialize(options = {})
@@ -65,6 +66,7 @@ module Ros
         Ros::Generators::Be::Application::Platform::PlatformGenerator.new.invoke_all
         $stdout = rs unless options.v
       end
+    end
     end
   end
 end
