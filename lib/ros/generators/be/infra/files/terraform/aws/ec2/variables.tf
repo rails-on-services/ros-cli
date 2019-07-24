@@ -10,6 +10,12 @@ variable "name_prefix" {
   description = "Name prefix for created resources"
 }
 
+variable "project_name" {
+  default     = "dev"
+  type        = string
+  description = "The project name used by cloud-init userdata"
+}
+
 
 variable "vpc_id" {
   type = string

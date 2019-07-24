@@ -91,7 +91,8 @@ resource "aws_instance" "this" {
   }
 
   user_data = templatefile("${path.module}/templates/userdata-${var.ec2_ami_distro}.tpl", {
-    ssh_public_keys = var.ssh_public_keys
+    ssh_public_keys = var.ssh_public_keys,
+    project_name    = var.project_name
   })
 
   tags = merge(var.tags, {

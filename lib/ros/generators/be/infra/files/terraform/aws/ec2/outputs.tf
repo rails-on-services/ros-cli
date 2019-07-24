@@ -1,4 +1,4 @@
-output "ec2" {
+output "this" {
   value = aws_instance.this
 }
 
