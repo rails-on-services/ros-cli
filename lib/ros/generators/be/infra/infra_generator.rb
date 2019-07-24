@@ -14,61 +14,6 @@ module Ros
           def deploy_path; "#{Stack.deploy_path}/be/infra" end
           def cluster_type; config.cluster.type end
           # def skaffold_version; config.skaffold_version end
-
-          def tf_vars
-            (components.keys - %i(kubernetes instance) + [cluster_type]).each do |name|
-              klass = const_get(components[name].config.provider.capitalize)
-              # puts JSON.pretty_generate(klass.send(name, components[name]))
-            end
-          end
-        end
-
-        # TODO: This is not based on just instance vs kubernetes
-        # There will be tf_vars for all kinds of resources
-        class Aws
-          def self.instance(values)
-            {
-              aws_region: values.config.name
-            }
-          end
-
-          def self.kubernetes(values)
-            {
-              aws_region: values.config.name
-            }
-          end
-
-          def self.tf_vars_instance(cluster)
-            {
-              aws_region: cluster.provider.region,
-              route53_zone_main_name: cluster.config.dns.domain,
-              route53_zone_this_name: cluster.config.dns.subdomain,
-              ec2_instance_type: cluster.provider.instance.type,
-              ec2_key_pair: cluster.provider.instance.key_pair,
-              ec2_tags: cluster.provider.instance.tags,
-              ec2_ami_distro: cluster.provider.instance.ami_distro
-              # lambda_filename: infra.lambda_filename
-            }
-          end
-
-          def self.tf_vars_kubernetes(cluster)
-            {
-              aws_region: cluster.provider.region,
-              route53_zone_main_name: cluster.config.dns.domain,
-              route53_zone_this_name: cluster.config.dns.subdomain,
-              # name: infra.name
-            }
-          end
-        end
-
-        class Gcp
-          def self.tf_vars_instance(cluster)
-            {}
-          end
-
-          def self.tf_vars_kubernetes(cluster)
-            {}
-          end
         end
 
         class InfraGenerator < Thor::Group
@@ -79,17 +24,22 @@ module Ros
 
           def generate
             create_file("#{deploy_path}/state.tf.json", "#{JSON.pretty_generate(tf_state)}")
-            # create_file("#{deploy_path}/terraform.tfvars", "#{JSON.pretty_generate(tf_vars)}")
-            # Copies over the provider+type files only
+            providers = Set.new
+            # For each component, copy over the provider/component_type TF module code
             infra.components.each_pair do |component, config|
               next if %i(kubernetes instance).include?(component) and Infra.cluster_type != component.to_s
               provider = config.config.provider
+              providers.add(provider)
               module_name = send(provider, component)
               module_path = "../files/terraform/#{provider}/#{module_name}"
+              # NOTE: Uncomment next line to pause execution and inspect variable values, test code, etc
+              # binding.pry
               directory(module_path, "#{deploy_path}/#{provider}/#{module_name}")
             end
-            # TODO: 'aws' is hardcoded at the moment
-            template("terraform/aws/#{Infra.cluster_type}.tf.erb", "#{deploy_path}/main.tf")
+            # Render each provider's main.tf
+            providers.each do |provider|
+              template("terraform/#{provider}/#{Infra.cluster_type}.tf.erb", "#{deploy_path}/#{provider}-main.tf")
+            end
           end
 
           def execute
@@ -102,7 +52,6 @@ module Ros
           end
 
           private
-          def tf; infra.components end
           def aws(type)
             {
               cert: 'acm',
@@ -111,13 +60,6 @@ module Ros
               kubernetes: 'eks',
               vpc: 'vpc'
             }[type]
-          end
-
-          def tf_vars
-            # binding.pry
-            # obj = Object.const_get("Ros::Generators::Be::Infra::#{Cluster.config.provider.capitalize}")
-            # obj.send("tf_vars_#{Cluster.config.type}", Cluster)
-            Infra.tf_vars
           end
 
           def tf_state
@@ -130,12 +72,9 @@ module Ros
             }
           end
 
+          def tf; infra.components end
           def infra; Settings.components.be.components.infra end
-
           def deploy_path; Infra.deploy_path end
-
-          # def cluster; Settings.components.be.components.infra.components.cluster end
-          # def settings; cluster.components.infra end
         end
       end
     end
