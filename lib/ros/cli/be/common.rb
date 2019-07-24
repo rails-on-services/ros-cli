@@ -14,6 +14,17 @@ module Ros
         @options = options
       end
 
+      def show(service_name)
+        service = service_name.split('/')[0]
+        service_name = "#{service_name}.yml" unless service_name.index('.')
+        %w(services platform).each do |type|
+          keys = application.components[type].components.keys
+          next unless keys.include?(service.to_sym)
+          file = "#{Ros::Generators::Be::Application.deploy_path}/#{type}/#{service_name}"
+          STDOUT.puts File.read(file)
+        end
+      end
+
       def show_endpoint
         STDOUT.puts "\n*** Services available at #{application.api_uri} ***\n\n"
       end

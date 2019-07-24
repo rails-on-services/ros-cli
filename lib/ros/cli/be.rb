@@ -103,6 +103,11 @@ module Ros
         context(options).ps
       end
 
+      desc 'show', 'show service config'
+      def show(service)
+        context(options).show(service)
+      end
+
       desc 'console', 'Start the Ros console (short-cut alias: "c")'
       map %w(c) => :console
       def console(service)

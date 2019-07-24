@@ -10,6 +10,7 @@ module Ros
         class << self
           def settings; Settings.components.be.components.application end
           def config; settings.config || Config::Options.new end
+          def components; settings.components end
           def c_environment; settings.environment || Config::Options.new end
           # def deploy_path; "#{Stack.deploy_path}/be/application" end
           def deploy_path; "#{Stack.deploy_path}/be/application/#{current_feature_set}" end
