@@ -14,6 +14,7 @@ module Ros
             system_cmd({}, 'terraform init')
             system_cmd({}, 'terraform plan') unless options.apply
             system_cmd({}, 'terraform apply') if options.apply
+            system_cmd({}, 'terraform output -json > output.json') if options.apply
           end
         end
 
