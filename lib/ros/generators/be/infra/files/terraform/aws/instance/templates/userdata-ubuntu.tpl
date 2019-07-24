@@ -10,4 +10,6 @@ packages:
   - python-pip
 
 runcmd:
-  - "echo ${public_key_openssh} >> /home/ubuntu/.ssh/authorized_keys"
+  %{ for key in ssh_public_keys ~}
+  - "echo ${key} >> /home/ubuntu/.ssh/authorized_keys"
+  %{ endfor ~}

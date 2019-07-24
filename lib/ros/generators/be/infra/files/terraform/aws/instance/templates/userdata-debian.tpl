@@ -13,4 +13,6 @@ runcmd:
   - add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
   - pip install ansible docker-compose
   - apt-get update && apt-get install -y docker-ce docker-ce-cli containerd.io
-  - "echo ${public_key_openssh} >> /home/admin/.ssh/authorized_keys"
+  %{ for key in ssh_public_keys ~}
+  - "echo ${key} >> /home/admin/.ssh/authorized_keys"
+  %{ endfor ~}

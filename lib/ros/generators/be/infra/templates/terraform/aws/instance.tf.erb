@@ -1,0 +1,49 @@
+module "vpc" {
+  source = "./vpc"
+  name   = "duan-vpc"
+  cidr   = "10.100.0.0/16"
+}
+
+module "route53" {
+  source                         = "./route53"
+  root_domain                    = "perxtech.io"
+  sub_domain                     = "duan"
+  root_domain_managed_in_route53 = true
+}
+
+
+module "acm_cert" {
+  source                    = "./acm"
+  domain_name               = "duan.perxtech.org"
+  route53_domain_name       = "perxtech.org"
+  route53_dns_record_count  = 1
+  subject_alternative_names = ["*.duan.perxtech.org"]
+}
+
+
+module "instance" {
+  source           = "./instance"
+  name_prefix      = "duan"
+  vpc_id           = module.vpc.this.vpc_id
+  subnet_ids       = module.vpc.this.public_subnets
+  aws_cert_arn     = module.acm_cert.this.arn
+  lb_dns_hostnames = ["api.duan.perxtech.org"]
+  route53_zone_id  = module.route53.this.zone_id
+  ec2_key_pair     = null
+}
+
+output "vpc" {
+  value = module.vpc.this
+}
+
+output "route53" {
+  value = module.route53.this
+}
+
+output "acm_cert" {
+  value = module.acm_cert.this
+}
+
+output "instance" {
+  value = module.instance.ec2
+}
