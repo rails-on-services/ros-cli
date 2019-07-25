@@ -37,8 +37,8 @@ module Ros
 
         desc 'preflight', 'Prepare a project'
         def preflight
-          Ros.preflight_check(fix: true)
-          Ros.preflight_check
+          preflight_check(fix: true)
+          preflight_check
         end
 
         desc 'init', 'Initialize the cluster'
@@ -103,7 +103,7 @@ module Ros
           context(options).exec(service, "rails #{command}")
         end
 
-        desc 'sh SERVICE', 'execute an interactive shell on a service (short-cut alias: "sh")'
+        desc 'sh SERVICE', 'execute an interactive shell on a service'
         # NOTE: shell is a reserved word
         def sh(service)
           context(options).exec(service, 'bash')
@@ -140,6 +140,19 @@ module Ros
         end
 
         private
+
+        def preflight_check(fix: false)
+          options = {}
+          ros_repo = Dir.exists?(Ros.ros_root)
+          env_config = File.exists?("#{Ros.environments_dir}/#{Ros.env}.yml")
+          if fix
+            %x(git clone git@github.com:rails-on-services/ros.git) unless ros_repo
+            generate_env([Ros.env]) unless env_config
+          else
+            puts "ros repo: #{ros_repo ? 'ok' : 'missing'}"
+            puts "environment configuration: #{env_config ? 'ok' : 'missing'}"
+          end
+        end
 
         def context(options = {})
           return @context if @context

@@ -28,19 +28,6 @@ module Ros
   end
 
   class << self
-    def preflight_check(fix: false)
-      options = {}
-      ros_repo = Dir.exists?(Ros.ros_root)
-      env_config = File.exists?("#{environments_dir}/#{Ros.env}.yml")
-      if fix
-        %x(git clone git@github.com:rails-on-services/ros.git) unless ros_repo
-        generate_env([Ros.env]) unless env_config
-      else
-        puts "ros repo: #{ros_repo ? 'ok' : 'missing'}"
-        puts "environment configuration: #{env_config ? 'ok' : 'missing'}"
-      end
-    end
-
     def from_rake(task, args)
       behavior, *stack = task.name.split(':')
       require 'ros/generators/stack'
