@@ -90,7 +90,7 @@ module Ros
                 compose_project_name: Application.compose_project_name,
                 context_dir: relative_path,
                 ros_context_dir: "#{relative_path}/ros",
-                image_repository: Stack.config.platform.image_registry,
+                image_repository: Stack.config.platform.config.image_registry,
                 image_tag: Stack.image_tag
               }
             end

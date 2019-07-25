@@ -21,8 +21,8 @@ module Ros
 
       desc 'new NAME', 'Create a new Ros project. "ros new my_project" creates a new project in "./my_project"'
       option :force, type: :boolean, default: false, aliases: '-f'
-      def new(*args)
-        name = args[0]
+      def new(name)
+        # name = args[0]
         FileUtils.rm_rf(name) if Dir.exists?(name) and options.force
         raise Error, set_color("ERROR: #{name} already exists. Use -f to force", :red) if Dir.exists?(name)
         generate_project(args)
@@ -48,20 +48,20 @@ module Ros
         name = args[0]
         # host = URI(args[1] || 'http://localhost:3000')
         # args.push(:nil, :nil, :nil)
-        require 'ros/generators/stack/project/project_generator.rb'
-        generator = Ros::Generators::ProjectGenerator.new(args)
+        require 'ros/generators/project/project_generator.rb'
+        generator = Ros::Generators::Project::ProjectGenerator.new(args)
         generator.destination_root = name
         generator.invoke_all
-        # require 'ros/generators/stack/env/env_generator.rb'
-        # %w(development test production).each do |env|
-        #   generator = Ros::Generators::EnvGenerator.new([env, nil, name, nil])
-        #   generator.destination_root = name
-        #   generator.invoke_all
-        # end
-        require 'ros/generators/be/application/platform/rails/rails_generator.rb'
-        generator = Ros::Generators::Be::RailsGenerator.new(args)
-        generator.destination_root = "#{name}/be"
-        generator.invoke_all
+        require 'ros/generators/stack/env/env_generator.rb'
+        %w(development test production).each do |env|
+          generator = Ros::Generators::EnvGenerator.new([env, nil, name, nil])
+          generator.destination_root = name
+          generator.invoke_all
+        end
+        # require 'ros/generators/be/application/platform/rails/rails_generator.rb'
+        # generator = Ros::Generators::Be::RailsGenerator.new(args)
+        # generator.destination_root = "#{name}/be"
+        # generator.invoke_all
       end
     end
   end

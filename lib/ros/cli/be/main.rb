@@ -19,7 +19,7 @@ module Ros
 
         def initialize(*args)
           super
-          self.options = args[2][:class_options]
+          self.options = args.empty? ? {} : args[2][:class_options]
         end
 
         desc 'infra', 'Run terraform to create/destroy infrastructure'
@@ -147,7 +147,7 @@ module Ros
           env_config = File.exists?("#{Ros.environments_dir}/#{Ros.env}.yml")
           if fix
             %x(git clone git@github.com:rails-on-services/ros.git) unless ros_repo
-            generate_env([Ros.env]) unless env_config
+            Generate.new.env(Ros.env) unless env_config
           else
             puts "ros repo: #{ros_repo ? 'ok' : 'missing'}"
             puts "environment configuration: #{env_config ? 'ok' : 'missing'}"

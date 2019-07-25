@@ -1,0 +1,46 @@
+# Values defined here override any values defined in deployment.yml
+---
+components:
+  be:
+    components:
+      infra:
+        config:
+          cluster:
+            type: cluster
+        components:
+          vpc:
+            config:
+              provider: aws
+          cluster:
+            config:
+              provider: aws
+              name: test
+      application:
+        config:
+          dns:
+            subdomain: whistler
+        components:
+          services:
+            ingress:
+            postgres:
+            redis:
+          platform:
+            config:
+              images:
+                rails:
+                  # NOTE: for production set rails_env to production
+                  build_args:
+                    rails_env: development
+            components:
+              cognito:
+                config:
+                  profiles: ['server']
+              comm:
+                config:
+                  profiles: ['server']
+              iam:
+                config:
+                  profiles: ['server']
+              storage:
+                config:
+                  profiles: ['server']

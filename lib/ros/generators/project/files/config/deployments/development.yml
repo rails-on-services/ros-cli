@@ -1,50 +1,59 @@
-# Configuration values defined here override any values defined in platform.yml
-# naming and segmenting nginx for compose multi deploys
-# writing out IAM credentials in a namespace aware way
-# if feature_set is an ENV var then IAM can use that
-# postman generating api docs for a feature set aware endpoint
-# WORKSPACE is api_endpoint
-# tmp/deployments/development/feature_set
-# tmp/deployments/development/mounted
-# tmp/deployments/development/no-mount
-# tmp/deployments/development/production-image
+# Values defined here override any values defined in deployment.yml
 ---
 components:
   be:
-    config:
-      feature_set: mounted
-      feature_from_branch: no
     environment:
       nginx_host_port: 3000
     components:
-      cluster:
+      infra:
         config:
-          # this creates a CNAME hello.ros.rails-on-services.org
-          # which is how to access the running instance
-          name: titan
-          type: instance
-          dns:
-            domain: rails-on-services.org
-            subdomain: titan
+          cluster:
+            type: instance
         components:
-          services:
-            components:
-              fluentd:
-                config:
-                  enabled: no
-              grafana:
-                config:
-                  enabled: no
-              prometheus:
-                config:
-                  enabled: no
+          vpc:
+            config:
+              provider: aws
+              name: demo
+              cidr: 10.100.0.0/16
+          dns:
+            config:
+              provider: aws
+              root_domain: rails-on-services.org
+              sub_domain: demo
+          cert:
+            config:
+              provider: aws
+              domain_name: demo.rails-on-services.org
+              route53_domain_name: rails-on-services.org
+              subject_alternative_names: ['*.demo.rails-on-services.org']
+          instance:
+            config:
+              provider: aws
+              name_prefix: demo
+              lb_dns_hostnames: ['api.demo.rails-on-services.org']
+              ec2_key_pair: demo_admin
+            # NOTE: The instance does not deploy services like the cluster does
+            # components:
+            #   services:
+            #     components:
+            #       fluentd:
+            #         config:
+            #           enabled: no
+            #       grafana:
+            #         config:
+            #           enabled: no
+            #       prometheus:
+            #         config:
+            #           enabled: no
       application:
         # Uncomment and set values to a hostname that is mapped to this machine
         # to enable public access to this installation
-        # config:
-        #   dns:
-        #     domain: rails-on-services.org
-        #     subdomain: demo
+        config:
+          feature_from_branch: no
+          feature_set: mounted
+          dns:
+            # domain: rails-on-services.org
+            subdomain: demo
         environment:
           bucket_endpoint_url: http://localstack:4572
           aws_access_key_id: this_key_from_development_yml
@@ -108,3 +117,6 @@ components:
                 config:
                   profiles: ['server']
                   # command: ["tail", "-F", "log/development.log"]
+              storage:
+                config:
+                  profiles: ['server']

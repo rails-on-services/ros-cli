@@ -1,0 +1,171 @@
+# Configuration values defined here will be overridden by any values defined in deployments/[ROS_ENV].yml
+---
+config:
+  name: <%= name %>
+  terraform:
+    state:
+      type: local
+      # can be remote tf state
+      # type: s3
+      # bucket: org-rails-on-services-terraform-state
+      # key: ros-develop-ec2
+      # dynamodb_table: org-rails-on-services-terraform-lock
+
+components:
+  fe:
+    components:
+      server:
+        config:
+          provider: aws # gcp azure
+      storage:
+      application:
+  data:
+    components:
+      warehouse:
+        config:
+          provider: gcp
+          type: big_query
+        components:
+      api:
+        config:
+          type: metabase
+        components:
+          card_1:
+          card_2:
+  be:
+    config:
+      cicd:
+        circleci:
+          push_on_new_tag: true
+      skaffold_version: skaffold/v1beta11
+    environment:
+      aws_access_key_id: from_deployment_yml
+      aws_secret_access_key: from_deployment_yml
+      aws_default_region: ap-southeast-1
+    components:
+      infra:
+        config:
+          cluster:
+            type: kubernetes
+        components:
+          kubernetes:
+            config:
+              provider: aws
+              name: enceladus
+              dns:
+                domain: perxtech.io
+                # domain: rails-on-services.org
+                # subdomain: enceladus
+              endpoints:
+                grafana: grafana
+            components:
+              infra:
+                components:
+                  istio:
+              services:
+                components:
+                  # NOTE: should also have separate credentials from logging
+                  fluentd:
+                    environment:
+                      # This will be passed to terraform which invokes helm to deploy fluentd
+                      destinations: ['s3'] # google_logging cloudwatch
+                  # Grafana itself is a cluster services component, however the application's platform component
+                  # may install additional platform specific dashboards
+                  grafana:
+                    environment:
+                      key: value
+                  prometheus:
+                    environment:
+                      key: value
+      application:
+        config:
+          # Multiple deployments can be configured by setting feature_from_branch to 'yes'
+          # When 'yes' deployments are made into the namespace taken from the branch name
+          feature_from_branch: yes
+          # When feature_from_branch is 'yes' the deployment's endpoint is mapped to api-branch.subdomain.domain
+          # A deployment from the branch with the same name as feature_set will mapped to api.subdomain.domain
+          feature_set: master
+          dns:
+            # domain: rails-on-services.org
+            subdomain: k8s-demo
+          endpoints:
+            api:
+              scheme: https
+              host: api
+            sftp:
+              host: sftp
+        components:
+          infra:
+            components:
+              storage:
+              grafana:
+                config:
+                  dashboard_1: 'location of dashboard template'
+          services:
+            # environment:
+            components:
+              fluentd: # request logging and cloud events
+              # kafka:
+              #   config:
+              #     destination: big_query
+              sftp:
+                environment:
+                  bucket_prefix: storage
+          platform:
+            environment:
+              rails_database_host: postgres
+              # NOTE: TF can be configured to create a CNAME for RDS
+              # this CNAME would come from the infra level
+              # The deployment code could use that to set this value
+              # Same with redis url
+              # This is for production; for staging it is the values here
+              redis_url: redis://redis-master:6379
+              platform:
+                infra:
+                  provider: aws
+                metrics:
+                  enabled: false
+                  process_stats_enabled: false
+                partition_name: ros
+                request_logging:
+                  enabled: yes
+                  config:
+                    host: fluentd
+                event_logging:
+                  enabled: no
+            components:
+              account:
+                config:
+                  enabled: no
+                  mount: yes
+                  profiles: ['server', 'worker']
+                  ros: yes
+              billing:
+                config:
+                  enabled: no
+                  mount: yes
+                  profiles: ['server', 'worker']
+                  ros: yes
+              cognito:
+                config:
+                  enabled: yes
+                  mount: yes
+                  profiles: ['server', 'worker']
+                  ros: yes
+              comm:
+                config:
+                  enabled: yes
+                  mount: yes
+                  profiles: ['server', 'worker']
+                  ros: yes
+              iam:
+                config:
+                  mount: yes
+                  profiles: ['server', 'worker']
+                  ros: yes
+              storage:
+                config:
+                  enabled: yes
+                  mount: yes
+                  profiles: ['server', 'worker', 'sqs_worker']
+                  ros: yes
