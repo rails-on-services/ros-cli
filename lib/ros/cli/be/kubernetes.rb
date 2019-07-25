@@ -4,10 +4,14 @@ module Ros
   module Cli
     module Be
       class Kubernetes
-        include Ros::Be::Common::Cli
+        include Ros::Cli::Be::Common
 
         def init
           Ros::Generators::Be::Cluster.init(self)
+        end
+
+        def initialize(options = {})
+          @options = options
         end
 
         def up(services)
@@ -149,6 +153,20 @@ module Ros
 
         def platform_root; "#{Ros::Generators::Be::Application.deploy_path}/platform" end
         def services_root; "#{Ros::Generators::Be::Application.deploy_path}/services" end
+
+        def config_files
+          # TODO: The skaffold dirs
+          Dir[application.compose_file]
+        end
+
+        def generate_config
+          silence_output do
+            Ros::Generators::Be::Application::Services::ServicesGenerator.new([], {}, {behavior: :revoke}).invoke_all
+            Ros::Generators::Be::Application::Services::ServicesGenerator.new.invoke_all
+            Ros::Generators::Be::Application::Platform::PlatformGenerator.new([], {}, {behavior: :revoke}).invoke_all
+            Ros::Generators::Be::Application::Platform::PlatformGenerator.new.invoke_all
+          end
+        end
       end
     end
   end

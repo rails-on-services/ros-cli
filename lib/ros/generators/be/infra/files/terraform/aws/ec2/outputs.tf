@@ -9,3 +9,7 @@ output "lb" {
 output "eip" {
   value = aws_eip.this
 }
+
+output "lb_route53_record" {
+  value = aws_route53_record.lb
+}

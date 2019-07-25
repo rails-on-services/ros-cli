@@ -27,6 +27,6 @@ else
     Ros::Cli.start
   end
 =end
-  require 'ros/cli/be'
-  Ros::Be::Cli.start
+  require 'ros/cli/main'
+  Ros::Cli::Main.start
 end

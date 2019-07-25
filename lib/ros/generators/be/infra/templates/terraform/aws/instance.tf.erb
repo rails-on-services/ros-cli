@@ -55,3 +55,7 @@ output "ec2-eip" {
 output "ec2-lb" {
   value = module.ec2.lb
 }
+
+output "lb_route53_record" {
+  value = module.ec2.lb_route53_record
+}

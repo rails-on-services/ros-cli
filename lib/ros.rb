@@ -13,7 +13,7 @@ end
 module Ros
 
   def self.gem_root
-    File.expand_path '../..', __FILE__
+    Pathname.new(File.expand_path('../..', __FILE__))
   end
 
   # Copied from ActiveSupport::StringInquirer
@@ -28,38 +28,6 @@ module Ros
   end
 
   class << self
-    def generate_project(args)
-      name = args[0]
-      # host = URI(args[1] || 'http://localhost:3000')
-      # args.push(:nil, :nil, :nil)
-      require 'ros/generators/stack/project/project_generator.rb'
-      generator = Ros::Generators::ProjectGenerator.new(args)
-      generator.destination_root = name
-      generator.invoke_all
-      # require 'ros/generators/stack/env/env_generator.rb'
-      # %w(development test production).each do |env|
-      #   generator = Ros::Generators::EnvGenerator.new([env, nil, name, nil])
-      #   generator.destination_root = name
-      #   generator.invoke_all
-      # end
-      require 'ros/generators/be/application/platform/rails/rails_generator.rb'
-      generator = Ros::Generators::Be::RailsGenerator.new(args)
-      generator.destination_root = "#{name}/be"
-      generator.invoke_all
-    end
-
-    def generate_env(args, options = {}, behavior = nil)
-      require "ros/generators/stack/env/env_generator.rb"
-      args.push('http://localhost:3000') unless args[1]
-      args.push(File.basename(Ros.root)) unless args[2]
-      args.push('')
-      generator = Ros::Generators::EnvGenerator.new(args)
-      generator.options = options
-      generator.behavior = behavior if behavior
-      generator.destination_root = Ros.root
-      generator.invoke_all
-    end
-
     def preflight_check(fix: false)
       options = {}
       ros_repo = Dir.exists?(Ros.ros_root)
@@ -71,17 +39,6 @@ module Ros
         puts "ros repo: #{ros_repo ? 'ok' : 'missing'}"
         puts "environment configuration: #{env_config ? 'ok' : 'missing'}"
       end
-    end
-
-    def generate_service(args, options = {}, behavior = nil)
-      require 'ros/generators/be/service/service_generator'
-      # require_relative "ros/generators/service/service_generator.rb"
-      args.push(File.basename(Ros.root)) unless args[1]
-      generator = Ros::Generators::ServiceGenerator.new(args, options)
-      # generator.options = options
-      generator.behavior = behavior if behavior
-      generator.destination_root = Ros.root
-      generator.invoke_all
     end
 
     def from_rake(task, args)

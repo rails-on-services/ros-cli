@@ -4,9 +4,13 @@ module Ros
   module Cli
     module Be
       class Instance
-        include Ros::Be::Common::Cli
+        include Ros::Cli::Be::Common
 
         def init; STDOUT.puts 'init is not used/necessary for compose. only kubernetes' end
+
+        def initialize(options = {})
+          @options = options
+        end
 
         def build(services)
           generate_config if stale_config
@@ -139,20 +143,18 @@ module Ros
 
         def application; Ros::Generators::Be::Application end
 
-        # def provision_with_ansible
-        #   puts "Deploy '#{config.name_to_s}' of type #{deploy_config.type} in #{Ros.env} environment"
-        #   puts "Work dir: #{Ros.ansible_root}"
-        #   Dir.chdir(Ros.ansible_root) do
-        #     cmd = "ansible-playbook ./#{deploy_config.type}.yml"
-        #     puts cmd
-        #     # system(cmd)
-        #     puts 'TODO: ansible code to invoke compose to spin up images'
-        #   end
-        # end
-        # # TODO: this probably needs a tf var that is set to the name of the file for TF to write code into
-        # def after_provision
-        #   puts "TODO: After terraform apply, write instance IP to devops/ansible/inventory/#{infra.type}"
-        # end
+        def config_files
+          Dir[application.compose_file]
+        end
+
+        def generate_config
+          silence_output do
+            Ros::Generators::Be::Application::Services::ServicesGenerator.new([], {}, {behavior: :revoke}).invoke_all
+            Ros::Generators::Be::Application::Services::ServicesGenerator.new.invoke_all
+            Ros::Generators::Be::Application::Platform::PlatformGenerator.new([], {}, {behavior: :revoke}).invoke_all
+            Ros::Generators::Be::Application::Platform::PlatformGenerator.new.invoke_all
+          end
+        end
       end
     end
   end
