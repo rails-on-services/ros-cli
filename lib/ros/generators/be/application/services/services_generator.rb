@@ -103,6 +103,13 @@ module Ros
               template("services/nginx/nginx.conf.erb", "#{destination_root}/#{deploy_path}/nginx/nginx.conf")
             end
 
+            def generate_support_files
+              if Infra.cluster_type.eql?('cluster')
+                directory('../files/helm', "#{deploy_path}/helm")
+                directory('../files/k8s', "#{deploy_path}/k8s")
+              end
+            end
+
             # def write_fluentd
             #   return unless components.keys.include?(:fluentd)
             #   content_dir = "#{core_root}/fluentd"
