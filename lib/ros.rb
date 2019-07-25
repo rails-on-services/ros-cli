@@ -42,14 +42,14 @@ module Ros
       #   generator.destination_root = name
       #   generator.invoke_all
       # end
-      require 'ros/generators/be/rails/rails_generator.rb'
+      require 'ros/generators/be/application/platform/rails/rails_generator.rb'
       generator = Ros::Generators::Be::RailsGenerator.new(args)
       generator.destination_root = "#{name}/be"
       generator.invoke_all
     end
 
     def generate_env(args, options = {}, behavior = nil)
-      require "ros/generators/be/env/env_generator.rb"
+      require "ros/generators/stack/env/env_generator.rb"
       args.push('http://localhost:3000') unless args[1]
       args.push(File.basename(Ros.root)) unless args[2]
       args.push('')
