@@ -32,10 +32,11 @@ module Ros
       # end
 
       private
-      def app; Settings.components.be.components.application end
-      def partition_name; app.components.platform.environment.platform.partition_name end
-      def dns; app.config.dns end
-      def uri; URI("#{app.config.endpoints.api.scheme}://#{app.config.endpoints.api.host}.#{dns.subdomain}.#{dns.domain}") end
+      def application; Settings.components.be.components.application end
+      def platform; application.components.platform end
+      def partition_name; platform.environment.platform.partition_name end
+      def infra; Ros::Generators::Be::Infra end
+      def uri; infra.uri end
     end
   end
 end

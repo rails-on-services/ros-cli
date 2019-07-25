@@ -14,6 +14,8 @@ module Ros
           def deploy_path; "#{Stack.deploy_path}/be/infra" end
           def cluster_type; config.cluster.type end
           # def skaffold_version; config.skaffold_version end
+          def dns; settings.components.dns.config end
+          def uri; URI("#{dns.endpoints.api.scheme}://#{dns.endpoints.api.host}.#{dns.sub_domain}.#{dns.root_domain}") end
         end
 
         class InfraGenerator < Thor::Group

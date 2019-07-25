@@ -85,7 +85,10 @@ module Ros
 
             # continue compose only methods
             def compose_environment
+              user_info = Etc.getpwnam(Etc.getlogin)
               {
+                puid: user_info.uid,
+                pgid: user_info.gid,
                 compose_file: Dir["#{Application.deploy_path}/**/*.yml"].map{ |p| p.gsub("#{Ros.root}/", '') }.sort.join(':'),
                 compose_project_name: Application.compose_project_name,
                 context_dir: relative_path,

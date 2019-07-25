@@ -55,29 +55,30 @@ module Ros
           end
 
           def api_uri
-            URI("#{config.endpoints.api.scheme}://#{api_hostname}").to_s
+            URI("#{infra.dns.endpoints.api.scheme}://#{api_hostname}").to_s
           end
 
           def api_hostname
-            @api_hostname ||= "#{config.endpoints.api.host}#{base_hostname}"
+            @api_hostname ||= "#{infra.dns.endpoints.api.host}#{base_hostname}"
           end
 
           def sftp_hostname
-            @sftp_hostname ||= "#{config.endpoints.sftp.host}#{base_hostname}"
+            @sftp_hostname ||= "#{infra.dns.endpoints.sftp.host}#{base_hostname}"
           end
 
           def base_hostname
-            @base_hostname ||= (config.dns ? "#{override_feature_set ? '-' + current_feature_set : ''}.#{dns_domain}" : 'localhost')
+            @base_hostname ||= (infra.dns ? "#{override_feature_set ? '-' + current_feature_set : ''}.#{dns_domain}" : 'localhost')
           end
 
           def dns_domain
-            @dns_domain ||= "#{config.dns.subdomain}.#{cluster.config.dns.domain}"
+            @dns_domain ||= "#{infra.dns.sub_domain}.#{infra.dns.root_domain}"
           end
 
           def bucket_name
             @bucket_name ||= "#{current_feature_set}-#{Stack.name}-#{cluster.name}"
           end
 
+          def infra; Ros::Generators::Be::Infra end
           def cluster; Ros::Generators::Be::Infra::Cluster end
         end
 

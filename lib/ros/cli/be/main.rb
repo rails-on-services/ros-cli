@@ -17,11 +17,6 @@ module Ros
         class_option :v, type: :boolean, default: false, desc: 'verbose output'
         class_option :n, type: :boolean, default: false, desc: "run but don't execute action"
 
-        def initialize(*args)
-          super
-          self.options = args.empty? ? {} : args[2][:class_options]
-        end
-
         desc 'infra', 'Run terraform to create/destroy infrastructure'
         subcommand 'infra', Ros::Cli::Be::Infra
 
@@ -82,6 +77,11 @@ module Ros
         desc 'show', 'show service config'
         def show(service)
           context(options).show(service)
+        end
+
+        desc 'credentials', 'show iam credentials'
+        def credentials
+          context(options).credentials
         end
 
         desc 'console', 'Start the Ros console (short-cut alias: "c")'

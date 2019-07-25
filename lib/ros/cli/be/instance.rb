@@ -45,6 +45,12 @@ module Ros
           compose(:ps)
         end
 
+        def credentials
+          generate_config if stale_config
+          exec('iam', 'rails app:ros:iam:credentials:show')
+          show_endpoint
+        end
+
         def console(service)
           generate_config if stale_config
           exec(service, 'rails console')
