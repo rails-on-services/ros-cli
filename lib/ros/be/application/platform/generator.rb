@@ -87,7 +87,7 @@ module Ros
 
           # continue compose only methods
           def compose_environment
-            user_info = Etc.getpwnam(Etc.getlogin)
+            user_info = Etc.getlogin ? Etc.getpwnam(Etc.getlogin) : OpenStruct.new(uid: 1000, gid: 1000)
             {
               puid: user_info.uid,
               pgid: user_info.gid,

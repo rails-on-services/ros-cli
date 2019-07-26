@@ -17,6 +17,20 @@ module Ros
           compose("build #{services.join(' ')}")
         end
 
+        def test(services)
+          services = enabled_services if services.empty?
+          generate_config if stale_config
+          services.each do |service|
+            exec(service, 'spec/dummy/bin/spring rspec')
+          end
+        end
+
+        def push(services)
+          services = enabled_services if services.empty?
+          generate_config if stale_config
+          compose("push #{services.join(' ')}")
+        end
+
         def up(services)
           services = enabled_services if services.empty?
           generate_config if stale_config

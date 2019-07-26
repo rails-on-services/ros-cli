@@ -45,6 +45,16 @@ module Ros
           context(options).build(services)
         end
 
+        desc 'test IMAGE', 'test one or all images'
+        def test(*services)
+          context(options).test(services)
+        end
+
+        desc 'push IMAGE', 'push one or all images'
+        def push(*services)
+          context(options).push(services)
+        end
+
         desc 'up SERVICE', 'bring up service(s)'
         option :build, type: :boolean, aliases: '-b', desc: 'Build image before run'
         option :console, type: :boolean, aliases: '-c', desc: 'Connect to service console after starting'

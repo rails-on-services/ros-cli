@@ -132,9 +132,9 @@ module Ros
 
         def kube_env; @kube_env ||= { 'KUBECONFIG' => kubeconfig, 'TILLER_NAMESPACE' => namespace } end
 
-        def kubeconfig; @kubeconfig ||= File.expand_path(Settings.infra.config.kubeconfig || '~/.kube/config') end
+        def kubeconfig; @kubeconfig ||= '~/.kube/config' end
 
-        def namespace; @namespace ||= "#{Ros::Generators::Stack.current_feature_set}-#{Settings.config.name}" end
+        def namespace; @namespace ||= "#{Stack.current_feature_set}-#{Settings.config.name}" end
 
         def switch!; end
 
@@ -151,20 +151,19 @@ module Ros
           File.file?(kubeconfig)
         end
 
-        def platform_root; "#{Ros::Generators::Be::Application.deploy_path}/platform" end
-        def services_root; "#{Ros::Generators::Be::Application.deploy_path}/services" end
+        def platform_root; "#{Ros::Be::Application::Model.deploy_path}/platform" end
+        def services_root; "#{Ros::Be::Application::Model.deploy_path}/services" end
 
         def config_files
-          # TODO: The skaffold dirs
-          Dir[application.compose_file]
+          Dir["#{Ros::Be::Application::Model.deploy_path}/**"]
         end
 
         def generate_config
           silence_output do
-            Ros::Generators::Be::Application::Services::ServicesGenerator.new([], {}, {behavior: :revoke}).invoke_all
-            Ros::Generators::Be::Application::Services::ServicesGenerator.new.invoke_all
-            Ros::Generators::Be::Application::Platform::PlatformGenerator.new([], {}, {behavior: :revoke}).invoke_all
-            Ros::Generators::Be::Application::Platform::PlatformGenerator.new.invoke_all
+            Ros::Be::Application::Services::Generator.new([], {}, {behavior: :revoke}).invoke_all
+            Ros::Be::Application::Services::Generator.new.invoke_all
+            Ros::Be::Application::Platform::Generator.new([], {}, {behavior: :revoke}).invoke_all
+            Ros::Be::Application::Platform::Generator.new.invoke_all
           end
         end
       end
