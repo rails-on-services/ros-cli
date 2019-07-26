@@ -1,20 +1,20 @@
 # frozen_string_literal: true
-require 'ros/cli/be/common'
+require 'ros/be/application/cli/common'
 require 'ros/be/infra/generator'
 
 module Ros
   module Be
     module Infra
       class Cli < Thor
-        include Ros::Cli::Be::Common
+        include Ros::Be::Application::Common
         check_unknown_options!
         class_option :v, type: :boolean, default: false, desc: 'verbose output'
         class_option :n, type: :boolean, default: false, desc: "run but don't execute action"
 
-        def initialize(*args)
-          super
-          self.options = args[2][:class_options]
-        end
+        # def initialize(*args)
+        #   super
+        #   self.options = args[2][:class_options]
+        # end
 
         desc 'show', 'Show infrastructure items'
         def show(type = 'json')
@@ -27,8 +27,8 @@ module Ros
         def plan
           generate_config if stale_config
           Dir.chdir(infra.deploy_path) do
-            # system_cmd({}, 'terraform init')
-            # system_cmd({}, 'terraform plan')
+            system_cmd({}, 'terraform init')
+            system_cmd({}, 'terraform plan')
           end
         end
 
@@ -58,8 +58,8 @@ module Ros
 
         def generate_config
           silence_output do
-            Ros::Generators::Be::Infra::InfraGenerator.new([], {}, {behavior: :revoke}).invoke_all
-            Ros::Generators::Be::Infra::InfraGenerator.new.invoke_all
+            Ros::Be::Infra::Generator.new([], {}, {behavior: :revoke}).invoke_all
+            Ros::Be::Infra::Generator.new.invoke_all
           end
         end
 
@@ -73,8 +73,8 @@ module Ros
             end
           end
         end
-        def infra; Ros::Generators::Be::Infra end
-        def application; Ros::Generators::Be::Application end
+        def infra; Ros::Be::Infra::Model end
+        def application; Ros::Be::Application::Model end
       end
     end
   end

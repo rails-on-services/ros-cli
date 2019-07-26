@@ -14,9 +14,15 @@ else
   require 'ros'
   arg = ARGV[0]
   if %w(be fe data).include?(arg)
-    require "ros/#{arg}/application/cli"
     ARGV.shift
-    Ros.const_get("#{arg.capitalize}::Application::Cli").start
+    if arg.eql?('be') and ARGV[0].eql?('infra')
+      ARGV.shift
+      require "ros/#{arg}/infra/cli"
+      Ros.const_get("#{arg.capitalize}::Infra::Cli").start
+    else
+      require "ros/#{arg}/application/cli"
+      Ros.const_get("#{arg.capitalize}::Application::Cli").start
+    end
   else
     require 'ros/cli'
     Ros::Cli.start
