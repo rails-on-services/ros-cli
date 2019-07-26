@@ -1,34 +1,31 @@
 # frozen_string_literal: true
 
-require 'ros/cli/be/common'
-require 'ros/cli/be/infra'
-require 'ros/cli/be/generate'
-require 'ros/cli/be/rails'
-
-# TODO: move new, generate and destroy to ros/generators
-# NOTE: it should be possible to invoke any operation from any of rake task, cli or console
+require 'ros/be/application/cli/common'
+require 'ros/be/application/cli/generate'
+require 'ros/be/application/cli/rails'
+require 'ros/be/application/generator'
 
 module Ros
-  module Cli
-    module Be
-      class Main < Thor
+  module Be
+    module Application
+      class Cli < Thor
         def self.exit_on_failure?; true end
         check_unknown_options!
         class_option :v, type: :boolean, default: false, desc: 'verbose output'
         class_option :n, type: :boolean, default: false, desc: "run but don't execute action"
 
-        desc 'infra', 'Run terraform to create/destroy infrastructure'
-        subcommand 'infra', Ros::Cli::Be::Infra
+        # desc 'infra', 'Run terraform to create/destroy infrastructure'
+        # subcommand 'infra', Ros::Cli::Be::Infra
 
         desc 'generate TYPE', 'Generate a new asset of type TYPE (short-cut alias: "g")'
         map %w(g) => :generate
         option :force, type: :boolean, default: false, aliases: '-f'
-        subcommand 'generate', Ros::Cli::Be::Generate
+        subcommand 'generate', Ros::Be::Application::GenerateCli
 
         # TODO: refactor setting action to :destroy
         desc 'destroy TYPE', 'Destroy an asset (environment or service)'
         map %w(d) => :destroy
-        subcommand 'destroy', Generate
+        subcommand 'destroy', Ros::Be::Application::GenerateCli
 
         desc 'preflight', 'Prepare a project'
         def preflight
@@ -157,11 +154,11 @@ module Ros
         def context(options = {})
           return @context if @context
           raise Error, set_color("ERROR: Not a Ros project", :red) if Ros.root.nil?
-          require "ros/cli/be/#{infra_x.cluster_type}"
-          @context = Ros::Cli::Be.const_get(infra_x.cluster_type.capitalize).new(options)
+          require "ros/be/application/cli/#{infra_x.cluster_type}"
+          @context = Ros::Be::Application.const_get(infra_x.cluster_type.capitalize).new(options)
           @context
         end
-        def infra_x; Ros::Generators::Be::Infra end
+        def infra_x; Ros::Be::Infra::Model end
       end
     end
   end

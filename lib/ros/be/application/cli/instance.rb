@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 module Ros
-  module Cli
-    module Be
+  module Be
+    module Application
       class Instance
-        include Ros::Cli::Be::Common
+        include Ros::Be::Application::Common
 
         def init; STDOUT.puts 'init is not used/necessary for compose. only kubernetes' end
 
@@ -99,7 +99,7 @@ module Ros
           running_services = services(application_component: 'platform')
           rs = $stdout
           $stdout = StringIO.new
-          Ros::Generators::Be::Application::Services::ServicesGenerator.new.invoke(:write_nginx, [running_services])
+          Ros::Be::Application::Services::Generator.new.invoke(:write_nginx, [running_services])
           $stdout = rs
           compose('stop nginx')
           compose('up -d nginx')
@@ -147,7 +147,7 @@ module Ros
 
         def namespace; @namespace ||= (ENV['ROS_PROFILE'] ? "#{ENV['ROS_PROFILE']}-" : '') + Ros::Generators::Stack.compose_project_name end
 
-        def application; Ros::Generators::Be::Application end
+        def application; Ros::Be::Application::Model end
 
         def config_files
           Dir[application.compose_file]
@@ -155,10 +155,10 @@ module Ros
 
         def generate_config
           silence_output do
-            Ros::Generators::Be::Application::Services::ServicesGenerator.new([], {}, {behavior: :revoke}).invoke_all
-            Ros::Generators::Be::Application::Services::ServicesGenerator.new.invoke_all
-            Ros::Generators::Be::Application::Platform::PlatformGenerator.new([], {}, {behavior: :revoke}).invoke_all
-            Ros::Generators::Be::Application::Platform::PlatformGenerator.new.invoke_all
+            Ros::Be::Application::Services::Generator.new([], {}, {behavior: :revoke}).invoke_all
+            Ros::Be::Application::Services::Generator.new.invoke_all
+            Ros::Be::Application::Platform::Generator.new([], {}, {behavior: :revoke}).invoke_all
+            Ros::Be::Application::Platform::Generator.new.invoke_all
           end
         end
       end

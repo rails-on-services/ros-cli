@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 require 'ros/cli/be/common'
-require 'ros/generators/be/infra/infra_generator'
+require 'ros/be/infra/generator'
 
 module Ros
-  module Cli
-    module Be
-      class Infra < Thor
+  module Be
+    module Infra
+      class Cli < Thor
         include Ros::Cli::Be::Common
         check_unknown_options!
         class_option :v, type: :boolean, default: false, desc: 'verbose output'

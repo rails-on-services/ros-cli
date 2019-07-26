@@ -14,11 +14,11 @@ else
   require 'ros'
   arg = ARGV[0]
   if %w(be fe data).include?(arg)
-    require "ros/cli/#{arg}/main"
+    require "ros/#{arg}/application/cli"
     ARGV.shift
-    Ros::Cli.const_get("#{arg.capitalize}::Main").start
+    Ros.const_get("#{arg.capitalize}::Application::Cli").start
   else
-    require 'ros/cli/main'
-    Ros::Cli::Main.start
+    require 'ros/cli'
+    Ros::Cli.start
   end
 end

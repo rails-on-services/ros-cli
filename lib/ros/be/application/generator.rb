@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-require 'ros/generators/be/application/platform/platform_generator'
-require 'ros/generators/be/application/services/services_generator'
+require 'ros/be/application/platform/generator'
+require 'ros/be/application/services/generator'
 
 module Ros
-  module Generators
-    module Be
-      module Application
+  module Be
+    module Application
+      module Model
         class << self
           def settings; Settings.components.be.components.application end
           def config; settings.config || Config::Options.new end
@@ -36,7 +36,7 @@ module Ros
             {
               infra: {
                 # provider: Settings.components.be.config.provider,
-                provider: cluster.config.provider,
+                provider: cluster::Model.config.provider,
               },
               platform: {
                 feature_set: current_feature_set,
@@ -78,23 +78,23 @@ module Ros
             @bucket_name ||= "#{current_feature_set}-#{Stack.name}-#{cluster.name}"
           end
 
-          def infra; Ros::Generators::Be::Infra end
-          def cluster; Ros::Generators::Be::Infra::Cluster end
+          def infra; Ros::Be::Infra::Model end
+          def cluster; Ros::Be::Infra::Cluster end
         end
+      end
 
-        class ApplicationGenerator < Thor::Group
-          include Thor::Actions
-          extend CommonGenerator
+      class Generator < Thor::Group
+        include Thor::Actions
+        extend Ros::CommonGenerator
 
-          def self.a_path; File.dirname(__FILE__) end
+        def self.a_path; File.dirname(__FILE__) end
 
-          def execute
-            [Platform::PlatformGenerator, Services::ServicesGenerator].each do |klass|
-              generator = klass.new
-              generator.behavior = behavior
-              generator.destination_root = destination_root
-              generator.invoke_all
-            end
+        def execute
+          [Ros::Be::Application::Platform::Generator, Ros::Be::Application::Services::Generator].each do |klass|
+            generator = klass.new
+            generator.behavior = behavior
+            generator.destination_root = destination_root
+            generator.invoke_all
           end
         end
       end

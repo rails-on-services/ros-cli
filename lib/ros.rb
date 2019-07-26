@@ -30,9 +30,10 @@ module Ros
   class << self
     def from_rake(task, args)
       behavior, *stack = task.name.split(':')
-      require 'ros/generators/stack'
-      g_string = "#{stack.map{ |s| s.capitalize }.join('::')}::#{stack.last.capitalize}Generator"
-      generator = Ros::Generators.const_get(g_string).new
+      require 'ros/stack'
+      # g_string = "#{stack.map{ |s| s.capitalize }.join('::')}::#{stack.last.capitalize}Generator"
+      g_string = "#{stack.map{ |s| s.capitalize }.join('::')}::Generator"
+      generator = Ros.const_get(g_string).new
       generator.behavior = behavior.eql?('destroy') ? :revoke : :invoke
       generator.destination_root = Ros.root
       generator.invoke_all

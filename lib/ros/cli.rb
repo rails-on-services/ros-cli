@@ -1,15 +1,14 @@
 # frozen_string_literal: true
 # https://nandovieira.com/creating-generators-and-executables-with-thor
 require 'thor'
-require 'ros/cli/be/main'
-require 'ros/cli/lpass'
+require 'ros/be/application/cli'
+# require 'ros/cli/lpass'
 
 # TODO: move new, generate and destroy to ros/generators
 # NOTE: it should be possible to invoke any operation from any of rake task, cli or console
 
 module Ros
-  module Cli
-    class Main < Thor
+    class Cli < Thor
       def self.exit_on_failure?; true end
 
       check_unknown_options!
@@ -36,11 +35,11 @@ module Ros
       end
 
       desc 'be COMMAND', 'Invoke backend commands'
-      subcommand 'be', Ros::Cli::Be::Main
+      subcommand 'be', Ros::Be::Application::Cli
 
-      desc 'lpass COMMAND', "Transfer the contents of #{Ros.env} to/from a Lastpass account"
-      option :username, aliases: '-u'
-      subcommand 'lpass', Ros::Cli::Lpass
+      # desc 'lpass COMMAND', "Transfer the contents of #{Ros.env} to/from a Lastpass account"
+      # option :username, aliases: '-u'
+      # subcommand 'lpass', Ros::Cli::Lpass
 
       private
 
@@ -63,6 +62,5 @@ module Ros
         # generator.destination_root = "#{name}/be"
         # generator.invoke_all
       end
-    end
   end
 end

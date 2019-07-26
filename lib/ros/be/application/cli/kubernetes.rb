@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
 module Ros
-  module Cli
-    module Be
+  module Be
+    module Application
       class Kubernetes
-        include Ros::Cli::Be::Common
+        include Ros::Be::Application::Common
 
         def init
-          Ros::Generators::Be::Cluster.init(self)
+          Ros::Be::Infra::Cluster::Model.init(self)
         end
 
         def initialize(options = {})

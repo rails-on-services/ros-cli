@@ -1,11 +1,11 @@
 # frozen_string_literal: true
-require 'ros/cli/be/common'
+require 'ros/be/application/cli/common'
 
 module Ros
-  module Cli
-    module Be
-      class Generate < Thor
-        include Ros::Cli::Be::Common
+  module Be
+    module Application
+      class GenerateCli < Thor
+        include Ros::Be::Application::Common
         check_unknown_options!
         class_option :v, type: :boolean, default: false, desc: 'verbose output'
         class_option :n, type: :boolean, default: false, desc: "run but don't execute action"
