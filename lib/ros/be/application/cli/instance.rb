@@ -21,6 +21,7 @@ module Ros
           services = enabled_services if services.empty?
           generate_config if stale_config
           services.each do |service|
+            exec(service, 'rails app:db:test:prepare')
             exec(service, 'spec/dummy/bin/spring rspec')
           end
         end
