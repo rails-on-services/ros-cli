@@ -55,7 +55,7 @@ module Ros
 
         desc 'test IMAGE', 'test one or all images'
         def test(*services)
-          context(options).test(services)
+          exit context(options).test(services)
         end
 
         desc 'push IMAGE', 'push one or all images'
@@ -132,6 +132,7 @@ module Ros
 
         desc 'restart SERVICE', 'Start and stop one or more services'
         option :console, type: :boolean, aliases: '-c', desc: 'Connect to service console after starting'
+        option :seed, type: :boolean, aliases: '--seed', desc: 'Seed the database before starting the service'
         option :shell, type: :boolean, aliases: '--sh', desc: 'Connect to service shell after starting'
         def restart(*services)
           context(options).restart(services)

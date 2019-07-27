@@ -20,8 +20,8 @@ services:
     <% elsif profile.eql?('sqs_worker') %>
     command: ["bundle", "exec", "shoryuken", "-r", "./app/workers", "-C", "config/shoryuken.yml"]
   <% end %>
-    env_file:
-      - ../platform/platform.env<% if @service.has_envs %><%= "\n      - ../platform/#{@service.name}.env" %><% end %>
+    env_file:<% @service.env_files.each do |env_file| %>
+      - <%= env_file %><% end %>
     depends_on:
       - wait
     ports:

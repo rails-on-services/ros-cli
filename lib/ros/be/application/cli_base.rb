@@ -30,13 +30,13 @@ module Ros
         def enabled_services
           application.components.platform.components.to_hash.select do |k, v|
             v.nil? || v.dig(:config, :enabled).nil? || v.dig(:config, :enabled)
-          end.keys.sort
+          end.keys
         end
 
         def enabled_services_f
           application.components.services.components.to_hash.select do |k, v|
             v.nil? || v.dig(:config, :enabled).nil? || v.dig(:config, :enabled)
-          end.keys.sort
+          end.keys
         end
       end
     end

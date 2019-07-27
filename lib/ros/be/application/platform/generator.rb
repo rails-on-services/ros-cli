@@ -24,6 +24,13 @@ module Ros
           def use_ros_context_dir; (not Ros.is_ros? and config.ros) end
           def context_dir; use_ros_context_dir ? 'ROS_CONTEXT_DIR' : 'CONTEXT_DIR' end
           def has_envs; !environment.nil? end
+          def env_files
+            ary = []
+            ary.append('../platform/platform.env')
+            ary.append('../platform/credentials.env') if File.exists?("#{deploy_path}/credentials.env")
+            ary.append("../platform/#{name}.env") if has_envs
+            ary
+          end
           # NOTE: Update image_type
           def image; Stack.config.platform.config.images.rails end
           def mount_ros; (not Ros.is_ros? and not config.ros) end

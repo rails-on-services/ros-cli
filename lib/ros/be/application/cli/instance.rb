@@ -21,9 +21,13 @@ module Ros
           services = enabled_services if services.empty?
           generate_config if stale_config
           services.each do |service|
-            exec(service, 'rails app:db:test:prepare')
-            exec(service, 'spec/dummy/bin/spring rspec')
+            is_ros = svc_config(service)&.config&.ros
+            prefix = is_ros ? 'app:' : ''
+            exec_dir = is_ros ? 'spec/dummy/' : ''
+            next if exec(service, "rails #{prefix}db:test:prepare") && exec(service, "#{exec_dir}bin/spring rspec")
+            return false
           end
+          true
         end
 
         def push(services)
@@ -43,7 +47,7 @@ module Ros
           services.each do |service|
             # if the service name is without a profile extension, e.g. 'iam' then load config and check db migration
             # If the database check is ok then bring up the service and trigger a reload of nginx
-            if ref = Settings.components.be.components.application.components.platform.components.dig(service)
+            if ref = svc_config(service)
               config = ref.dig(:config) || Config::Options.new
               next unless database_check(service, config)
             end
@@ -55,6 +59,8 @@ module Ros
           console(services.last) if options.console
           exec(services.last, 'bash') if options.shell
         end
+
+        def svc_config(service); Settings.components.be.components.application.components.platform.components.dig(service) end
 
         def ps
           generate_config if stale_config
@@ -89,11 +95,11 @@ module Ros
         def status
           STDOUT.puts "\nPlatform Services             Status\n"
           running_services = services
-          enabled_services.each do |es|
+          enabled_services.sort.each do |es|
             STDOUT.puts "#{es}#{' ' * (30 - es.length)}#{running_services.include?(es.to_s) ? 'Running' : 'Stopped'}"
           end
           STDOUT.puts "\nInfra Services                Status\n"
-          (enabled_services_f - %i(wait)).each do |es|
+          (enabled_services_f - %i(wait)).sort.each do |es|
             STDOUT.puts "#{es}#{' ' * (30 - es.length)}#{running_services.include?(es.to_s) ? 'Running' : 'Stopped'}"
           end
           show_endpoint
@@ -104,7 +110,14 @@ module Ros
           compose("stop #{services.join(' ')}")
           compose("up -d #{services.join(' ')}")
           # sleep 3
+          services.each do |service|
+            if ref = Settings.components.be.components.application.components.platform.components.dig(service)
+              config = ref.dig(:config) || Config::Options.new
+              next unless database_check(service, config)
+            end
+          end
           reload_nginx(services)
+          status
           return unless services.size.eql? 1
           console(services[0]) if options.console
           exec(services[0], 'bash') if options.shell
@@ -126,10 +139,9 @@ module Ros
           end
           return unless nginx_reload
           running_services = services(application_component: 'platform')
-          rs = $stdout
-          $stdout = StringIO.new
-          Ros::Be::Application::Services::Generator.new.invoke(:write_nginx, [running_services])
-          $stdout = rs
+          silence_output do
+            Ros::Be::Application::Services::Generator.new.invoke(:write_nginx, [running_services])
+          end
           compose('stop nginx')
           compose('up -d nginx')
           # NOTE: nginx seems not to notice changes in the mounted file (at least on NFS share) so can't just reload
@@ -162,8 +174,10 @@ module Ros
           migration_file = "#{application.compose_dir}/#{name}-migrated"
           return true if File.exists?(migration_file) unless options.seed
           FileUtils.rm(migration_file) if File.exists?(migration_file)
-          success = compose("run --rm #{name} rails #{prefix}ros:db:reset:seed")
-          FileUtils.touch(migration_file) if success
+          if success = compose("run --rm #{name} rails #{prefix}ros:db:reset:seed")
+            FileUtils.touch(migration_file)
+            publish_env_credentials if name.eql?('iam')
+          end
           success
         end
 
@@ -190,7 +204,103 @@ module Ros
             Ros::Be::Application::Platform::Generator.new.invoke_all
           end
         end
+
+        # TODO: After every IAM seed then write all versions of credentials
+        # TODO: ros generate:docs:openapi
+        # TODO: ros generate:docs:postman
+        # TODO: ros generate:docs:erd
+        # NOTE: if these are cli commands then can take one or more services
+        def publish_env_credentials
+          return unless File.exists?(creds_file)
+          content = json.each_with_object([]) { |j, a| a.append(Credential.new(j).to_env) }.join("\n")
+          File.open("#{application.deploy_path}/platform/credentials.env", 'w') { |f| f.puts "#{content}\n" }
+        end
+
+        def json
+          @json ||= File.exists?(creds_file) ? JSON.parse(File.read(creds_file)) : []
+        end
+
+        def creds_file; "#{Ros.is_ros? ? '' : 'ros/'}services/iam/tmp/#{application.current_feature_set}/credentials.json" end
+
+        # TODO: Publish to Postman
+        def publish_postman_credentials
+          return unless File.exists?(creds_file)
+          content = json.each_with_object([]) { |j, a| a.append(Credential.new(j).to_postman) }.join("\n")
+          # TODO: Some feature_set based dir like comopse .env files
+          File.open("#{application.deploy_path}/platform/credentials.env", 'w') { |f| f.puts "#{content}\n" }
+        end
+
+        def publish_cli_credentials
+          File.open("#{write_dir}/cli", 'a') do |f|
+          end
+        end
+      end
+
+      class Credential
+        attr_accessor :type, :owner, :tenant, :credential, :secret
+
+        def initialize(json)
+          self.type = json['type']
+          self.owner = json['owner']
+          self.tenant = json['tenant']
+          self.credential = json['credential']
+          self.secret = json['secret']
+        end
+
+        def to_env
+          Ros.format_envs('', Config::Options.new.merge!({
+            'platform' => {
+              'tenant' => {
+                "#{tenant['id']}" => {
+                  "#{type}" => {
+                    "#{owner['id']}" => "Basic #{credential['access_key_id']}:#{secret}"
+                  }
+                }
+              }
+            }
+          })).first
+        end
+
+        def to_cli
+          "[#{identifier}]"
+          "#{part_name}_access_key_id=#{credential['access_key_id']}"
+          "#{part_name}_secret_access_key=#{secret}\n"
+        end
+
+        def to_postman
+          # TODO: password is not serialized
+          {
+            name: identifier,
+            values: [
+              { key: :authorization, value: "Basic #{credential['access_key_id']}:#{secret}" },
+              { key: type, value: uid },
+              { key: :password, value: owner['password'] }
+            ]
+          }
+        end
+
+        def identifier; "#{tenant_account_id}-#{cred_uid}"
+
+        def uid; type.eql?('Root') ? owner['email'] : owner['username'] end
+
+        def cred_uid; type.eql?('Root') ? owner['email'].split('@').first : owner['username'] end
+
+        def part_name; application.components.platform.environment.platform.partition_name end
+
+        def tenant_account_id; tenant['urn'].split('/') end
+
+        # def login
+        #   puts "Login Payload user: { #{type}: '#{uid}', password: '#{owner['password']}' }, account_id: '#{tenant['account_id']}')"
+        # end
+
+
+        def write_postman_credentials
+          name = "#{tenant.schema_name}-#{uid}"
+          file_name = "#{write_dir}/postman/#{name}.json"
+          File.write(file_name, "#{postman_config(name).to_json}\n")
+        end
       end
     end
   end
+end
 end
