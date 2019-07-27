@@ -11,18 +11,6 @@ module Ros
         class_option :v, type: :boolean, default: false, desc: 'verbose output'
         class_option :n, type: :boolean, default: false, desc: "run but don't execute action"
 
-        # def initialize(*args)
-        #   super
-        #   self.options = args[2][:class_options]
-        # end
-
-        desc 'show', 'Show infrastructure items'
-        def show(type = 'json')
-          Dir.chdir(infra.deploy_path) do
-            show_json
-          end
-        end
-
         desc 'plan', 'Show the terraform infrastructure plan'
         def plan
           generate_config if stale_config
@@ -36,10 +24,16 @@ module Ros
         def apply
           generate_config if stale_config
           Dir.chdir(infra.deploy_path) do
-            # TODO: Refactor to do a check to generate the infrastructure templates
             system_cmd({}, 'terraform init')
             system_cmd({}, 'terraform apply')
             system_cmd({}, 'terraform output -json > output.json')
+            show_json
+          end
+        end
+
+        desc 'show', 'Show infrastructure details'
+        def show(type = 'json')
+          Dir.chdir(infra.deploy_path) do
             show_json
           end
         end
@@ -66,15 +60,20 @@ module Ros
         def show_json
           if File.exists?('output.json')
             json = JSON.parse(File.read('output.json'))
-            if json['ec2']
-              ip = json['ec2']['value']['public_ip']
-              STDOUT.puts "ssh admin@#{ip}"
+            # TODO: This will need to change for two things:
+            # 1. when deploying to cluster these values will be different
+            # 2. when deploying to another provider these keys will be different
+            if json['ec2-eip']
+              ip = json['ec2-eip']['value']['public_ip']
+              STDOUT.puts "ssh -A admin@#{ip}"
+            end
+            if json['lb_route53_record']
               STDOUT.puts "API endpoint: #{json['lb_route53_record']['value'][0]['fqdn']}"
             end
           end
         end
+
         def infra; Ros::Be::Infra::Model end
-        def application; Ros::Be::Application::Model end
       end
     end
   end

@@ -26,22 +26,22 @@ module Ros
         def self.a_path; File.dirname(__FILE__) end
 
         def generate
-          create_file("#{deploy_path}/state.tf.json", "#{JSON.pretty_generate(tf_state)}")
+          create_file("#{infra.deploy_path}/state.tf.json", "#{JSON.pretty_generate(tf_state)}")
           providers = Set.new
           # For each component, copy over the provider/component_type TF module code
           infra.components.each_pair do |component, config|
-            next if %i(kubernetes instance).include?(component) and Infra::Model.cluster_type != component.to_s
+            next if %i(kubernetes instance).include?(component) and infra.cluster_type != component.to_s
             provider = config.config.provider
             providers.add(provider)
             module_name = send(provider, component)
             module_path = "../files/terraform/#{provider}/#{module_name}"
             # NOTE: Uncomment next line to pause execution and inspect variable values, test code, etc
             # binding.pry
-            directory(module_path, "#{deploy_path}/#{provider}/#{module_name}")
+            directory(module_path, "#{infra.deploy_path}/#{provider}/#{module_name}")
           end
           # Render each provider's main.tf
           providers.each do |provider|
-            template("terraform/#{provider}/#{Infra::Model.cluster_type}.tf.erb", "#{deploy_path}/#{provider}-main.tf")
+            template("terraform/#{provider}/#{infra.cluster_type}.tf.erb", "#{infra.deploy_path}/#{provider}-main.tf")
           end
         end
 
@@ -91,8 +91,7 @@ module Ros
         end
 
         def tf; infra.components end
-        def infra; Settings.components.be.components.infra end
-        def deploy_path; Infra::Model.deploy_path end
+        def infra; Ros::Be::Infra::Model end
       end
     end
   end

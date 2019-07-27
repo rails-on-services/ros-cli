@@ -12,16 +12,17 @@ elsif ARGV[0]&.include? ':'
 else
   require 'bundler/setup'
   require 'ros'
-  arg = ARGV[0]
-  if %w(be fe data).include?(arg)
+  cmd = ARGV[0]
+  if %w(be fe data).include?(cmd)
     ARGV.shift
-    if arg.eql?('be') and ARGV[0].eql?('infra')
+    sub_cmd = ARGV[0]
+    if cmd.eql?('be') and %w(infra).include?(sub_cmd)
       ARGV.shift
-      require "ros/#{arg}/infra/cli"
-      Ros.const_get("#{arg.capitalize}::Infra::Cli").start
+      require "ros/#{cmd}/#{sub_cmd}/cli"
+      Ros.const_get("#{cmd.capitalize}::#{sub_cmd.capitalize}::Cli").start
     else
-      require "ros/#{arg}/application/cli"
-      Ros.const_get("#{arg.capitalize}::Application::Cli").start
+      require "ros/#{cmd}/application/cli"
+      Ros.const_get("#{cmd.capitalize}::Application::Cli").start
     end
   else
     require 'ros/cli'
