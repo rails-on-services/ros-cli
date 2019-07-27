@@ -4,7 +4,7 @@ module Ros
   module Be
     module Application
       class Instance
-        include Ros::Be::Application::Common
+        include CliBase
 
         def init; STDOUT.puts 'init is not used/necessary for compose. only kubernetes' end
 

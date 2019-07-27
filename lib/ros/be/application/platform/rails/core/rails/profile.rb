@@ -8,19 +8,18 @@ class Profile
 
   def initialize(name, generator, options)
     self.name = name
-    # self.lib_path = Pathname(generator.destination_root).join('../../lib')
-    self.lib_path = '../../lib'
+    self.is_engine = (options.full or options.mountable)
+    self.lib_path = Pathname('../../lib')
     if File.basename(options['template']).eql?('core_generator.rb')
       self.platform_name = name.gsub('-core', '')
     else
-      self.platform_name = File.basename(Dir["#{lib_path.join('sdk')}/*.gemspec"].first).gsub('_sdk.gemspec', '')
+      platform_path = is_engine? ? Pathname(generator.destination_root).join('../../lib') : lib_path
+      self.platform_name = File.basename(Dir["#{platform_path.join('sdk')}/*.gemspec"].first).gsub('_sdk.gemspec', '')
     end
-    # self.service_name = name.gsub('ros-', '')
     self.service_name = name
     self.module_name = service_name.classify
     #
     self.is_ros = platform_name.eql?('ros')
-    self.is_engine = (options.full or options.mountable)
     # 
     self.module_string = is_engine? ? module_name : 'Ros'
     self.app_dir = is_engine? ? "#{options.dummy_path}/" : '.'

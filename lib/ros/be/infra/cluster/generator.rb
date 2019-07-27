@@ -29,7 +29,7 @@ module Ros
 
         class Generator < Thor::Group
           include Thor::Actions
-          extend Ros::CommonGenerator
+          include Ros::Be::CommonGenerator
 
           def self.a_path; File.dirname(__FILE__) end
 

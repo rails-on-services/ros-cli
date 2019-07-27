@@ -43,8 +43,10 @@ template('db/seeds/development/data.seeds.rb')
 template 'config/sidekiq.yml'
 template 'doc/open_api.yml'
 
+apply('rspec.rb')
+
 after_bundle do
-  apply('rspec.rb')
+  generate 'rspec:install'
   run 'spring stop'
 end
 

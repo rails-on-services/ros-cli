@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-require 'ros/be/infra/generator'
-require 'ros/be/application/generator'
+require 'ros/generator_base'
 
 module Ros
   module Be
@@ -11,13 +10,27 @@ module Ros
       end
     end
 
+    module CommonGenerator
+      include Ros::BaseGenerator
+
+      def self.included(base)
+        base.extend(Ros::BaseGenerator::ClassMethods)
+      end
+
+      def application; Ros::Be::Application::Model end
+      def infra; Ros::Be::Infra::Model end
+      def cluster; Ros::Be::Infra::Cluster::Model end
+    end
+
     class Generator < Thor::Group
       include Thor::Actions
-      extend CommonGenerator
+      include CommonGenerator
 
       def self.a_path; File.dirname(__FILE__) end
 
       def execute
+        require 'ros/be/infra/generator'
+        require 'ros/be/application/generator'
         [Infra::Generator, Application::Generator].each do |klass|
           generator = klass.new
           generator.behavior = behavior

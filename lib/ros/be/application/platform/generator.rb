@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+require 'ros/be/generator'
 
 module Ros
   module Be
@@ -45,7 +46,7 @@ module Ros
 
         class Generator < Thor::Group
           include Thor::Actions
-          extend Ros::CommonGenerator
+          include Ros::Be::CommonGenerator
           add_runtime_options!
 
           def self.a_path; File.dirname(__FILE__) end
@@ -69,17 +70,17 @@ module Ros
 
           # Compose only methods
           def write_compose_envs
-            return unless Infra::Model.cluster_type.eql?('instance')
+            return unless infra.cluster_type.eql?('instance')
             content = compose_environment.each_with_object([]) do |kv, ary|
               ary << "#{kv[0].upcase}=#{kv[1]}"
             end.join("\n")
             content = "# This file was auto generated\n# The values are used by docker-compose\n# #{Ros.env}\n#{content}"
             # empty_directory(Ros::Generators::Stack.compose_dir)
-            create_file(application::Model.compose_file, "#{content}\n")
+            create_file(application.compose_file, "#{content}\n")
           end
 
           def write_nginx
-            return unless Infra::Model.config.type.eql?('instance')
+            return unless infra.config.type.eql?('instance')
             Service::Generator.new([], {}, { behavior: behavior }).invoke(:write_nginx)
           end
 
@@ -91,8 +92,8 @@ module Ros
             {
               puid: user_info.uid,
               pgid: user_info.gid,
-              compose_file: Dir["#{application::Model.deploy_path}/**/*.yml"].map{ |p| p.gsub("#{Ros.root}/", '') }.sort.join(':'),
-              compose_project_name: application::Model.compose_project_name,
+              compose_file: Dir["#{application.deploy_path}/**/*.yml"].map{ |p| p.gsub("#{Ros.root}/", '') }.sort.join(':'),
+              compose_project_name: application.compose_project_name,
               context_dir: relative_path,
               ros_context_dir: "#{relative_path}/ros",
               image_repository: Stack.config.platform.config.image_registry,
@@ -104,35 +105,36 @@ module Ros
           # end compose only methods
 
           def environment
-            @environment ||= application::Model.environment.dup.merge!(settings.environment.to_hash)
+            @environment ||= application.environment.dup.merge!(settings.environment.to_hash)
           end
 
           def config
-            @config ||= Stack.config.dup.merge!(application::Model.config.dup.merge!(settings.config.to_hash).to_hash)
+            @config ||= Stack.config.dup.merge!(application.config.dup.merge!(settings.config.to_hash).to_hash)
           end
 
           def deploy_path
-            "#{application::Model.deploy_path}/platform"
+            "#{application.deploy_path}/platform"
           end
 
           def services_components
             services_settings.components.to_h.select{|k, v| v.nil? || v.dig(:config, :enabled).nil? || v.dig(:config, :enabled) }
           end
 
-          def services_settings; application::Model.settings.components.services end
+          def services_settings; application.settings.components.services end
 
           def components
             settings.components.to_h.select{|k, v| v.dig(:config, :enabled).nil? || v.dig(:config, :enabled) }
           end
 
-          def settings; application::Model.settings.components.platform end
+          def settings; application.settings.components.platform end
 
           def template_dir
-            cluster::Model.config.type.eql?('kubernetes') ? 'skaffold' : 'compose'
+            cluster.config.type.eql?('kubernetes') ? 'skaffold' : 'compose'
           end
 
-          def cluster; Ros::Be::Infra::Cluster end
-          def application; Ros::Be::Application end
+          # def cluster; Ros::Be::Infra::Model end
+          # def cluster; Ros::Be::Infra::Cluster::Model end
+          # def application; Ros::Be::Application::Model end
         end
       end
     end

@@ -48,16 +48,22 @@ components:
           cluster:
             type: kubernetes
         components:
+          dns:
+            config:
+              provider: aws
+              root_domain: example.com
+              sub_domain: ros
+              endpoints:
+                grafana: grafana
+                api:
+                  scheme: https
+                  host: api
+                sftp:
+                  host: sftp
           kubernetes:
             config:
               provider: aws
-              name: enceladus
-              dns:
-                domain: perxtech.io
-                # domain: rails-on-services.org
-                # subdomain: enceladus
-              endpoints:
-                grafana: grafana
+              name: test
             components:
               infra:
                 components:

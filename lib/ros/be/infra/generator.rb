@@ -21,7 +21,7 @@ module Ros
 
       class Generator < Thor::Group
         include Thor::Actions
-        extend CommonGenerator
+        include Ros::Be::CommonGenerator
 
         def self.a_path; File.dirname(__FILE__) end
 
@@ -91,7 +91,7 @@ module Ros
         end
 
         def tf; infra.components end
-        def infra; Ros::Be::Infra::Model end
+        # def infra; Ros::Be::Infra::Model end
       end
     end
   end

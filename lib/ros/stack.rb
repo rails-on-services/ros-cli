@@ -1,11 +1,6 @@
 # frozen_string_literal: true
 require 'bump'
 
-require 'thor/group'
-require 'ros/common_generator'
-require 'ros/be/generator'
-# require 'ros/generators/be/application/application_generator'
-
 module Ros
   module Stack
     class << self
@@ -23,7 +18,11 @@ module Ros
 
       # image_suffix is specific to the image_type
       # TODO: Update to handle more than just rails
-      def image_suffix; Settings.platform.config.image.build_args.rails_env.eql?('production') ? '' : "-#{Settings.platform.config.image.build_args.rails_env}" end
+      def image_suffix
+        @image_suffix ||= (
+          Settings.platform.config.image.build_args.rails_env.eql?('production') ? '' : "-#{Settings.platform.config.image.build_args.rails_env}"
+        )
+      end
 
       def branch_name
         return unless system('git rev-parse --git-dir > /dev/null 2>&1')

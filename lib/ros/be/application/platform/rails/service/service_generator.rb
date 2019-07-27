@@ -3,8 +3,10 @@
 require 'thor/group'
 
 module Ros
-  module Generators
-    class ServiceGenerator < Thor::Group
+  module Be::Application::Platform
+    module Rails
+      module Service
+    class Generator < Thor::Group
       include Thor::Actions
       argument :name
 
@@ -65,3 +67,6 @@ module Ros
     end
   end
 end
+  end
+end
+

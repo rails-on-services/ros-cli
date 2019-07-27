@@ -1,12 +1,14 @@
 # frozen_string_literal: true
-require 'ros/be/application/cli/common'
+# require 'ros/cli_base'
+require 'ros/be/generator'
+require 'ros/be/application/cli_base'
 require 'ros/be/infra/generator'
 
 module Ros
   module Be
     module Infra
       class Cli < Thor
-        include Ros::Be::Application::Common
+        include CliBase
         check_unknown_options!
         class_option :v, type: :boolean, default: false, desc: 'verbose output'
         class_option :n, type: :boolean, default: false, desc: "run but don't execute action"
@@ -15,8 +17,8 @@ module Ros
         def plan
           generate_config if stale_config
           Dir.chdir(infra.deploy_path) do
-            system_cmd({}, 'terraform init')
-            system_cmd({}, 'terraform plan')
+            system_cmd(cmd_environment, 'terraform init')
+            system_cmd(cmd_environment, 'terraform plan')
           end
         end
 
@@ -24,9 +26,9 @@ module Ros
         def apply
           generate_config if stale_config
           Dir.chdir(infra.deploy_path) do
-            system_cmd({}, 'terraform init')
-            system_cmd({}, 'terraform apply')
-            system_cmd({}, 'terraform output -json > output.json')
+            system_cmd(cmd_environment, 'terraform init')
+            system_cmd(cmd_environment, 'terraform apply')
+            system_cmd(cmd_environment, 'terraform output -json > output.json')
             show_json
           end
         end
@@ -46,6 +48,11 @@ module Ros
         end
 
         private
+        # TODO: this needs to be per provider and region comes from deployment.yml
+        def cmd_environment
+          { 'AWS_DEFAULT_REGION' => 'ap-southeast-1' }
+        end
+
         def config_files
           Dir["#{Ros.root.join(infra.deploy_path)}/*.tf"]
         end

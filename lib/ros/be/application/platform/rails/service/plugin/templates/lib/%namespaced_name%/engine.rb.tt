@@ -14,10 +14,10 @@
       Settings.prepend_source!(settings_path) if File.exists? settings_path
       name = self.class.parent.name.demodulize.underscore
       Settings.prepend_source!({ service: { name: name, policy_name: name.capitalize } })
-    end
+    end\n
 
     initializer 'service.initialize_infra_services', after: 'ros_core.initialize_infra_services' do |app|
-    end
+    end\n
 
     # Adds this gem's db/migrations path to the enclosing application's migraations_path array
     # if the gem has been included in an application, i.e. it is not running in the dummy app
@@ -30,7 +30,7 @@
           ActiveRecord::Migrator.migrations_paths << expanded_path
         end
       end
-    end
+    end\n
 
     initializer 'service.configure_console_methods', before: 'ros_core.configure_console_methods' do |_app|
       if Rails.env.development? and Rails.const_defined?('Console')

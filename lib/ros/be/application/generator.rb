@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'ros/generator_base'
 require 'ros/be/application/platform/generator'
 require 'ros/be/application/services/generator'
 
@@ -85,7 +86,7 @@ module Ros
 
       class Generator < Thor::Group
         include Thor::Actions
-        extend Ros::CommonGenerator
+        include Ros::Be::CommonGenerator
 
         def self.a_path; File.dirname(__FILE__) end
 

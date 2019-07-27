@@ -12,8 +12,6 @@ end
 copy_file 'spec/linter.rb'
 copy_file 'Guardfile'
 
-generate 'rspec:install'
-
 empty_directory 'spec/support'
 
 =begin

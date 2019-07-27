@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+require 'ros/be/generator'
 
 module Ros
   module Be
@@ -15,14 +16,14 @@ module Ros
           end
 
           def stack_name; Stack.name end
-          def current_feature_set; Ros::Be::Application::Model.current_feature_set end
+          def current_feature_set; application.current_feature_set end
           def has_envs; !environment.nil? end
 
           # skaffold only methods
           def relative_path; @relative_path ||= ('../' * deploy_path.split('/').size).chomp('/') end
           def chart_path; "#{relative_path}/devops/helm/charts/application/services" end
           # api_hostname is for ingress controller
-          def api_hostname; Ros::Be::Application::Model.api_hostname end
+          def api_hostname; application.api_hostname end
           # def bucket_name; stack.current_feature_set end
           def skaffold_version; Stack.config.skaffold_version end
 
@@ -31,7 +32,7 @@ module Ros
             @sftp ||= Config::Options.new({
               secrets_files: environment ? [:services, name.to_sym] : %i(services),
               pull_policy: 'Always',
-              hostname: Application.sftp_hostname
+              hostname: application.sftp_hostname
             })
           end
 
@@ -60,6 +61,7 @@ module Ros
               current_feature_set: application.current_feature_set
             })
           end
+
           def cluster; Ros::Be::Infra::Cluster::Model end
           def application; Ros::Be::Application::Model end
         end
@@ -69,7 +71,7 @@ module Ros
         # unless the name of the service to template was passed in
         class Generator < Thor::Group
           include Thor::Actions
-          extend Ros::CommonGenerator
+          include Ros::Be::CommonGenerator
           add_runtime_options!
 
           def self.a_path; File.dirname(__FILE__) end
@@ -104,7 +106,7 @@ module Ros
           end
 
           def generate_support_files
-            if Infra::Model.cluster_type.eql?('cluster')
+            if infra.cluster_type.eql?('cluster')
               directory('../files/helm', "#{deploy_path}/helm")
               directory('../files/k8s', "#{deploy_path}/k8s")
             end
@@ -123,11 +125,11 @@ module Ros
           def nginx_services; @nginx_services ||= (args[0] || platform_service_names) end
 
           def deploy_path
-            "#{Application::Model.deploy_path}/services"
+            "#{application.deploy_path}/services"
           end
 
           def environment
-            @environment ||= Application::Model.environment.dup.merge!(settings.environment&.to_hash)
+            @environment ||= application.environment.dup.merge!(settings.environment&.to_hash)
           end
 
           def service_names; components.keys  end
@@ -138,19 +140,17 @@ module Ros
             platform_settings.components.to_h.select{|k, v| v.nil? || v.dig(:config, :enabled).nil? || v.dig(:config, :enabled) }
           end
 
-          def platform_settings; Application::Model.settings.components.platform end
+          def platform_settings; application.settings.components.platform end
 
           def components
             settings.components.to_h.select{|k, v| v.nil? || v.dig(:config, :enabled).nil? || v.dig(:config, :enabled) }
           end
 
-          def settings; Application::Model.settings.components.services end
+          def settings; application.settings.components.services end
 
           def template_dir
-            cluster::Model.config.type.eql?('kubernetes') ? 'skaffold' : 'compose'
+            cluster.config.type.eql?('kubernetes') ? 'skaffold' : 'compose'
           end
-
-          def cluster; Ros::Be::Infra::Cluster end
         end
       end
     end

@@ -1,14 +1,16 @@
 # frozen_string_literal: true
 
-require 'ros/be/application/cli/common'
+require 'ros/be/application/cli_base'
 require 'ros/be/application/cli/generate'
 require 'ros/be/application/cli/rails'
+require 'ros/be/infra/generator'
 require 'ros/be/application/generator'
 
 module Ros
   module Be
     module Application
       class Cli < Thor
+        include CliBase
         def self.exit_on_failure?; true end
         check_unknown_options!
         class_option :v, type: :boolean, default: false, desc: 'verbose output'
@@ -24,10 +26,11 @@ module Ros
 
         # TODO: refactor setting action to :destroy
         desc 'destroy TYPE', 'Destroy an asset (environment or service)'
+        option :behavior, type: :string, default: 'revoke'
         map %w(d) => :destroy
         subcommand 'destroy', Ros::Be::Application::GenerateCli
 
-        desc 'preflight', 'Prepare a project'
+        desc 'preflight', 'Initialize a project environment'
         def preflight
           preflight_check(fix: true)
           preflight_check
@@ -154,7 +157,8 @@ module Ros
           env_config = File.exists?("#{Ros.environments_dir}/#{Ros.env}.yml")
           if fix
             %x(git clone git@github.com:rails-on-services/ros.git) unless ros_repo
-            Generate.new.env(Ros.env) unless env_config
+            require 'ros/main/env/generator'
+            Ros::Main::Env::Generator.new([Ros.env]).invoke_all
           else
             puts "ros repo: #{ros_repo ? 'ok' : 'missing'}"
             puts "environment configuration: #{env_config ? 'ok' : 'missing'}"

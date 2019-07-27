@@ -1,13 +1,14 @@
 # frozen_string_literal: true
+require 'ros/be/generator'
 
 module Ros
   module Be
     module Infra
       module Cluster
         module Service
-
           class Model
             attr_accessor :name, :config, :environment
+
             def initialize(name, definition)
               @name = name
               @config = definition&.dig(:config)
@@ -17,7 +18,7 @@ module Ros
 
           class Generator < Thor::Group
             include Thor::Actions
-            extend Ros::CommonGenerator
+            include Ros::Be::CommonGenerator
 
             def self.a_path; File.dirname(__FILE__) end
 
@@ -37,26 +38,26 @@ module Ros
 
             private
             def environment
-              @environment ||= Stack.environment.dup.merge!(Cluster::Model.environment.dup.merge!(settings.environment.to_hash).to_hash)
+              @environment ||= Stack.environment.dup.merge!(cluster.environment.dup.merge!(settings.environment.to_hash).to_hash)
             end
 
             def config
-              @config ||= Stack.config.dup.merge!(Cluster::Model.config.dup.merge!(settings.config.to_hash).to_hash)
+              @config ||= Stack.config.dup.merge!(cluster.config.dup.merge!(settings.config.to_hash).to_hash)
             end
 
             def deploy_path
               # TODO: For fluentd, grafana and prometheus, where do the templates go?
-              "#{Cluster::Model.deploy_path}/services"
+              "#{cluster.deploy_path}/services"
             end
 
             def components
               settings.components.to_h.select{|k, v| v.nil? || v.dig(:config, :enabled).nil? || v.dig(:config, :enabled) }
             end
 
-            def settings; Cluster::Model.settings.components&.services || Config::Options.new end
+            def settings; cluster.settings.components&.services || Config::Options.new end
             # def environment ; settings.environment end
             def template_dir
-              Cluster::Model.config.type.eql?('kubernetes') ? 'skaffold' : 'compose'
+              cluster.config.type.eql?('kubernetes') ? 'skaffold' : 'compose'
             end
           end
         end

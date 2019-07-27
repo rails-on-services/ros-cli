@@ -54,10 +54,13 @@ template('db/seeds/development/data.seeds.rb')
 remove_file("lib/tasks/#{namespaced_name}_tasks.rake")
 template('lib/tasks/%namespaced_name%_tasks.rake')
 
-apply('rspec.rb')
-
 template 'config/sidekiq.yml'
 template 'doc/open_api.yml'
 
-# copy_file 'defaults/files/Procfile', 'Procfile'
-# template 'defaults/files/tmuxinator.yml', '.tmuxinator.yml'
+apply('rspec.rb')
+
+# The rails plugin generator doesn't seem to support the 'after_bundle' method
+# after_bundle do
+#   generate 'rspec:install'
+#   run 'spring stop'
+# end

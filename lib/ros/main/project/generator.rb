@@ -3,9 +3,9 @@
 require 'thor/group'
 
 module Ros
-  module Generators
+  module Main
     module Project
-      class ProjectGenerator < Thor::Group
+      class Generator < Thor::Group
         include Thor::Actions
         argument :name
 
