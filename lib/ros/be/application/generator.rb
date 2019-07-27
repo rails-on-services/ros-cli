@@ -37,7 +37,7 @@ module Ros
             {
               infra: {
                 # provider: Settings.components.be.config.provider,
-                provider: cluster::Model.config.provider,
+                provider: cluster.config.provider,
               },
               platform: {
                 feature_set: current_feature_set,
@@ -80,7 +80,7 @@ module Ros
           end
 
           def infra; Ros::Be::Infra::Model end
-          def cluster; Ros::Be::Infra::Cluster end
+          def cluster; Ros::Be::Infra::Cluster::Model end
         end
       end
 

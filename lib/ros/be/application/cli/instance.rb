@@ -35,6 +35,7 @@ module Ros
         def up(services)
           services = enabled_services if services.empty?
           generate_config if stale_config
+          STDOUT.puts 'NOT regenerating config' if options.v and not stale_config
           compose_options = ''
           if options.daemon or options.console or options.shell
             compose_options = '-d'
@@ -50,7 +51,7 @@ module Ros
             compose("up #{compose_options} #{service}")
           end
           reload_nginx(services)
-          show_endpoint
+          status
           console(services.last) if options.console
           exec(services.last, 'bash') if options.shell
         end
@@ -63,7 +64,7 @@ module Ros
         def credentials
           generate_config if stale_config
           exec('iam', 'rails app:ros:iam:credentials:show')
-          show_endpoint
+          status
         end
 
         def console(service)
@@ -83,6 +84,19 @@ module Ros
           trap("SIGINT") { throw StandardError } if options.tail
           compose("logs #{compose_options} #{service}")
         rescue StandardError
+        end
+
+        def status
+          STDOUT.puts "\nPlatform Services             Status\n"
+          running_services = services
+          enabled_services.each do |es|
+            STDOUT.puts "#{es}#{' ' * (30 - es.length)}#{running_services.include?(es.to_s) ? 'Running' : 'Stopped'}"
+          end
+          STDOUT.puts "\nInfra Services                Status\n"
+          (enabled_services_f - %i(wait)).each do |es|
+            STDOUT.puts "#{es}#{' ' * (30 - es.length)}#{running_services.include?(es.to_s) ? 'Running' : 'Stopped'}"
+          end
+          show_endpoint
         end
 
         def restart(services)

@@ -18,7 +18,7 @@ module Ros
           %w(services platform).each do |type|
             keys = application.components[type].components.keys
             next unless keys.include?(service.to_sym)
-            file = "#{Ros::Be::Application::Model.deploy_path}/#{type}/#{service_name}"
+            file = "#{application.deploy_path}/#{type}/#{service_name}"
             STDOUT.puts File.read(file)
           end
         end
@@ -28,9 +28,15 @@ module Ros
         end
 
         def enabled_services
-          Settings.components.be.components.application.components.platform.components.to_hash.select do |k, v|
+          application.components.platform.components.to_hash.select do |k, v|
             v.nil? || v.dig(:config, :enabled).nil? || v.dig(:config, :enabled)
-          end.keys
+          end.keys.sort
+        end
+
+        def enabled_services_f
+          application.components.services.components.to_hash.select do |k, v|
+            v.nil? || v.dig(:config, :enabled).nil? || v.dig(:config, :enabled)
+          end.keys.sort
         end
       end
     end

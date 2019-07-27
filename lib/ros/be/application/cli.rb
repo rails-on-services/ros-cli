@@ -36,6 +36,11 @@ module Ros
           preflight_check
         end
 
+        desc 'status', 'Show platform services status'
+        def status
+          context(options).status
+        end
+
         desc 'init', 'Initialize the cluster'
         option :long, type: :boolean, aliases: '-l', desc: 'Run the long form of the command'
         def init
@@ -173,6 +178,7 @@ module Ros
           @context
         end
         def infra_x; Ros::Be::Infra::Model end
+        def application; Ros::Be::Application::Model end
       end
     end
   end
