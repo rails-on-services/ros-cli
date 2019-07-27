@@ -12,12 +12,8 @@ module Ros
         def self.source_paths; [Pathname(File.dirname(__FILE__)).join('templates').to_s, File.dirname(__FILE__)] end
 
         def generate
-          # in_root do
-          #   %x(git clone https://github.com/rails-on-services/ros.git)
-          #   FileUtils.cp_r('ros/devops', '.')
-          # end if false
           directory('files', '.')
-          # TODO: move to be specific
+          # TODO: template Dockerfiles for the various supported languages, e.g. node
           # template 'Dockerfile'
           template 'config/deployment.yml'
         end
@@ -60,6 +56,6 @@ module Ros
           end
         end
       end
-	  end
+    end
   end
 end

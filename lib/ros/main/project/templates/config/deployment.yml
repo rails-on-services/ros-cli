@@ -91,15 +91,6 @@ components:
           # When feature_from_branch is 'yes' the deployment's endpoint is mapped to api-branch.subdomain.domain
           # A deployment from the branch with the same name as feature_set will mapped to api.subdomain.domain
           feature_set: master
-          dns:
-            # domain: rails-on-services.org
-            subdomain: k8s-demo
-          endpoints:
-            api:
-              scheme: https
-              host: api
-            sftp:
-              host: sftp
         components:
           infra:
             components:
