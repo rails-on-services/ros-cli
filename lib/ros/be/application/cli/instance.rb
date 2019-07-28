@@ -69,8 +69,16 @@ module Ros
 
         def credentials
           generate_config if stale_config
-          exec('iam', 'rails app:ros:iam:credentials:show')
-          status
+          postman = JSON.parse(json.each_with_object([]) { |j, a| a.append(Credential.new(j).to_postman) }.to_json)
+          envs = json.each_with_object([]) { |j, a| a.append(Credential.new(j).to_env) }
+          cli = json.each_with_object([]) { |j, a| a.append(Credential.new(j).to_cli) }.join("\n\n")
+          STDOUT.puts "Postman:"
+          STDOUT.puts (postman)
+          STDOUT.puts "\nEnvs:"
+          STDOUT.puts (envs)
+          STDOUT.puts "\nCli:"
+          STDOUT.puts (cli)
+          STDOUT.puts "\nCredentials source: #{creds_file}"
         end
 
         def console(service)
@@ -93,14 +101,46 @@ module Ros
         end
 
         def status
-          STDOUT.puts "\nPlatform Services             Status\n"
           running_services = services
-          enabled_services.sort.each do |es|
-            STDOUT.puts "#{es}#{' ' * (30 - es.length)}#{running_services.include?(es.to_s) ? 'Running' : 'Stopped'}"
+          ros_services = {}
+          my_services = {}
+          infra_services = {}
+          application.components.platform.components.keys.sort.each do |name|
+            svc = application.components.platform.components[name.to_s]
+            status =
+              if running_services.include?(name.to_s)
+                'Running    '
+              elsif svc.dig(:config, :enabled).nil? || svc.dig(:config, :enabled)
+                'Stopped    '
+              else
+                'Not Enabled'
+              end
+            ros_services[name] = status if svc.dig(:config, :ros)
+            my_services[name] = status unless svc.dig(:config, :ros)
           end
-          STDOUT.puts "\nInfra Services                Status\n"
-          (enabled_services_f - %i(wait)).sort.each do |es|
-            STDOUT.puts "#{es}#{' ' * (30 - es.length)}#{running_services.include?(es.to_s) ? 'Running' : 'Stopped'}"
+          (application.components.services.components.keys - %i(wait)).sort.each do |name|
+            svc = application.components.services.components[name.to_s]
+            status =
+              if running_services.include?(name.to_s)
+                'Running    '
+              elsif svc&.dig(:config, :enabled).nil? || svc&.dig(:config, :enabled)
+                'Stopped    '
+              else
+                'Not Enabled'
+              end
+            infra_services[name] = status
+          end
+          buf = ' ' * 14
+          name_len = 21
+          no_buf = -11
+          STDOUT.puts "\nPlatform Services    Status                   Core Services" \
+            "        Status                   Infra Services       Status\n#{'-' * 144}"
+          (1..[infra_services.size, my_services.size, ros_services.size].max).each do |i|
+            mn, ms = my_services.shift
+            rn, rs = ros_services.shift
+            fn, fs = infra_services.shift
+            STDOUT.puts "#{mn}#{' ' * (name_len - (mn&.length || no_buf))}#{ms}#{buf}#{rn}" \
+              "#{' ' * (name_len - (rn&.length || no_buf))}#{rs}#{buf}#{fn}#{' ' * (name_len - (fn&.length || no_buf))}#{fs}"
           end
           show_endpoint
         end
@@ -109,7 +149,6 @@ module Ros
           generate_config if stale_config
           compose("stop #{services.join(' ')}")
           compose("up -d #{services.join(' ')}")
-          # sleep 3
           services.each do |service|
             if ref = Settings.components.be.components.application.components.platform.components.dig(service)
               config = ref.dig(:config) || Config::Options.new
@@ -176,7 +215,10 @@ module Ros
           FileUtils.rm(migration_file) if File.exists?(migration_file)
           if success = compose("run --rm #{name} rails #{prefix}ros:db:reset:seed")
             FileUtils.touch(migration_file)
-            publish_env_credentials if name.eql?('iam')
+            if name.eql?('iam')
+              publish_env_credentials
+              credentials
+            end
           end
           success
         end
@@ -204,103 +246,7 @@ module Ros
             Ros::Be::Application::Platform::Generator.new.invoke_all
           end
         end
-
-        # TODO: After every IAM seed then write all versions of credentials
-        # TODO: ros generate:docs:openapi
-        # TODO: ros generate:docs:postman
-        # TODO: ros generate:docs:erd
-        # NOTE: if these are cli commands then can take one or more services
-        def publish_env_credentials
-          return unless File.exists?(creds_file)
-          content = json.each_with_object([]) { |j, a| a.append(Credential.new(j).to_env) }.join("\n")
-          File.open("#{application.deploy_path}/platform/credentials.env", 'w') { |f| f.puts "#{content}\n" }
-        end
-
-        def json
-          @json ||= File.exists?(creds_file) ? JSON.parse(File.read(creds_file)) : []
-        end
-
-        def creds_file; "#{Ros.is_ros? ? '' : 'ros/'}services/iam/tmp/#{application.current_feature_set}/credentials.json" end
-
-        # TODO: Publish to Postman
-        def publish_postman_credentials
-          return unless File.exists?(creds_file)
-          content = json.each_with_object([]) { |j, a| a.append(Credential.new(j).to_postman) }.join("\n")
-          # TODO: Some feature_set based dir like comopse .env files
-          File.open("#{application.deploy_path}/platform/credentials.env", 'w') { |f| f.puts "#{content}\n" }
-        end
-
-        def publish_cli_credentials
-          File.open("#{write_dir}/cli", 'a') do |f|
-          end
-        end
-      end
-
-      class Credential
-        attr_accessor :type, :owner, :tenant, :credential, :secret
-
-        def initialize(json)
-          self.type = json['type']
-          self.owner = json['owner']
-          self.tenant = json['tenant']
-          self.credential = json['credential']
-          self.secret = json['secret']
-        end
-
-        def to_env
-          Ros.format_envs('', Config::Options.new.merge!({
-            'platform' => {
-              'tenant' => {
-                "#{tenant['id']}" => {
-                  "#{type}" => {
-                    "#{owner['id']}" => "Basic #{credential['access_key_id']}:#{secret}"
-                  }
-                }
-              }
-            }
-          })).first
-        end
-
-        def to_cli
-          "[#{identifier}]"
-          "#{part_name}_access_key_id=#{credential['access_key_id']}"
-          "#{part_name}_secret_access_key=#{secret}\n"
-        end
-
-        def to_postman
-          # TODO: password is not serialized
-          {
-            name: identifier,
-            values: [
-              { key: :authorization, value: "Basic #{credential['access_key_id']}:#{secret}" },
-              { key: type, value: uid },
-              { key: :password, value: owner['password'] }
-            ]
-          }
-        end
-
-        def identifier; "#{tenant_account_id}-#{cred_uid}"
-
-        def uid; type.eql?('Root') ? owner['email'] : owner['username'] end
-
-        def cred_uid; type.eql?('Root') ? owner['email'].split('@').first : owner['username'] end
-
-        def part_name; application.components.platform.environment.platform.partition_name end
-
-        def tenant_account_id; tenant['urn'].split('/') end
-
-        # def login
-        #   puts "Login Payload user: { #{type}: '#{uid}', password: '#{owner['password']}' }, account_id: '#{tenant['account_id']}')"
-        # end
-
-
-        def write_postman_credentials
-          name = "#{tenant.schema_name}-#{uid}"
-          file_name = "#{write_dir}/postman/#{name}.json"
-          File.write(file_name, "#{postman_config(name).to_json}\n")
-        end
       end
     end
   end
-end
 end

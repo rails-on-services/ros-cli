@@ -155,6 +155,11 @@ module Ros
           STDOUT.puts "#{Settings.components.be.components.application.components[what].components.keys.join("\n")}" unless what.nil?
         end
 
+        desc 'publish', 'Publish API documentation to Postman'
+        def publish
+          context(options).publish
+        end
+
         private
 
         def preflight_check(fix: false)
