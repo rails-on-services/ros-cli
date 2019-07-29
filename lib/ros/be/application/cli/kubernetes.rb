@@ -4,11 +4,7 @@ module Ros
   module Be
     module Application
       class Kubernetes
-        include Ros::Be::Application::Common
-
-        def init
-          Ros::Be::Infra::Cluster::Model.init(self)
-        end
+        include CliBase
 
         def initialize(options = {})
           @options = options
@@ -64,13 +60,13 @@ module Ros
               # since the profiles in the file were generated from the configuration already
               service = file.gsub('.yml', '')
               # run does build and deploy 
-              components[service].profiles.each { |profile| skaffold("run -f #{file} -p #{profile}") }
+              platform.components[service].profiles.each { |profile| skaffold("run -f #{file} -p #{profile}") }
               # platform.services[service].profiles.each { |profile| skaffold("deploy -f #{file} -p #{profile}") }
             end
           end
         end
 
-        def components; Settings.components.be.components.application.components.platform.components end
+        # def components; Settings.components.be.components.application.components.platform.components end
 
         def ps
           generate_config if stale_config

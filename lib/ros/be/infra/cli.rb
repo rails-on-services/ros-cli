@@ -13,6 +13,12 @@ module Ros
         class_option :v, type: :boolean, default: false, desc: 'verbose output'
         class_option :n, type: :boolean, default: false, desc: "run but don't execute action"
 
+        desc 'init', 'Initialize the cluster'
+        option :long, type: :boolean, aliases: '-l', desc: 'Run the long form of the command'
+        def init
+          cluster.init(self)
+        end
+
         desc 'plan', 'Show the terraform infrastructure plan'
         def plan
           generate_config if stale_config
@@ -81,6 +87,7 @@ module Ros
         end
 
         def infra; Ros::Be::Infra::Model end
+        def cluster; Ros::Be::Infra::Cluster::Model end
       end
     end
   end

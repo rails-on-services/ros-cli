@@ -54,7 +54,7 @@ module Ros
               # log_tag: "#{api_hostname}.rack-traffic-log",
               log_tag: "**.rack-traffic-log",
               fluent_code_from_duan: 'fluent_code_from_duan',
-              provider: Settings.components.be.config.provider, # infra.config.provider,
+              provider: cluster.config.provider,
               # storage_name: "storage#{base_hostname.gsub('.', '-')}",
               storage_name: application.bucket_name,
               storage_region: 'abc', # provider.config.region,
@@ -81,16 +81,27 @@ module Ros
             create_file("#{destination_root}/#{deploy_path}/services.env", "#{content}\n")
           end
 
+          def create_fluentd_log_dir_for_compose
+            return unless components.keys.include?(:fluentd) and infra.cluster_type.eql?('instance')
+            content_dir = "#{deploy_path}/fluentd/log"
+            empty_directory(content_dir)
+            FileUtils.chmod('+w', content_dir)
+          end
+
           def service_files
             empty_directory("#{destination_root}/#{deploy_path}")
+            base_service_template_dir = "#{File.dirname(__FILE__)}/templates/services"
             components.each do |service, definition|
               @service = Model.new(service, definition, deploy_path)
               template("#{template_dir}/#{service}.yml.erb", "#{destination_root}/#{deploy_path}/#{service}.yml")
-              service_dir = "#{File.dirname(__FILE__)}/templates/services/#{service}"
-              if Dir.exists?(service_dir)
-                Dir["#{service_dir}/*"].each do |template_file|
-                  next if File.basename(template_file).eql?('nginx.conf.erb')
-                  template(template_file, "#{destination_root}/#{deploy_path}/#{service}/#{File.basename(template_file).gsub('.erb', '')}")
+              service_template_dir = "#{base_service_template_dir}/#{service}"
+              if Dir.exists?(service_template_dir)
+                Dir["#{service_template_dir}/**/*"].reject{ |fn| File.directory?(fn) }.each do |template_file|
+                  # skip if it exists as an instance method on this class as it will be invoked by thor automatically
+                  next if respond_to?(File.basename(template_file).gsub('.', '_').chomp('_erb').to_sym)
+                  binding.pry
+                  destination_file = "#{destination_root}/#{deploy_path}/#{template_file.gsub("#{base_service_template_dir}/", '')}"
+                  template(template_file, destination_file)
                 end
               end
               next unless envs = @service.environment
@@ -99,26 +110,18 @@ module Ros
             end
           end
 
-          def write_nginx
+          def nginx_conf
             # empty_directory("#{destination_root}/#{deploy_path}/nginx")
             remove_file("#{destination_root}/#{deploy_path}/nginx/nginx.conf")
             template("services/nginx/nginx.conf.erb", "#{destination_root}/#{deploy_path}/nginx/nginx.conf")
           end
 
           def generate_support_files
-            if infra.cluster_type.eql?('cluster')
+            if infra.cluster_type.eql?('kubernetes')
               directory('../files/helm', "#{deploy_path}/helm")
               directory('../files/k8s', "#{deploy_path}/k8s")
             end
           end
-
-          # def write_fluentd
-          #   return unless components.keys.include?(:fluentd)
-          #   content_dir = "#{core_root}/fluentd"
-          #   FileUtils.mkdir_p("#{content_dir}/log")
-          #   FileUtils.chmod('+w', "#{content_dir}/log")
-          #   FileUtils.mkdir_p("#{content_dir}/etc")
-          # end
 
           private
            

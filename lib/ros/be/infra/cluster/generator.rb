@@ -8,12 +8,13 @@ module Ros
       module Cluster
         module Model
           class << self
-            def settings; Settings.components.be.components.infra.components[Infra::Model.cluster_type] end
+            def settings; Settings.components.be.components.infra.components[infra.cluster_type] end
             def config; settings.config || {} end
             def environment; settings.environment || {} end
-            def deploy_path; "#{Infra::Model.deploy_path}/cluster" end
-            def provider; Infra::Model.config.providers[config.provider] end
+            def deploy_path; "#{infra.deploy_path}/cluster" end
+            def provider; Stack.config.infra[config.provider] end
             def name; config.name end
+            def infra; Infra::Model end
 
             def init(cli); send("init_#{config.provider}", cli) end
 

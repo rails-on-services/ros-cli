@@ -6,19 +6,19 @@ components:
       infra:
         config:
           cluster:
-            type: cluster
+            type: kubernetes
         components:
           vpc:
             config:
               provider: aws
-          cluster:
+          kubernetes:
             config:
               provider: aws
               name: production
       application:
         config:
           dns:
-            subdomain: whistler
+            subdomain: production
         components:
           services:
             ingress:

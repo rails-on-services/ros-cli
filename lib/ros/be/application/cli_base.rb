@@ -12,6 +12,9 @@ module Ros
         include Ros::CliBase
         attr_accessor :options
 
+        def application; Ros::Be::Application::Model end
+        def platform ; Ros::Be::Application::Platform::Model end
+
         def show(service_name)
           service = service_name.split('/')[0]
           service_name = "#{service_name}.yml" unless service_name.index('.')

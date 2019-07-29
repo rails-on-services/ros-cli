@@ -87,8 +87,8 @@ module Ros
           end
 
           def write_nginx
-            return unless infra.config.type.eql?('instance')
-            Service::Generator.new([], {}, { behavior: behavior }).invoke(:write_nginx)
+            return unless infra.cluster_type.eql?('instance')
+            Ros::Be::Application::Services::Generator.new([], {}, { behavior: behavior }).invoke(:nginx_conf)
           end
 
           private

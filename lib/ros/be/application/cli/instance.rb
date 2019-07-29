@@ -6,8 +6,6 @@ module Ros
       class Instance
         include CliBase
 
-        def init; STDOUT.puts 'init is not used/necessary for compose. only kubernetes' end
-
         def initialize(options = {})
           @options = options
         end
@@ -134,7 +132,7 @@ module Ros
           name_len = 21
           no_buf = -11
           STDOUT.puts "\nPlatform Services    Status                   Core Services" \
-            "        Status                   Infra Services       Status\n#{'-' * 144}"
+            "        Status                   Infra Services       Status\n#{'-' * 124}"
           (1..[infra_services.size, my_services.size, ros_services.size].max).each do |i|
             mn, ms = my_services.shift
             rn, rs = ros_services.shift
@@ -179,7 +177,7 @@ module Ros
           return unless nginx_reload
           running_services = services(application_component: 'platform')
           silence_output do
-            Ros::Be::Application::Services::Generator.new.invoke(:write_nginx, [running_services])
+            Ros::Be::Application::Services::Generator.new.invoke(:nginx_conf, [running_services])
           end
           compose('stop nginx')
           compose('up -d nginx')
@@ -231,8 +229,6 @@ module Ros
         end
 
         def namespace; @namespace ||= (ENV['ROS_PROFILE'] ? "#{ENV['ROS_PROFILE']}-" : '') + Ros::Generators::Stack.compose_project_name end
-
-        def application; Ros::Be::Application::Model end
 
         def config_files
           Dir[application.compose_file]

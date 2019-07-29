@@ -13,25 +13,25 @@ components:
           vpc:
             config:
               provider: aws
-              name: demo
+              name: development
               cidr: 10.100.0.0/16
           dns:
             config:
               provider: aws
               root_domain: rails-on-services.org
-              sub_domain: demo
+              sub_domain: development
           cert:
             config:
               provider: aws
-              domain_name: demo.rails-on-services.org
+              domain_name: development.rails-on-services.org
               route53_domain_name: rails-on-services.org
-              subject_alternative_names: ['*.demo.rails-on-services.org']
+              subject_alternative_names: ['*.development.rails-on-services.org']
           instance:
             config:
               provider: aws
-              name_prefix: demo
-              lb_dns_hostnames: ['api.demo.rails-on-services.org']
-              ec2_key_pair: demo_admin
+              name_prefix: development
+              lb_dns_hostnames: ['api.development.rails-on-services.org']
+              ec2_key_pair: development
             # NOTE: The instance does not deploy services like the cluster does
             # components:
             #   services:

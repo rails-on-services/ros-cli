@@ -30,8 +30,8 @@ module Ros
         map %w(d) => :destroy
         subcommand 'destroy', Ros::Be::Application::GenerateCli
 
-        desc 'preflight', 'Initialize a project environment'
-        def preflight
+        desc 'init', 'Initialize a project environment'
+        def init
           preflight_check(fix: true)
           preflight_check
         end
@@ -39,12 +39,6 @@ module Ros
         desc 'status', 'Show platform services status'
         def status
           context(options).status
-        end
-
-        desc 'init', 'Initialize the cluster'
-        option :long, type: :boolean, aliases: '-l', desc: 'Run the long form of the command'
-        def init
-          context(options).init
         end
 
         desc 'build IMAGE', 'build one or all images'
