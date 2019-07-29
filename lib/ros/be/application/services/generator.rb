@@ -21,11 +21,11 @@ module Ros
 
           # skaffold only methods
           def relative_path; @relative_path ||= ('../' * deploy_path.split('/').size).chomp('/') end
-          def chart_path; "#{relative_path}/devops/helm/charts/application/services" end
+          def chart_path; "../services/helm/charts/service" end
           # api_hostname is for ingress controller
           def api_hostname; application.api_hostname end
           # def bucket_name; stack.current_feature_set end
-          def skaffold_version; Stack.config.skaffold_version end
+          def skaffold_version; Stack.components.be.config.skaffold_version end
 
           # skaffold sftp only methods
           def sftp

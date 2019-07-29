@@ -10,7 +10,7 @@ module Ros
 
       def name; config.name end
 
-      def registry_secret_name; "registry-#{Settings.platform.config.image_registry}" end
+      def registry_secret_name; "registry-#{Settings.config.platform.config.image_registry}" end
 
       def deploy_path; "tmp/deployments/#{Ros.env}" end
 
@@ -20,7 +20,7 @@ module Ros
       # TODO: Update to handle more than just rails
       def image_suffix
         @image_suffix ||= (
-          Settings.platform.config.image.build_args.rails_env.eql?('production') ? '' : "-#{Settings.platform.config.image.build_args.rails_env}"
+          image.build_args.rails_env.eql?('production') ? '' : "-#{image.build_args.rails_env}"
         )
       end
 
@@ -34,6 +34,7 @@ module Ros
       end
 
       def version; Dir.chdir(Ros.root) { Bump::Bump.current } end
+      def image; Settings.config.platform.config.image end
     end
   end
 end

@@ -43,12 +43,12 @@ module Ros
           def relative_path; @relative_path ||= ('../' * deploy_path.split('/').size).chomp('/') end
           def context_path; "#{relative_path}#{config.ros ? '/ros' : ''}" end
           def dockerfile_path; "#{relative_path}/#{config.ros ? 'ros/' : ''}Dockerfile" end
-          def chart_path; "#{relative_path}/devops/helm/charts/service" end
+          def chart_path; "../services/helm/charts/service" end
           def is_ros_service; config.ros end
           def pull_policy; 'Always' end
           def pull_secret; Stack.registry_secret_name end
           def secrets_files; environment ? [:platform, name.to_sym] : %i(platform) end
-          def skaffold_version; Stack.config.skaffold_version end
+          def skaffold_version; Settings.components.be.config.skaffold_version end
         end
 
         class Generator < Thor::Group
@@ -61,7 +61,6 @@ module Ros
           def service_files
             empty_directory("#{destination_root}/#{deploy_path}")
             components.each do |service, definition|
-              # @service = Ros::Be::Application::Service.new(service, definition, deploy_path)
               @service = Service.new(service, definition, deploy_path)
               template("#{template_dir}/service.yml.erb", "#{destination_root}/#{deploy_path}/#{service}.yml")
               next unless envs = @service.environment
@@ -136,7 +135,7 @@ module Ros
           def settings; application.settings.components.platform end
 
           def template_dir
-            cluster.config.type.eql?('kubernetes') ? 'skaffold' : 'compose'
+            infra.cluster_type.eql?('kubernetes') ? 'skaffold' : 'compose'
           end
 
           # def cluster; Ros::Be::Infra::Model end

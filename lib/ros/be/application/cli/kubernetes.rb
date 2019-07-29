@@ -5,12 +5,14 @@ module Ros
     module Application
       class Kubernetes
         include CliBase
+        attr_accessor :services
 
         def initialize(options = {})
           @options = options
         end
 
         def up(services)
+          @services = services.empty? ? enabled_services : services
           generate_config if stale_config
           if options.force or not system_cmd(kube_env, "kubectl get ns #{namespace}")
             STDOUT.puts 'Forcing namespace create' if options.force
@@ -19,11 +21,9 @@ module Ros
           else
             STDOUT.puts 'Namespace exists. skipping create. Use -f to force'
           end
-          services = enabled_services if services.empty?
+          deploy_platform_environment
+          deploy_platform
           show_endpoint
-          # binding.pry
-          thing = ARGV[1] || '*'
-          # binding.pry
         end
 
         def deploy_namespace
@@ -37,30 +37,31 @@ module Ros
         end
 
         def deploy_services
-          thing = ARGV[1] || '*'
-          Dir["#{services_root}/#{thing}.env"].each { |file| sync_secret(file) }
-          Dir.chdir(services_root) { Dir["#{thing}.yml"].each { |file| skaffold("deploy -f #{file}") } }
+          services.each do |service|
+            env_file = "#{services_root}/#{service}.env"
+            sync_secret(env_file) if File.exists?(env_file)
+            service_file = "#{services_root}/#{service}.yml"
+            Dir.chdir(services_root) { skaffold("deploy -f #{service_file}") }
+          end
+        end
+
+        def deploy_platform_environment
+          kube_cmd = "create secret generic #{Stack.registry_secret_name} " \
+            "--from-file=.dockerconfigjson=#{Dir.home}/.docker/config.json --type=kubernetes.io/dockerconfigjson"
+          kube_ctl(kube_cmd)
         end
 
         def deploy_platform
-          # return unless check and gem_version_check
-          # deploy secrets
-          thing = ARGV[1] || '*'
-          Dir["#{platform_root}/#{thing}.env"].each { |file| sync_secret(file) }
-          kube_cmd = "create secret generic #{Ros::Generators::Stack.registry_secret_name} " \
-            "--from-file=.dockerconfigjson=#{Dir.home}/.docker/config.json --type=kubernetes.io/dockerconfigjson"
-          kube_ctl(kube_cmd) if thing.eql?('*')
-
-          # deploy services
-          Dir.chdir(platform_root) do
-            Dir["#{thing}.yml"].each do |file|
+          services.each do |service|
+            env_file = "#{platform_root}/#{service}.env"
+            sync_secret(env_file) if File.exists?(env_file)
+            service_file = "#{platform_root}/#{service}.yml"
+            Dir.chdir(platform_root) do
               # skaffold("build -f #{file}")
-              # TODO: Can get the profiles by loading the YAML and iterating over the list of profiles
-              # since the profiles in the file were generated from the configuration already
-              service = file.gsub('.yml', '')
-              # run does build and deploy 
-              platform.components[service].profiles.each { |profile| skaffold("run -f #{file} -p #{profile}") }
-              # platform.services[service].profiles.each { |profile| skaffold("deploy -f #{file} -p #{profile}") }
+              # next unless check and gem_version_check
+              platform.settings.components[service].config.profiles.each do |profile|
+                skaffold("run -f #{File.basename(service_file)} -p #{profile}")
+              end
             end
           end
         end
@@ -130,7 +131,8 @@ module Ros
 
         def skaffold_env
           @skaffold_env ||=
-            { 'SKAFFOLD_DEFAULT_REPO' => Settings.platform.config.image_registry, 'IMAGE_TAG' => Ros::Generators::Stack.image_tag }.merge(kube_env)
+            { 'SKAFFOLD_DEFAULT_REPO' => Stack.config.platform.config.image_registry,
+              'IMAGE_TAG' => Stack.image_tag }.merge(kube_env)
         end
 
         def kube_env; @kube_env ||= { 'KUBECONFIG' => kubeconfig, 'TILLER_NAMESPACE' => namespace } end
@@ -149,9 +151,7 @@ module Ros
           kube_ctl("create secret generic #{name} --from-env-file #{file}")
         end
 
-        def check
-          File.file?(kubeconfig)
-        end
+        def check; File.file?(kubeconfig) end
 
         def platform_root; "#{Ros::Be::Application::Model.deploy_path}/platform" end
         def services_root; "#{Ros::Be::Application::Model.deploy_path}/services" end
