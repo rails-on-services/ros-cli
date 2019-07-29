@@ -99,8 +99,7 @@ module Ros
                 Dir["#{service_template_dir}/**/*"].reject{ |fn| File.directory?(fn) }.each do |template_file|
                   # skip if it exists as an instance method on this class as it will be invoked by thor automatically
                   next if respond_to?(File.basename(template_file).gsub('.', '_').chomp('_erb').to_sym)
-                  binding.pry
-                  destination_file = "#{destination_root}/#{deploy_path}/#{template_file.gsub("#{base_service_template_dir}/", '')}"
+                  destination_file = "#{destination_root}/#{deploy_path}/#{template_file.gsub("#{base_service_template_dir}/", '')}".chomp('.erb')
                   template(template_file, destination_file)
                 end
               end

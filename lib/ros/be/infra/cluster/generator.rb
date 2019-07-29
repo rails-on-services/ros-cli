@@ -8,7 +8,7 @@ module Ros
       module Cluster
         module Model
           class << self
-            def settings; Settings.components.be.components.infra.components[infra.cluster_type] end
+            def settings; infra.components[infra.cluster_type] end
             def config; settings.config || {} end
             def environment; settings.environment || {} end
             def deploy_path; "#{infra.deploy_path}/cluster" end

@@ -11,12 +11,11 @@ module Ros
         end
 
         def up(services)
-          return unless check
           generate_config if stale_config
           if options.force or not system_cmd(kube_env, "kubectl get ns #{namespace}")
             STDOUT.puts 'Forcing namespace create' if options.force
-            deploy_application_namespace
-            deploy_application_services
+            deploy_namespace
+            deploy_services
           else
             STDOUT.puts 'Namespace exists. skipping create. Use -f to force'
           end
@@ -27,7 +26,7 @@ module Ros
           # binding.pry
         end
 
-        def deploy_application_namespace
+        def deploy_namespace
           # create namespace
           system_cmd(kube_env, "kubectl create ns #{namespace}")
           system_cmd(kube_env, "kubectl label namespace #{namespace} istio-injection=enabled --overwrite")
@@ -37,13 +36,13 @@ module Ros
           system_cmd(kube_env, 'helm init --upgrade --wait --service-account tiller')
         end
 
-        def deploy_application_services
+        def deploy_services
           thing = ARGV[1] || '*'
           Dir["#{services_root}/#{thing}.env"].each { |file| sync_secret(file) }
           Dir.chdir(services_root) { Dir["#{thing}.yml"].each { |file| skaffold("deploy -f #{file}") } }
         end
 
-        def deploy_platform_services
+        def deploy_platform
           # return unless check and gem_version_check
           # deploy secrets
           thing = ARGV[1] || '*'
@@ -116,7 +115,15 @@ module Ros
         end
 
         # Supporting methods (2)
-        def kube_ctl(cmd); system_cmd(kube_env, "kubectl -n #{namespace} #{cmd}") end
+        def kube_ctl(cmd)
+          if not File.exists?(kubeconfig)
+            STDOUT.puts "kubeconfig not found at #{kubeconfig}"
+            return
+          end
+          STDOUT.puts "Using kubeconfig file: #{kubeconfig}" if options.v
+          system_cmd(kube_env, "kubectl -n #{namespace} #{cmd}")
+        end
+
         def kube_ctl_x(cmd); %x(kubectl -n #{namespace} #{cmd}) end
 
         def skaffold(cmd); system_cmd(skaffold_env, "skaffold -n #{namespace} #{cmd}") end
@@ -128,9 +135,9 @@ module Ros
 
         def kube_env; @kube_env ||= { 'KUBECONFIG' => kubeconfig, 'TILLER_NAMESPACE' => namespace } end
 
-        def kubeconfig; @kubeconfig ||= '~/.kube/config' end
+        def kubeconfig; @kubeconfig ||= "#{Dir.home}/.kube/config" end
 
-        def namespace; @namespace ||= "#{Stack.current_feature_set}-#{Settings.config.name}" end
+        def namespace; @namespace ||= "#{application.current_feature_set}-#{Stack.config.name}" end
 
         def switch!; end
 
@@ -143,7 +150,6 @@ module Ros
         end
 
         def check
-          puts File.file?(kubeconfig) ? "Using kubeconfig file: #{kubeconfig}" : "Kubeconfig not found at #{kubeconfig}"
           File.file?(kubeconfig)
         end
 
