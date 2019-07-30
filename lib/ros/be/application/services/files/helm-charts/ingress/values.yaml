@@ -1,0 +1,16 @@
+# Default values for ingress.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+nameOverride: ""
+fullnameOverride: ""
+
+# extra labels for the created resources
+labels: {}
+
+# External DNS hostnames
+hosts: []
+
+services: []
+  # - name: iam
+  #   port: 80
+  #   prefix: /iam
