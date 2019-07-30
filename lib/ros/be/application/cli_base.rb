@@ -73,7 +73,15 @@ module Ros
           @json ||= File.exists?(creds_file) ? JSON.parse(File.read(creds_file)) : []
         end
 
-        def creds_file; "#{Ros.is_ros? ? '' : 'ros/'}services/iam/tmp/#{application.current_feature_set}/credentials.json" end
+        def creds_file
+          if infra.cluster_type.eql?('kubernetes')
+            if not File.exists?(creds_file)
+              kubectl("cp iam-54c5746b9b-njlpl:/home/rails/services/app/README.md ./README.md")
+            end
+          elsif infra.cluster_type.eql?('instance')
+            @creds_file ||= "#{Ros.is_ros? ? '' : 'ros/'}services/iam/tmp/#{application.current_feature_set}/credentials.json"
+          end
+        end
 
         # TODO: support the proprietary project
         # TODO: each type, instance and k8s need to get their files

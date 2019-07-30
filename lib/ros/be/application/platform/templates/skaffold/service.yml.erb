@@ -24,11 +24,15 @@ profiles:<% @service.profiles.each do |profile| %>
         - name: <%= @service.name %><%= xname %>
           chartPath: <%= @service.chart_path %>
           skipBuildDependencies: true
-          values:
-            image: <%= @service.name %>
-          imageStrategy:
-            helm: {}
+          # values:
+            # image: <%= @service.name %>
+          # imageStrategy:
+          #   helm: {}
           wait: false
+          setValueTemplates:
+            replicaCount: "{{.REPLICA_COUNT}}"
+            image.tag: "{{.IMAGE_TAG}}"
+            image.repository: "{{.SKAFFOLD_DEFAULT_REPO}}/<%= @service.name %>"
           overrides:
             nameOverride: <%= @service.name %><%= xname %>
             image:

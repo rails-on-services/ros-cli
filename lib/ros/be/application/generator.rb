@@ -13,6 +13,9 @@ module Ros
           def config; settings.config || Config::Options.new end
           def components; settings.components end
           def c_environment; settings.environment || Config::Options.new end
+
+          def platform; components.platform end
+          def services; components.services end
           # def deploy_path; "#{Stack.deploy_path}/be/application" end
           def deploy_path; "#{Stack.deploy_path}/be/application/#{current_feature_set}" end
 

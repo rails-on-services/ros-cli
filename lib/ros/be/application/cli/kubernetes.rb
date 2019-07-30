@@ -42,6 +42,7 @@ module Ros
 
         def deploy_services
           services.each do |service|
+            next unless application.services.components.keys.include?(service.to_sym)
             env_file = "#{services_root}/#{service}.env"
             sync_secret(env_file) if File.exists?(env_file)
             service_file = "#{services_root}/#{service}.yml"
@@ -57,14 +58,20 @@ module Ros
 
         def deploy_platform
           services.each do |service|
+            next unless platform.components.keys.include?(service.to_sym)
             env_file = "#{platform_root}/#{service}.env"
             sync_secret(env_file) if File.exists?(env_file)
             service_file = "#{platform_root}/#{service}.yml"
             Dir.chdir(platform_root) do
-              # skaffold("build -f #{file}")
+              # skaffold cmds: build, deploy or run (build and deploy)
+              base_cmd = options.build ? 'run' : 'deploy'
               # next unless check and gem_version_check
-              platform.settings.components[service].config.profiles.each do |profile|
-                skaffold("run -f #{File.basename(service_file)} -p #{profile}")
+              profiles = options.profile.eql?('all') ? platform.components[service].config.profiles : [options.profile]
+              replica_count = (options.replicas || 1).to_s
+              profiles.each do |profile|
+                skaffold("#{base_cmd} -f #{File.basename(service_file)} -p #{profile}",
+                         { 'REPLICA_COUNT' => replica_count })
+                kubectl("scale deploy #{service} --replicas=#{replica_count}")
               end
             end
           end
@@ -94,12 +101,15 @@ module Ros
 
         def restart(services)
           generate_config if stale_config
-          status
+          stop(services)
+          services.each { |service| kubectl("scale deploy #{service} --replicas=1") }
+          # status
         end
 
         def stop(services)
           generate_config if stale_config
           services.each { |service| kubectl("scale deploy #{service} --replicas=0") }
+          # services.each { |service| kubectl("delete pod -l #{service} --replicas=0") }
         end
 
         def down
@@ -150,12 +160,16 @@ module Ros
 
         def kubectl_x(cmd); %x(kubectl -n #{namespace} #{cmd}) end
 
-        def skaffold(cmd); system_cmd(skaffold_env, "skaffold -n #{namespace} #{cmd}") end
+        def skaffold(cmd, env = {})
+          system_cmd(skaffold_env.merge(env), "skaffold -n #{namespace} #{cmd}")
+          puts "with environment: #{env}" if options.v
+        end
 
         def skaffold_env
-          @skaffold_env ||=
-            { 'SKAFFOLD_DEFAULT_REPO' => Stack.config.platform.config.image_registry,
-              'IMAGE_TAG' => Stack.image_tag }.merge(kube_env)
+          @skaffold_env ||= {
+            'SKAFFOLD_DEFAULT_REPO' => Stack.config.platform.config.image_registry,
+            'IMAGE_TAG' => Stack.image_tag
+          }.merge(kube_env)
         end
 
         def kube_env; @kube_env ||= { 'KUBECONFIG' => kubeconfig, 'TILLER_NAMESPACE' => namespace } end

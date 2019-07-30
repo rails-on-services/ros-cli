@@ -9,6 +9,7 @@ module Ros
           class << self
             def settings; Settings.components.be.components.application.components.platform end
             def config; settings.config end
+            def components; settings.components end
           end
         end
 
