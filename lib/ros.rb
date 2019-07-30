@@ -11,11 +11,6 @@ Config.setup do |config|
 end
 
 module Ros
-
-  def self.gem_root
-    Pathname.new(File.expand_path('../..', __FILE__))
-  end
-
   # Copied from ActiveSupport::StringInquirer
   class StringInquirer < String
     def method_missing(method_name, *arguments)
@@ -28,8 +23,8 @@ module Ros
   end
 
   class << self
-    def from_rake(task, args)
-      behavior, *stack = task.name.split(':')
+    def from_rake(task_name, args)
+      behavior, *stack = task_name.split(':')
       require 'ros/stack'
       require 'ros/be/application/generator'
       require 'ros/be/infra/generator'
@@ -95,30 +90,7 @@ module Ros
         end)
     end
 
-    # NOTE: uri and api_hostname are implemented in deployment.rb
-    # this file is not namespace aware so
-    # def uri; URI("#{Settings.infra.config.endpoints.api.scheme}://#{api_hostname}") end
-
-    # def api_hostname
-    #   @api_hostname ||= "#{Settings.infra.config.endpoints.api.host}.#{Settings.infra.config.dns.subdomain}.#{Settings.infra.config.dns.domain}"
-    # end
-
-    # def api_hostname
-    #   @api_hostname ||=
-    #     if Settings.infra.branch_deployments and not branch_name.eql?(infra.api_branch)
-    #       "#{Settins.infra.endpoints.api.host}-#{branch_name}"
-    #     else
-    #       Settings.infra.endpoints.api.host
-    #     end + ".#{Settings.infra.dns.subdomain}.#{Settings.infra.dns.domain}"
-    # end
-
-    # def service_names_enabled; Settings.platform.services.reject{|s| s.last.enabled.eql? false }.map{ |s| s.first } end
-    # def service_names; Settings.platform.services.keys end
-
-    # def tf_root; root.join('devops/terraform') end
-    # def ansible_root; root.join('devops/ansible') end
-    def helm_root; root.join('devops/helm') end
-    def k8s_root; root.join('devops/k8s') end
+    def gem_root; Pathname.new(File.expand_path('../..', __FILE__)) end
 
     def config_dir; "#{Ros.root}/config" end
     def environments_dir; "#{config_dir}/environments" end

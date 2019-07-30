@@ -36,6 +36,11 @@ module Ros
               end
             end
 
+            def copy_kubernetes_helm_charts
+              return unless infra.cluster_type.eql?('kubernetes')
+              directory('../files/helm-charts', "#{deploy_path}/helm-charts")
+            end
+
             private
             def environment
               @environment ||= Stack.environment.dup.merge!(cluster.environment.dup.merge!(settings.environment.to_hash).to_hash)

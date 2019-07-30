@@ -15,19 +15,6 @@ module Ros
           compose("build #{services.join(' ')}")
         end
 
-        def test(services)
-          services = enabled_services if services.empty?
-          generate_config if stale_config
-          services.each do |service|
-            is_ros = svc_config(service)&.config&.ros
-            prefix = is_ros ? 'app:' : ''
-            exec_dir = is_ros ? 'spec/dummy/' : ''
-            next if exec(service, "rails #{prefix}db:test:prepare") && exec(service, "#{exec_dir}bin/spring rspec")
-            return false
-          end
-          true
-        end
-
         def push(services)
           services = enabled_services if services.empty?
           generate_config if stale_config
@@ -57,8 +44,6 @@ module Ros
           console(services.last) if options.console
           exec(services.last, 'bash') if options.shell
         end
-
-        def svc_config(service); Settings.components.be.components.application.components.platform.components.dig(service) end
 
         def ps
           generate_config if stale_config

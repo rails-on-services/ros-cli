@@ -11,6 +11,10 @@ module Ros
           @options = options
         end
 
+        # def up(services)
+        #   x_services
+        # end
+
         def up(services)
           @services = services.empty? ? enabled_services : services
           generate_config if stale_config
@@ -32,7 +36,7 @@ module Ros
           system_cmd(kube_env, "kubectl label namespace #{namespace} istio-injection=enabled --overwrite")
 
           # deploy helm into namespace
-          kube_ctl("apply -f #{Ros.k8s_root}/tiller-rbac")
+          kubectl("apply -f #{cluster.kubernetes_root}/tiller-rbac")
           system_cmd(kube_env, 'helm init --upgrade --wait --service-account tiller')
         end
 
@@ -48,7 +52,7 @@ module Ros
         def deploy_platform_environment
           kube_cmd = "create secret generic #{Stack.registry_secret_name} " \
             "--from-file=.dockerconfigjson=#{Dir.home}/.docker/config.json --type=kubernetes.io/dockerconfigjson"
-          kube_ctl(kube_cmd)
+          kubectl(kube_cmd)
         end
 
         def deploy_platform
@@ -66,36 +70,36 @@ module Ros
           end
         end
 
-        # def components; Settings.components.be.components.application.components.platform.components end
-
         def ps
           generate_config if stale_config
-          kube_ctl('get pods')
+          kubectl('get pods')
         end
 
         def console(service)
           generate_config if stale_config
-          kube_ctl("exec -it #{pod(service)} -c #{service} rails console")
+          kubectl("exec -it #{pod(service)} -c #{service} rails console")
         end
 
         def exec(service, command)
           generate_config if stale_config
-          kube_ctl("exec -it #{pod(service)} -c #{service} #{command}")
+          kubectl("exec -it #{pod(service)} -c #{service} #{command}")
         end
 
         def logs(service)
           generate_config if stale_config
           trap("SIGINT") { throw StandardError } if options.tail
-          kube_ctl("#{command('logs')} #{pod(service)} -c #{service}")
+          kubectl("#{command('logs')} #{pod(service)} -c #{service}")
         rescue StandardError
         end
 
         def restart(services)
           generate_config if stale_config
+          status
         end
 
         def stop(services)
           generate_config if stale_config
+          services.each { |service| kubectl("scale deploy #{service} --replicas=0") }
         end
 
         def down
@@ -108,15 +112,34 @@ module Ros
         def command(cmd); "#{cmd}#{options.tail ? ' -f' : ''}" end
 
         def pod(service)
-          result = kube_ctl_x("get pod -l app=#{service} -l app.kubernetes.io/instance=#{service}")
+          result = kubectl_x("get pod -l app=#{service} -l app.kubernetes.io/instance=#{service}")
           result.split("\n").each do |res|
             pod, count, status, restarts, age = res.split
             break pod if status.eql?('Running')
           end
         end
 
+        def x_services(status: nil, application_component: nil)
+          status ||= 'running'
+          filters = []
+          # filters.append("--filter 'status=#{status}'")
+          filters.append("-l stack.name=#{Settings.config.name}")
+          filters.append("-l application.component=#{application_component}") if application_component
+          filters.append("-l platform.feature_set=#{application.current_feature_set}")
+          # filters.append("--format '{{.Names}}'")
+          # kubectl("get pods -l #{filters.join(' ')}"
+          cmd = "get pods #{filters.join(' ')}"
+          puts cmd
+          # cmd = "docker ps #{filters.join(' ')}"
+          ar = kubectl_x(cmd)
+          puts ar
+          # TODO: _server is only one profile; fix
+          # TODO: _1 is assumed; there could be > 1
+          ar.split("\n").map{ |a| a.gsub("#{application.compose_project_name}_", '').chomp('_1') }
+        end
+
         # Supporting methods (2)
-        def kube_ctl(cmd)
+        def kubectl(cmd)
           if not File.exists?(kubeconfig)
             STDOUT.puts "kubeconfig not found at #{kubeconfig}"
             return
@@ -125,7 +148,7 @@ module Ros
           system_cmd(kube_env, "kubectl -n #{namespace} #{cmd}")
         end
 
-        def kube_ctl_x(cmd); %x(kubectl -n #{namespace} #{cmd}) end
+        def kubectl_x(cmd); %x(kubectl -n #{namespace} #{cmd}) end
 
         def skaffold(cmd); system_cmd(skaffold_env, "skaffold -n #{namespace} #{cmd}") end
 
@@ -146,9 +169,9 @@ module Ros
         def sync_secret(file)
           name = File.basename(file).chomp('.env')
           # TODO: base64 decode values then do an md5 on the contents
-          # yaml = kube_ctl("get secret #{name} -o yaml")
-          kube_ctl("delete secret #{name}") if kube_ctl("get secret #{name}")
-          kube_ctl("create secret generic #{name} --from-env-file #{file}")
+          # yaml = kubectl("get secret #{name} -o yaml")
+          kubectl("delete secret #{name}") if kubectl("get secret #{name}")
+          kubectl("create secret generic #{name} --from-env-file #{file}")
         end
 
         def check; File.file?(kubeconfig) end

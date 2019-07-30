@@ -21,7 +21,7 @@ module Ros
 
           # skaffold only methods
           def relative_path; @relative_path ||= ('../' * deploy_path.split('/').size).chomp('/') end
-          def chart_path; "../services/helm/charts/service" end
+          def chart_path; 'helm-charts' end
           # api_hostname is for ingress controller
           def api_hostname; application.api_hostname end
           # def bucket_name; stack.current_feature_set end
@@ -115,11 +115,9 @@ module Ros
             template("services/nginx/nginx.conf.erb", "#{destination_root}/#{deploy_path}/nginx/nginx.conf")
           end
 
-          def generate_support_files
-            if infra.cluster_type.eql?('kubernetes')
-              directory('../files/helm', "#{deploy_path}/helm")
-              directory('../files/k8s', "#{deploy_path}/k8s")
-            end
+          def copy_kubernetes_helm_charts
+            return unless infra.cluster_type.eql?('kubernetes')
+            directory('../files/helm-charts', "#{deploy_path}/helm-charts")
           end
 
           private

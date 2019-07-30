@@ -12,8 +12,25 @@ module Ros
         include Ros::CliBase
         attr_accessor :options
 
+        def infra; Ros::Be::Infra::Model end
+        def cluster; Ros::Be::Infra::Cluster::Model end
         def application; Ros::Be::Application::Model end
         def platform ; Ros::Be::Application::Platform::Model end
+
+        def test(services)
+          services = enabled_services if services.empty?
+          generate_config if stale_config
+          services.each do |service|
+            is_ros = svc_config(service)&.config&.ros
+            prefix = is_ros ? 'app:' : ''
+            exec_dir = is_ros ? 'spec/dummy/' : ''
+            next if exec(service, "rails #{prefix}db:test:prepare") && exec(service, "#{exec_dir}bin/spring rspec")
+            return false
+          end
+          true
+        end
+
+        def svc_config(service); Settings.components.be.components.application.components.platform.components.dig(service) end
 
         def show(service_name)
           service = service_name.split('/')[0]
