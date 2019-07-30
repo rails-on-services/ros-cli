@@ -53,11 +53,8 @@ module Ros
               header: cluster.config.type.eql?('kubernetes') ? "configMaps:\n  rails-audit-log.conf: |" : '',
               # log_tag: "#{api_hostname}.rack-traffic-log",
               log_tag: "**.rack-traffic-log",
-              fluent_code_from_duan: 'fluent_code_from_duan',
-              provider: cluster.config.provider,
+              kafka_brokers: 'kafkastack:9092',
               # storage_name: "storage#{base_hostname.gsub('.', '-')}",
-              storage_name: application.bucket_name,
-              storage_region: 'abc', # provider.config.region,
               current_feature_set: application.current_feature_set
             })
           end

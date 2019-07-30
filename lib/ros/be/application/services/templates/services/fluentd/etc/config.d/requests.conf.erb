@@ -16,22 +16,9 @@
       remove_keys _unix_time
     </filter>
 
-    <match <%= @service.fluentd.log_tag %>><% if @service.fluentd.provider.eql? 'aws' %>
-      @type s3
-      <instance_profile_credentials>
-      </instance_profile_credentials>
-      s3_bucket <%= @service.fluentd.storage_name %>
-      s3_region <%= @service.fluentd.storage_region  %>
-      store_as json
-      s3_object_key_format "<%= @service.fluentd.current_feature_set %>/fluentd/<%= @service.fluentd.fluent_code_from_duan %>/dt=%Y-%m-%d-%H-%M/%{index}.%{file_extension}"<% end %>
-      <buffer tag,time>
-        @type file
-        path /var/log/fluent/s3
-        timekey 5m
-        timekey_wait 5m
-        timekey_use_utc true
-      </buffer>
-      <format>
-        @type json
-      </format>
+    <match <%= @service.fluentd.log_tag %>>
+      @type kafka_buffered
+      brokers <%= @service.fluentd.kafka_brokers %>
+      default_topic http_request_log
+      
     </match>
