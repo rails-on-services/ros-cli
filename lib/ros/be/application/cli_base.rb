@@ -17,6 +17,15 @@ module Ros
         def application; Ros::Be::Application::Model end
         def platform ; Ros::Be::Application::Platform::Model end
 
+        def generate_config
+          silence_output do
+            Ros::Be::Application::Services::Generator.new([], {}, {behavior: :revoke}).invoke_all
+            Ros::Be::Application::Services::Generator.new.invoke_all
+            Ros::Be::Application::Platform::Generator.new([], {}, {behavior: :revoke}).invoke_all
+            Ros::Be::Application::Platform::Generator.new.invoke_all
+          end
+        end
+
         def test(services)
           services = enabled_services if services.empty?
           generate_config if stale_config
@@ -48,6 +57,20 @@ module Ros
           STDOUT.puts "*** API Docs available at [TO IMPLEMENT] ***\n\n"
         end
 
+        def credentials
+          generate_config if stale_config
+          postman = JSON.parse(json.each_with_object([]) { |j, a| a.append(Credential.new(j).to_postman) }.to_json)
+          envs = json.each_with_object([]) { |j, a| a.append(Credential.new(j).to_env) }
+          cli = json.each_with_object([]) { |j, a| a.append(Credential.new(j).to_cli) }.join("\n\n")
+          STDOUT.puts "Postman:"
+          STDOUT.puts (postman)
+          STDOUT.puts "\nEnvs:"
+          STDOUT.puts (envs)
+          STDOUT.puts "\nCli:"
+          STDOUT.puts (cli)
+          STDOUT.puts "\nCredentials source: #{creds_file}"
+        end
+
         def enabled_services
           application.components.platform.components.to_hash.select do |k, v|
             v.nil? || v.dig(:config, :enabled).nil? || v.dig(:config, :enabled)
@@ -75,9 +98,7 @@ module Ros
 
         def creds_file
           if infra.cluster_type.eql?('kubernetes')
-            if not File.exists?(creds_file)
-              kubectl("cp iam-54c5746b9b-njlpl:/home/rails/services/app/README.md ./README.md")
-            end
+            @creds_file ||= 'credentials.json'
           elsif infra.cluster_type.eql?('instance')
             @creds_file ||= "#{Ros.is_ros? ? '' : 'ros/'}services/iam/tmp/#{application.current_feature_set}/credentials.json"
           end

@@ -50,20 +50,6 @@ module Ros
           compose(:ps)
         end
 
-        def credentials
-          generate_config if stale_config
-          postman = JSON.parse(json.each_with_object([]) { |j, a| a.append(Credential.new(j).to_postman) }.to_json)
-          envs = json.each_with_object([]) { |j, a| a.append(Credential.new(j).to_env) }
-          cli = json.each_with_object([]) { |j, a| a.append(Credential.new(j).to_cli) }.join("\n\n")
-          STDOUT.puts "Postman:"
-          STDOUT.puts (postman)
-          STDOUT.puts "\nEnvs:"
-          STDOUT.puts (envs)
-          STDOUT.puts "\nCli:"
-          STDOUT.puts (cli)
-          STDOUT.puts "\nCredentials source: #{creds_file}"
-        end
-
         def console(service)
           generate_config if stale_config
           exec(service, 'rails console')
@@ -217,15 +203,6 @@ module Ros
 
         def config_files
           Dir[application.compose_file]
-        end
-
-        def generate_config
-          silence_output do
-            Ros::Be::Application::Services::Generator.new([], {}, {behavior: :revoke}).invoke_all
-            Ros::Be::Application::Services::Generator.new.invoke_all
-            Ros::Be::Application::Platform::Generator.new([], {}, {behavior: :revoke}).invoke_all
-            Ros::Be::Application::Platform::Generator.new.invoke_all
-          end
         end
       end
     end

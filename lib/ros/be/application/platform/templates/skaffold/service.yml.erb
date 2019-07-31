@@ -34,6 +34,13 @@ profiles:<% @service.profiles.each do |profile| %>
             image.tag: "{{.IMAGE_TAG}}"
             image.repository: "{{.SKAFFOLD_DEFAULT_REPO}}/<%= @service.name %>"
           overrides:
+            labels:
+              stack.name: <%= @service.stack_name %>
+              stack.component: be
+              be.component: application
+              application.component: platform
+              platform.feature_set: <%= @service.current_feature_set %>
+              service.type: <%= profile %>
             nameOverride: <%= @service.name %><%= xname %>
             image:
               pullPolicy: <%= @service.pull_policy %>

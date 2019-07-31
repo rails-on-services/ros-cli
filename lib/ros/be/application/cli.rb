@@ -157,18 +157,19 @@ module Ros
         end
 
         private
-
         def preflight_check(fix: false)
           options = {}
           ros_repo = Dir.exists?(Ros.ros_root)
-          env_config = File.exists?("#{Ros.environments_dir}/#{Ros.env}.yml")
+          environments = Dir["#{Ros.deployments_dir}/*.yml"].select{ |f| not File.basename(f).index('-') }.map{ |f| File.basename(f).chomp('.yml') }
           if fix
             %x(git clone git@github.com:rails-on-services/ros.git) unless ros_repo
             require 'ros/main/env/generator'
-            Ros::Main::Env::Generator.new([Ros.env]).invoke_all
+            environments.each do |env|
+              Ros::Main::Env::Generator.new([env]).invoke_all if not File.exists?("#{Ros.environments_dir}/#{env}.yml")
+            end
           else
-            puts "ros repo: #{ros_repo ? 'ok' : 'missing'}"
-            puts "environment configuration: #{env_config ? 'ok' : 'missing'}"
+            STDOUT.puts "ros repo: #{ros_repo ? 'ok' : 'missing'}"
+            # STDOUT.puts "environment configuration: #{env_config ? 'ok' : 'missing'}"
           end
         end
 

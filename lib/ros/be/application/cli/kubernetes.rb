@@ -4,7 +4,7 @@ module Ros
   module Be
     module Application
       class Kubernetes
-        include CliBase
+        include Ros::Be::Application::CliBase
         attr_accessor :services
 
         def initialize(options = {})
@@ -106,10 +106,23 @@ module Ros
           # status
         end
 
-        def stop(services)
+        def x_stop(services)
           generate_config if stale_config
-          services.each { |service| kubectl("scale deploy #{service} --replicas=0") }
-          # services.each { |service| kubectl("delete pod -l #{service} --replicas=0") }
+          # puts x_services
+          # services.each { |service| kubectl("scale deploy #{service} --replicas=0") }
+          services.each do |service|
+            kubectl("scale deploy #{service} --replicas=0")
+            service_pods(service).each do |pod|
+              kubectl("delete pod #{pod}")
+            end
+          end
+        end
+
+        def stop(services)
+          name = service_pods('iam').first
+          kubectl("cp #{name}:/home/rails/services/app/tmp/credentials.json ./credentials.json")
+          # kubectl("cp #{name}:/home/rails/services/app/tmp/#{application.current_feature_set}/credentials.json ./credentials.json")
+          #   @creds_file ||= "#{Ros.is_ros? ? '' : 'ros/'}services/iam/tmp/#{application.current_feature_set}/credentials.json"
         end
 
         def down
@@ -129,7 +142,7 @@ module Ros
           end
         end
 
-        def x_services(status: nil, application_component: nil)
+        def service_pods(service, application_component: nil) # (status: nil, application_component: nil)
           status ||= 'running'
           filters = []
           # filters.append("--filter 'status=#{status}'")
@@ -138,14 +151,16 @@ module Ros
           filters.append("-l platform.feature_set=#{application.current_feature_set}")
           # filters.append("--format '{{.Names}}'")
           # kubectl("get pods -l #{filters.join(' ')}"
-          cmd = "get pods #{filters.join(' ')}"
+          cmd = "get pods #{filters.join(' ')} -o yaml"
           puts cmd
           # cmd = "docker ps #{filters.join(' ')}"
           ar = kubectl_x(cmd)
-          puts ar
+          # puts ar
+          # binding.pry
+          YAML.load(ar)['items'].map{ |i| i['metadata']['name'] }
           # TODO: _server is only one profile; fix
           # TODO: _1 is assumed; there could be > 1
-          ar.split("\n").map{ |a| a.gsub("#{application.compose_project_name}_", '').chomp('_1') }
+          # ar.split("\n").map{ |a| a.gsub("#{application.compose_project_name}_", '').chomp('_1') }
         end
 
         # Supporting methods (2)
@@ -195,15 +210,6 @@ module Ros
 
         def config_files
           Dir["#{Ros::Be::Application::Model.deploy_path}/**"]
-        end
-
-        def generate_config
-          silence_output do
-            Ros::Be::Application::Services::Generator.new([], {}, {behavior: :revoke}).invoke_all
-            Ros::Be::Application::Services::Generator.new.invoke_all
-            Ros::Be::Application::Platform::Generator.new([], {}, {behavior: :revoke}).invoke_all
-            Ros::Be::Application::Platform::Generator.new.invoke_all
-          end
         end
       end
     end
