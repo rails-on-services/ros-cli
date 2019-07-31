@@ -1,7 +1,4 @@
-
-<% service_names.each do |name| %>
-<match <%= name %>>
+<match **.events-log>
   @type file
-  path /fluentd/log/<%= name %>
+  path /fluentd/log/events_log
 </match>
-<% end %>
