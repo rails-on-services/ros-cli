@@ -37,6 +37,7 @@ module Ros
               next unless database_check(service, config)
             end
             compose("build #{service}") if options.build
+            service = "#{service} 'tail -f log/development.log'" unless options.process
             compose("up #{compose_options} #{service}")
           end
           reload_nginx(services)
@@ -48,6 +49,14 @@ module Ros
         def ps
           generate_config if stale_config
           compose(:ps)
+        end
+
+        def get_credentials
+          file = "#{Ros.is_ros? ? '' : 'ros/'}services/iam/tmp/#{application.current_feature_set}/credentials.json"
+          FileUtils.mkdir_p(documents_dir)
+          # TODO: This coule be mv
+          # and the tmp file on iam should probably be ROS_ENV (as passed to image vi ENV var) / feature_set
+          FileUtils.cp(file, "#{documents_dir}/credentials.json")
         end
 
         def console(service)

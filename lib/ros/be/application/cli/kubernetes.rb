@@ -41,6 +41,8 @@ module Ros
         end
 
         def deploy_services
+          env_file = "#{services_root}/services.env"
+          sync_secret(env_file) if File.exists?(env_file)
           services.each do |service|
             next unless application.services.components.keys.include?(service.to_sym)
             env_file = "#{services_root}/#{service}.env"
@@ -57,6 +59,8 @@ module Ros
         end
 
         def deploy_platform
+          env_file = "#{platform_root}/platform.env"
+          sync_secret(env_file) if File.exists?(env_file)
           services.each do |service|
             next unless platform.components.keys.include?(service.to_sym)
             env_file = "#{platform_root}/#{service}.env"
@@ -99,17 +103,16 @@ module Ros
         rescue StandardError
         end
 
+        # TODO: This isn't working quite as expected
         def restart(services)
           generate_config if stale_config
           stop(services)
-          services.each { |service| kubectl("scale deploy #{service} --replicas=1") }
+          up(services)
           # status
         end
 
-        def x_stop(services)
+        def stop(services)
           generate_config if stale_config
-          # puts x_services
-          # services.each { |service| kubectl("scale deploy #{service} --replicas=0") }
           services.each do |service|
             kubectl("scale deploy #{service} --replicas=0")
             service_pods(service).each do |pod|
@@ -118,11 +121,11 @@ module Ros
           end
         end
 
-        def stop(services)
+        def get_credentials
           name = service_pods('iam').first
-          kubectl("cp #{name}:/home/rails/services/app/tmp/credentials.json ./credentials.json")
-          # kubectl("cp #{name}:/home/rails/services/app/tmp/#{application.current_feature_set}/credentials.json ./credentials.json")
-          #   @creds_file ||= "#{Ros.is_ros? ? '' : 'ros/'}services/iam/tmp/#{application.current_feature_set}/credentials.json"
+          FileUtils.mkdir_p(documents_dir)
+          # kubectl("cp #{name}:/home/rails/services/app/tmp/credentials.json #{documents_dir}/credentials.json")
+          kubectl("cp #{name}:/home/rails/services/app/tmp/#{application.current_feature_set}/credentials.json #{documents_dir}/credentials.json")
         end
 
         def down
@@ -144,23 +147,19 @@ module Ros
 
         def service_pods(service, application_component: nil) # (status: nil, application_component: nil)
           status ||= 'running'
+          # TODO: these filters are more or less identical with instance so refactor to cli_base
           filters = []
-          # filters.append("--filter 'status=#{status}'")
           filters.append("-l stack.name=#{Settings.config.name}")
           filters.append("-l application.component=#{application_component}") if application_component
           filters.append("-l platform.feature_set=#{application.current_feature_set}")
-          # filters.append("--format '{{.Names}}'")
-          # kubectl("get pods -l #{filters.join(' ')}"
+          filters.append("-l app.kubernetes.io/instance=#{service}")
           cmd = "get pods #{filters.join(' ')} -o yaml"
-          puts cmd
-          # cmd = "docker ps #{filters.join(' ')}"
-          ar = kubectl_x(cmd)
-          # puts ar
+          result = kubectl_x(cmd)
+          # puts cmd
+          # puts result
           # binding.pry
-          YAML.load(ar)['items'].map{ |i| i['metadata']['name'] }
-          # TODO: _server is only one profile; fix
-          # TODO: _1 is assumed; there could be > 1
-          # ar.split("\n").map{ |a| a.gsub("#{application.compose_project_name}_", '').chomp('_1') }
+          # TODO: Does this effectively handle > 1 pod running
+          YAML.load(result)['items'].map{ |i| i['metadata']['name'] }
         end
 
         # Supporting methods (2)

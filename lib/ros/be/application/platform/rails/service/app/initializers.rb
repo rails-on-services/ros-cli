@@ -17,25 +17,20 @@ inject_into_file 'config/application.rb', after: ".api_only = true\n" do <<-RUBY
     g.fixture_replacement :factory_bot, dir: 'spec/factories'
   end
 
-  initializer 'service.set_platform_config', before: 'ros_core.load_platform_config' do |_app|
+  initializer 'service.set_platform_config', before: 'ros_core.load_platform_config' do |app|
     settings_path = root.join('config/settings.yml')
     Settings.prepend_source!(settings_path) if File.exists? settings_path
     name = self.class.name.split('::').first.downcase
     Settings.prepend_source!({ service: { name: name, policy_name: name.capitalize } })
+    app.config.hosts << name
   end
 
   initializer 'service.initialize_infra_services', after: 'ros_core.initialize_infra_services' do |app|
   end
 
-  initializer 'service.configure_migrations' do |app|
-    Ros.config.factory_paths += Dir[Pathname.new(__FILE__).join('../../../../spec/factories')]
-    Ros.config.model_paths += config.paths['app/models'].expanded
-  end
-
   initializer 'service.configure_console_methods', before: 'ros_core.configure_console_methods' do |_app|
-    if Rails.env.development? and Rails.const_defined?('Console')
+    if Rails.env.development? and not Rails.const_defined?('Server')
       Ros.config.factory_paths += Dir[Pathname.new(__FILE__).join('../../../../spec/factories')]
-      Ros.config.model_paths += config.paths['app/models'].expanded
     end
   end
 RUBY

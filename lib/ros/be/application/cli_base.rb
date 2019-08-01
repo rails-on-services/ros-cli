@@ -58,6 +58,7 @@ module Ros
         end
 
         def credentials
+          get_credentials if not File.exists?(creds_file)
           generate_config if stale_config
           postman = JSON.parse(json.each_with_object([]) { |j, a| a.append(Credential.new(j).to_postman) }.to_json)
           envs = json.each_with_object([]) { |j, a| a.append(Credential.new(j).to_env) }
@@ -70,6 +71,14 @@ module Ros
           STDOUT.puts (cli)
           STDOUT.puts "\nCredentials source: #{creds_file}"
         end
+
+        def json
+          @json ||= File.exists?(creds_file) ? JSON.parse(File.read(creds_file)) : []
+        end
+
+        def creds_file; @creds_file ||= "#{documents_dir}/credentials.json" end
+
+        def documents_dir; @documents_dir ||= "#{application.deploy_path.gsub('deployments', 'documents')}/platform" end
 
         def enabled_services
           application.components.platform.components.to_hash.select do |k, v|
@@ -92,28 +101,15 @@ module Ros
           File.open("#{application.deploy_path}/platform/credentials.env", 'w') { |f| f.puts "#{content}\n" }
         end
 
-        def json
-          @json ||= File.exists?(creds_file) ? JSON.parse(File.read(creds_file)) : []
-        end
-
-        def creds_file
-          if infra.cluster_type.eql?('kubernetes')
-            @creds_file ||= 'credentials.json'
-          elsif infra.cluster_type.eql?('instance')
-            @creds_file ||= "#{Ros.is_ros? ? '' : 'ros/'}services/iam/tmp/#{application.current_feature_set}/credentials.json"
-          end
-        end
-
         # TODO: support the proprietary project
         # TODO: each type, instance and k8s need to get their files
         # TODO: For now just change the host in the API docs
         def publish
-          erd_dir = "#{application.deploy_path.gsub('deployments', 'documents')}/platform"
-          FileUtils.mkdir_p(erd_dir)
+          FileUtils.mkdir_p(documents_dir)
           services.each do |service|
             exec(service, 'rails app:ros:erd:generate')
             if File.exists?("services/#{service}/spec/dummy/erd.pdf")
-              FileUtils.mv("services/#{service}/spec/dummy/erd.pdf", "#{erd_dir}/#{service}.erd")
+              FileUtils.mv("services/#{service}/spec/dummy/erd.pdf", "#{documents_dir}/#{service}.erd")
             end
           end
           # TODO publish to slack, confluence or someother
