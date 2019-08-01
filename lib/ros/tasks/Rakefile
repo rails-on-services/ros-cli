@@ -14,7 +14,7 @@ end
     Settings.components.keys.each do |item1|
       desc "#{action} #{item1}"
       task item1 do |task, args|
-        Ros.from_rake(task.naem, args)
+        Ros.from_rake(task.name, args)
       end
       namespace item1 do
         Settings.components[item1].components.keys.each do |item2|
