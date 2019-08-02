@@ -20,7 +20,8 @@ module Ros
           def deploy_path; "#{Stack.deploy_path}/be/application/#{current_feature_set}" end
 
           def compose_file; @compose_file ||= "#{compose_dir}/compose.env" end
-          def compose_dir; "#{Ros.root}/tmp/compose/#{Ros.env}/#{current_feature_set}" end
+          # def compose_dir; "#{Ros.root}/tmp/runtime/#{Ros.env}/#{current_feature_set}" end
+          def compose_dir; deploy_path.gsub('deployments', 'runtime') end
           def compose_project_name; "#{Stack.name}_#{current_feature_set}" end
 
           def current_feature_set

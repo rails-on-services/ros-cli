@@ -7,12 +7,13 @@ module Ros
       module Services
 
         class Model
-          attr_accessor :name, :config, :environment, :deploy_path
-          def initialize(name, definition, deploy_path)
+          attr_accessor :name, :config, :environment, :deploy_path, :runtime_path
+          def initialize(name, definition, deploy_path, runtime_path)
             @name = name
             @config = definition&.dig(:config)
             @environment = definition&.dig(:environment)
             @deploy_path = deploy_path
+            @runtime_path = runtime_path
           end
 
           def stack_name; Stack.name end
@@ -79,17 +80,18 @@ module Ros
           end
 
           def create_fluentd_log_dir_for_compose
-            return unless components.keys.include?(:fluentd) and infra.cluster_type.eql?('instance')
-            content_dir = "#{deploy_path}/fluentd/log"
-            empty_directory(content_dir)
-            FileUtils.chmod('+w', content_dir)
+            return unless components.keys.include?(:fluentd) and infra.cluster_type.eql?('instance') and behavior.eql?(:invoke)
+            empty_directory(runtime_path)
+            FileUtils.chmod('+w', runtime_path)
           end
+
+          def runtime_path; "#{deploy_path.gsub('deployments', 'runtime')}/fluentd/log" end
 
           def service_files
             empty_directory("#{destination_root}/#{deploy_path}")
             base_service_template_dir = "#{File.dirname(__FILE__)}/templates/services"
             components.each do |service, definition|
-              @service = Model.new(service, definition, deploy_path)
+              @service = Model.new(service, definition, deploy_path, runtime_path)
               template("#{template_dir}/#{service}.yml.erb", "#{destination_root}/#{deploy_path}/#{service}.yml")
               service_template_dir = "#{base_service_template_dir}/#{service}"
               if Dir.exists?(service_template_dir)

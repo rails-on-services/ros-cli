@@ -56,7 +56,7 @@ module Ros
           FileUtils.mkdir_p(documents_dir)
           # TODO: This coule be mv
           # and the tmp file on iam should probably be ROS_ENV (as passed to image vi ENV var) / feature_set
-          FileUtils.cp(file, "#{documents_dir}/credentials.json")
+          FileUtils.cp(file, creds_file)
         end
 
         def console(service)

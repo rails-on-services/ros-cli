@@ -123,9 +123,9 @@ module Ros
 
         def get_credentials
           name = service_pods('iam').first
-          FileUtils.mkdir_p(documents_dir)
-          # kubectl("cp #{name}:/home/rails/services/app/tmp/credentials.json #{documents_dir}/credentials.json")
-          kubectl("cp #{name}:/home/rails/services/app/tmp/#{application.current_feature_set}/credentials.json #{documents_dir}/credentials.json")
+          FileUtils.mkdir_p("#{runtime_dir}/platform")
+          source_creds_file = "/home/rails/services/app/tmp/#{application.current_feature_set}/credentials.json"
+          kubectl("cp #{name}:#{source_creds_file} #{creds_file}")
         end
 
         def down

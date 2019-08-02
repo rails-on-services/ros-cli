@@ -48,6 +48,7 @@ module Ros
             keys = application.components[type].components.keys
             next unless keys.include?(service.to_sym)
             file = "#{application.deploy_path}/#{type}/#{service_name}"
+            STDOUT.puts "Contents of #{file}"
             STDOUT.puts File.read(file)
           end
         end
@@ -76,9 +77,10 @@ module Ros
           @json ||= File.exists?(creds_file) ? JSON.parse(File.read(creds_file)) : []
         end
 
-        def creds_file; @creds_file ||= "#{documents_dir}/credentials.json" end
+        def creds_file; @creds_file ||= "#{runtime_dir}/platform/credentials.json" end
 
         def documents_dir; @documents_dir ||= "#{application.deploy_path.gsub('deployments', 'documents')}/platform" end
+        def runtime_dir; @runtime_dir ||= application.deploy_path.gsub('deployments', 'runtime') end
 
         def enabled_services
           application.components.platform.components.to_hash.select do |k, v|

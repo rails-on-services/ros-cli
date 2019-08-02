@@ -13,5 +13,5 @@ services:
       - "24224:24224"
       - "24224:24224/udp"
     volumes:
-      - "../services/fluentd/log:/fluentd/log"
+      - "<%= "#{@service.relative_path}/#{@service.runtime_path}/fluentd/log" %>:/fluentd/log"
       - "../services/fluentd/etc/config.d:/fluentd/etc/config.d"
