@@ -170,7 +170,10 @@ module Ros
             end
           else
             STDOUT.puts "ros repo: #{ros_repo ? 'ok' : 'missing'}"
-            # STDOUT.puts "environment configuration: #{env_config ? 'ok' : 'missing'}"
+            env_ok = environments.each do |env|
+              break false if not File.exists?("#{Ros.environments_dir}/#{env}.yml")
+            end
+            STDOUT.puts "environment configuration: #{env_ok ? 'ok' : 'missing'}"
           end
         end
 
