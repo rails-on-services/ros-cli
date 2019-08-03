@@ -12,11 +12,16 @@ module Ros
         def self.source_paths; ["#{File.dirname(__FILE__)}/templates", File.dirname(__FILE__)] end
 
         def generate
+          if File.exists?("#{Ros.deployments_dir}/#{name}.yml.enc")
+            system("ansible-vault decrypt #{Ros.deployments_dir}/#{name}.yml.enc --output #{Ros.environments_dir}/#{name}.yml")
+            return
+          end
           require 'securerandom'
           in_root do
             Ros.load_env(name)
             template 'environments.yml.erb', "#{Ros.environments_dir}/#{name}.yml"
           end
+          system("ansible-vault encrypt #{Ros.environments_dir}/#{name}.yml --output #{Ros.deployments_dir}/#{name}.yml.enc")
         end
 
         # TODO: some other way to seed services on host with an env
