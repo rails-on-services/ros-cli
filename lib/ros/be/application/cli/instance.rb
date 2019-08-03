@@ -53,7 +53,7 @@ module Ros
 
         def get_credentials
           file = "#{Ros.is_ros? ? '' : 'ros/'}services/iam/tmp/#{application.current_feature_set}/credentials.json"
-          FileUtils.mkdir_p(documents_dir)
+          FileUtils.mkdir_p("#{runtime_dir}/platform")
           # TODO: This coule be mv
           # and the tmp file on iam should probably be ROS_ENV (as passed to image vi ENV var) / feature_set
           FileUtils.cp(file, creds_file)
