@@ -103,6 +103,8 @@ module Ros
         rescue StandardError
         end
 
+        def running_services; @running_services ||= service_pods.map{ |svc| svc.split('-').first }.uniq end
+
         # TODO: This isn't working quite as expected
         def restart(services)
           generate_config if stale_config
@@ -122,38 +124,74 @@ module Ros
         end
 
         def get_credentials
-          name = service_pods('iam').first
           FileUtils.mkdir_p("#{runtime_dir}/platform")
-          source_creds_file = "/home/rails/services/app/tmp/#{application.current_feature_set}/credentials.json"
-          kubectl("cp #{name}:#{source_creds_file} #{creds_file}")
+          # source_creds_file = "/home/rails/services/app/tmp/#{application.current_feature_set}/credentials.json"
+          # kubectl("cp #{pod('iam', { 'app.kubernetes.io/component' => 'bootstrap' })}:#{source_creds_file} #{creds_file}")
+          # TODO: the following command isn't working
+          # bootstrap_pod = pod('iam', { 'app.kubernetes.io/component' => 'bootstrap' })
+          bootstrap_pod = 'iam-bootstrap-wn54f'
+          rs = kubectl_x("logs #{bootstrap_pod}")
+          index_of_json = rs.index('[{"type":')
+          json = rs[index_of_json..-1]
+          File.write(creds_file, json)
         end
 
-        def down
-          string = "kubectl delete ns #{namespace}"
-          system(string)
+        def down(services)
+          if services.empty?
+            cmd = "kubectl delete ns #{namespace}"
+            system(cmd)
+            remove_cache
+          else
+            base_cmd = 'delete'
+            services.each do |service|
+              next unless platform.components.keys.include?(service.to_sym)
+              # kubectl("delete secret #{service}") if kubectl("get secret #{service}")
+              service_file = "#{platform_root}/#{service}.yml"
+              profiles = (options.profile.nil? or options.profile.eql?('all')) ? platform.components[service].config.profiles : [options.profile]
+              # binding.pry
+              Dir.chdir(platform_root) do
+                profiles.each do |profile|
+                  skaffold("#{base_cmd} -f #{File.basename(service_file)} -p #{profile}")
+                end
+              end
+            end
+          end
+        end
+
+        # TODO: fully implement so when down is called that all runtime and docs are revmoed
+        # TODO: Iam cached credentials should also be remvoed when IAM service is brought down
+        def remove_cache
+          FileUtils.rm_rf(runtime_dir)
         end
 
         # Supporting methods (1)
         # NOTE: only goes with 'logs' for now
         def command(cmd); "#{cmd}#{options.tail ? ' -f' : ''}" end
 
-        def pod(service)
-          result = kubectl_x("get pod -l app=#{service} -l app.kubernetes.io/instance=#{service}")
+        def pod(service, labels = {})
+          # cmd = "get pod -l app=#{service} -l app.kubernetes.io/instance=#{service} #{labels.map{ |k, v| "-l #{k}=#{v}" }.join(' ')}"
+          cmd = "get pod #{labels.map{ |k, v| "-l #{k}=#{v}" }.join(' ')}"
+          result = kubectl_x(cmd)
+          # result = kubectl_x("get pod -l app=#{service} -l app.kubernetes.io/instance=#{service}")
           result.split("\n").each do |res|
             pod, count, status, restarts, age = res.split
             break pod if status.eql?('Running')
           end
         end
 
-        def service_pods(service, application_component: nil) # (status: nil, application_component: nil)
+        def service_pods(service = nil, application_component = nil) # (status: nil, application_component: nil)
           status ||= 'running'
           # TODO: these filters are more or less identical with instance so refactor to cli_base
           filters = []
           filters.append("-l stack.name=#{Settings.config.name}")
           filters.append("-l application.component=#{application_component}") if application_component
           filters.append("-l platform.feature_set=#{application.current_feature_set}")
-          filters.append("-l app.kubernetes.io/instance=#{service}")
+          filters.append("-l app.kubernetes.io/instance=#{service}") if service
           cmd = "get pods #{filters.join(' ')} -o yaml"
+          svpr(cmd)
+        end
+
+        def svpr(cmd)
           result = kubectl_x(cmd)
           # puts cmd
           # puts result
@@ -172,7 +210,10 @@ module Ros
           system_cmd(kube_env, "kubectl -n #{namespace} #{cmd}")
         end
 
-        def kubectl_x(cmd); %x(kubectl -n #{namespace} #{cmd}) end
+        def kubectl_x(cmd)
+          STDOUT.puts cmd if options.v
+          %x(kubectl -n #{namespace} #{cmd})
+        end
 
         def skaffold(cmd, env = {})
           system_cmd(skaffold_env.merge(env), "skaffold -n #{namespace} #{cmd}")

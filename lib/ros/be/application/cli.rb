@@ -141,8 +141,8 @@ module Ros
         end
 
         desc 'down', 'bring down platform'
-        def down
-          context(options).down
+        def down(*services)
+          context(options).down(services)
         end
 
         desc 'list', 'List backend application configuration objects'

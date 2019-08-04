@@ -1,24 +1,9 @@
-# README
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+# Overview
 
-Things you may want to cover:
+This project was created with the ros-cli
 
-* Ruby version
+## Getting Started
 
-* System dependencies
-
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+See documentation [here](http://guides.rails-on-services.org/getting-started.html)
+and [here](https://github.com/rails-on-services/setup)

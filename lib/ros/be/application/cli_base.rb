@@ -53,6 +53,51 @@ module Ros
           end
         end
 
+        def status
+          ros_services = {}
+          my_services = {}
+          infra_services = {}
+          application.components.platform.components.keys.sort.each do |name|
+            svc = application.components.platform.components[name.to_s]
+            status =
+              if running_services.include?(name.to_s)
+                'Running    '
+              elsif svc.dig(:config, :enabled).nil? || svc.dig(:config, :enabled)
+                'Stopped    '
+              else
+                'Not Enabled'
+              end
+            ros_services[name] = status if svc.dig(:config, :ros)
+            my_services[name] = status unless svc.dig(:config, :ros)
+          end
+          (application.components.services.components.keys - %i(wait)).sort.each do |name|
+            svc = application.components.services.components[name.to_s]
+            status =
+              if running_services.include?(name.to_s)
+                'Running    '
+              elsif svc&.dig(:config, :enabled).nil? || svc&.dig(:config, :enabled)
+                'Stopped    '
+              else
+                'Not Enabled'
+              end
+            infra_services[name] = status
+          end
+          buf = ' ' * 14
+          name_len = 21
+          no_buf = -11
+          STDOUT.puts "\nPlatform Services    Status                   Core Services" \
+            "        Status                   Infra Services       Status\n#{'-' * 124}"
+          (1..[infra_services.size, my_services.size, ros_services.size].max).each do |i|
+            mn, ms = my_services.shift
+            rn, rs = ros_services.shift
+            fn, fs = infra_services.shift
+            STDOUT.puts "#{mn}#{' ' * (name_len - (mn&.length || no_buf))}#{ms}#{buf}#{rn}" \
+              "#{' ' * (name_len - (rn&.length || no_buf))}#{rs}#{buf}#{fn}#{' ' * (name_len - (fn&.length || no_buf))}#{fs}"
+          end
+          show_endpoint
+        end
+
+
         def show_endpoint
           STDOUT.puts "\n*** Services available at #{application.api_uri} ***"
           STDOUT.puts "*** API Docs available at [TO IMPLEMENT] ***\n\n"
