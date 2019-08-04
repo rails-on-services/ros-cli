@@ -19,7 +19,7 @@ spec:
   {{- range .Values.services }}
     - match:
       - uri:
-          prefix: {{ .prefix }}
+          prefix: {{ .prefix }}/
       rewrite:
         uri: /
       route:
