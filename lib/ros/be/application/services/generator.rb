@@ -26,7 +26,7 @@ module Ros
           # api_hostname is for ingress controller
           def api_hostname; application.api_hostname end
           # def bucket_name; stack.current_feature_set end
-          def skaffold_version; Stack.components.be.config.skaffold_version end
+          def skaffold_version; Settings.components.be.config.skaffold_version end
 
           # skaffold sftp only methods
           def sftp
@@ -109,6 +109,7 @@ module Ros
           end
 
           def nginx_conf
+            return unless infra.cluster_type.eql?('instance')
             # empty_directory("#{destination_root}/#{deploy_path}/nginx")
             remove_file("#{destination_root}/#{deploy_path}/nginx/nginx.conf")
             template("services/nginx/nginx.conf.erb", "#{destination_root}/#{deploy_path}/nginx/nginx.conf")
@@ -148,7 +149,7 @@ module Ros
           def settings; application.settings.components.services end
 
           def template_dir
-            cluster.config.type.eql?('kubernetes') ? 'skaffold' : 'compose'
+            infra.cluster_type.eql?('kubernetes') ? 'skaffold' : 'compose'
           end
         end
       end

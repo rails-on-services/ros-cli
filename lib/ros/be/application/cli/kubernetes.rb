@@ -21,10 +21,10 @@ module Ros
           if options.force or not system_cmd(kube_env, "kubectl get ns #{namespace}")
             STDOUT.puts 'Forcing namespace create' if options.force
             deploy_namespace
-            deploy_services
           else
             STDOUT.puts 'Namespace exists. skipping create. Use -f to force'
           end
+          deploy_services
           deploy_platform_environment
           deploy_platform
           show_endpoint
@@ -47,7 +47,7 @@ module Ros
             next unless application.services.components.keys.include?(service.to_sym)
             env_file = "#{services_root}/#{service}.env"
             sync_secret(env_file) if File.exists?(env_file)
-            service_file = "#{services_root}/#{service}.yml"
+            service_file = "#{service}.yml"
             Dir.chdir(services_root) { skaffold("deploy -f #{service_file}") }
           end
         end
@@ -124,16 +124,15 @@ module Ros
         end
 
         def get_credentials
-          FileUtils.mkdir_p("#{runtime_dir}/platform")
-          # source_creds_file = "/home/rails/services/app/tmp/#{application.current_feature_set}/credentials.json"
-          # kubectl("cp #{pod('iam', { 'app.kubernetes.io/component' => 'bootstrap' })}:#{source_creds_file} #{creds_file}")
-          # TODO: the following command isn't working
-          # bootstrap_pod = pod('iam', { 'app.kubernetes.io/component' => 'bootstrap' })
-          bootstrap_pod = 'iam-bootstrap-wn54f'
+          bootstrap_pod = pod('iam', true, { 'app.kubernetes.io/component' => 'bootstrap' })
           rs = kubectl_x("logs #{bootstrap_pod}")
-          index_of_json = rs.index('[{"type":')
-          json = rs[index_of_json..-1]
-          File.write(creds_file, json)
+          if index_of_json = rs.index('[{"type":')
+            json = rs[index_of_json..-1]
+            FileUtils.mkdir_p("#{runtime_dir}/platform")
+            File.write(creds_file, json)
+          else
+            STDOUT.puts 'WARNING: Credentials not found in bootstrap file'
+          end
         end
 
         def down(services)
@@ -168,19 +167,15 @@ module Ros
         # NOTE: only goes with 'logs' for now
         def command(cmd); "#{cmd}#{options.tail ? ' -f' : ''}" end
 
-        def pod(service, labels = {})
-          # cmd = "get pod -l app=#{service} -l app.kubernetes.io/instance=#{service} #{labels.map{ |k, v| "-l #{k}=#{v}" }.join(' ')}"
-          cmd = "get pod #{labels.map{ |k, v| "-l #{k}=#{v}" }.join(' ')}"
-          result = kubectl_x(cmd)
-          # result = kubectl_x("get pod -l app=#{service} -l app.kubernetes.io/instance=#{service}")
-          result.split("\n").each do |res|
-            pod, count, status, restarts, age = res.split
-            break pod if status.eql?('Running')
-          end
+        def pod(service, return_one = true, labels = {})
+          cmd = "get pod -l app=#{service} -l app.kubernetes.io/instance=#{service} #{labels.map{ |k, v| "-l #{k}=#{v}" }.join(' ')} -o yaml"
+          result = svpr(cmd)
+          return result.first if return_one
+          result
         end
 
         def service_pods(service = nil, application_component = nil) # (status: nil, application_component: nil)
-          status ||= 'running'
+          # status ||= 'running'
           # TODO: these filters are more or less identical with instance so refactor to cli_base
           filters = []
           filters.append("-l stack.name=#{Settings.config.name}")
@@ -193,9 +188,6 @@ module Ros
 
         def svpr(cmd)
           result = kubectl_x(cmd)
-          # puts cmd
-          # puts result
-          # binding.pry
           # TODO: Does this effectively handle > 1 pod running
           YAML.load(result)['items'].map{ |i| i['metadata']['name'] }
         end
