@@ -21,6 +21,7 @@ spec:
       labels:
         app.kubernetes.io/name: {{ include "service.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: bootstrap
         {{- with .Values.labels }}
         {{- toYaml . | trim | nindent 8 }}
         {{- end }}
