@@ -14,7 +14,7 @@ module Ros
         def generate
           # If an encrypted version of the environment exists and a key is present
           # then decrypt and write the contents to config/environments
-          if File.exists?("#{Ros.deployments_dir}/#{name}.yml.enc") and ENV['ANSIBLE_VAULT_PASSWORD']
+          if File.exists?("#{Ros.deployments_dir}/#{name}.yml.enc") and ENV['ROS_MASTER_KEY']
             system("ansible-vault decrypt #{Ros.deployments_dir}/#{name}.yml.enc --output #{Ros.environments_dir}/#{name}.yml")
             return
           end
@@ -26,7 +26,7 @@ module Ros
           end
           # If a new environment has been generated and the encryption key is present then encrypt the file
           # to a location that will be saved in the repository
-          if not File.exists?("#{Ros.deployments_dir}/#{name}.yml.enc") and ENV['ANSIBLE_VAULT_PASSWORD']
+          if not File.exists?("#{Ros.deployments_dir}/#{name}.yml.enc") and ENV['ROS_MASTER_KEY']
             system("ansible-vault encrypt #{Ros.environments_dir}/#{name}.yml --output #{Ros.deployments_dir}/#{name}.yml.enc")
           end
         end

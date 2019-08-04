@@ -50,5 +50,6 @@ after_bundle do
   run 'spring stop'
 end
 
+directory('files', '.')
 # copy_file 'defaults/files/Procfile', 'Procfile'
 # template 'defaults/files/tmuxinator.yml', '.tmuxinator.yml'
