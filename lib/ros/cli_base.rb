@@ -19,7 +19,7 @@ module Ros
       # Check config files
       Dir["#{Ros.root}/config/**/*.yml"].each { |f| return true if mtime < File.mtime(f) }
       # Check template files
-      Dir["#{Ros.gem_root.join('lib/ros/generators')}/be/**/{templates,files}/**/*"].each do |f|
+      Dir["#{Ros.gem_root.join('lib/ros/be')}/**/{templates,files}/**/*"].each do |f|
         return true if mtime < File.mtime(f)
       end
       # Check custom templates

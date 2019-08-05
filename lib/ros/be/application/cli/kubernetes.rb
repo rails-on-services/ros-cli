@@ -48,7 +48,10 @@ module Ros
             env_file = "#{services_root}/#{service}.env"
             sync_secret(env_file) if File.exists?(env_file)
             service_file = "#{service}.yml"
-            Dir.chdir(services_root) { skaffold("deploy -f #{service_file}") }
+            Dir.chdir(services_root) do
+              base_cmd = options.build ? 'run' : 'deploy'
+              skaffold("#{base_cmd} -f #{service_file}")
+            end
           end
         end
 
@@ -72,10 +75,13 @@ module Ros
               # next unless check and gem_version_check
               profiles = options.profile.eql?('all') ? platform.components[service].config.profiles : [options.profile]
               replica_count = (options.replicas || 1).to_s
+              build_count = 0
               profiles.each do |profile|
-                skaffold("#{base_cmd} -f #{File.basename(service_file)} -p #{profile}",
+                run_cmd = build_count.eql?(0) ? base_cmd : 'deploy'
+                skaffold("#{run_cmd} -f #{File.basename(service_file)} -p #{profile}",
                          { 'REPLICA_COUNT' => replica_count })
                 kubectl("scale deploy #{service} --replicas=#{replica_count}")
+                build_count += 1
               end
             end
           end
@@ -241,7 +247,7 @@ module Ros
         def services_root; "#{Ros::Be::Application::Model.deploy_path}/services" end
 
         def config_files
-          Dir["#{Ros::Be::Application::Model.deploy_path}/**"]
+          Dir["#{Ros::Be::Application::Model.deploy_path}/**/*"]
         end
       end
     end

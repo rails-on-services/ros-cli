@@ -15,6 +15,7 @@ build:
       template: "{{.IMAGE_NAME}}:{{.IMAGE_TAG}}"
   local:
     useDockerCLI: true
+    push: true
 profiles:<% @service.profiles.each do |profile| %>
   <% xname = profile.eql?('server') ? '' : "_#{profile}" %>
   - name: <%= profile %>
@@ -35,6 +36,7 @@ profiles:<% @service.profiles.each do |profile| %>
             image.repository: "{{.SKAFFOLD_DEFAULT_REPO}}/<%= @service.name %>"
           overrides:
             labels:
+              app.kubernetes.io/component: <%= profile %>
               stack.name: <%= @service.stack_name %>
               stack.component: be
               be.component: application
