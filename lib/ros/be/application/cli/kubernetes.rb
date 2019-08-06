@@ -56,6 +56,7 @@ module Ros
         end
 
         def deploy_platform_environment
+          return if kubectl("get secret #{Stack.registry_secret_name}") unless options.force
           kube_cmd = "create secret generic #{Stack.registry_secret_name} " \
             "--from-file=.dockerconfigjson=#{Dir.home}/.docker/config.json --type=kubernetes.io/dockerconfigjson"
           kubectl(kube_cmd)
@@ -93,23 +94,24 @@ module Ros
         end
 
         def console(service)
-          generate_config if stale_config
-          kubectl("exec -it #{pod(service)} -c #{service} rails console")
+          exec(service, 'rails console')
         end
 
         def exec(service, command)
           generate_config if stale_config
-          kubectl("exec -it #{pod(service)} -c #{service} #{command}")
+          kubectl("exec -it #{service_pod(service)} -c #{service} #{command}")
         end
+
+        def service_pod(service); pod(name: service, component: :server) end
 
         def logs(service)
           generate_config if stale_config
           trap("SIGINT") { throw StandardError } if options.tail
-          kubectl("#{command('logs')} #{pod(service)} -c #{service}")
+          kubectl("#{command('logs')} #{service_pod(service)} -c #{service}")
         rescue StandardError
         end
 
-        def running_services; @running_services ||= service_pods.map{ |svc| svc.split('-').first }.uniq end
+        def running_services; @running_services ||= pods(component: :server).map{ |svc| svc.split('-').first }.uniq end
 
         # TODO: This isn't working quite as expected
         def restart(services)
@@ -123,14 +125,14 @@ module Ros
           generate_config if stale_config
           services.each do |service|
             kubectl("scale deploy #{service} --replicas=0")
-            service_pods(service).each do |pod|
+            pods(name: service).each do |pod|
               kubectl("delete pod #{pod}")
             end
           end
         end
 
         def get_credentials
-          bootstrap_pod = pod('iam', true, { 'app.kubernetes.io/component' => 'bootstrap' })
+          bootstrap_pod = pod(name: 'iam', component: 'bootstrap')
           rs = kubectl_x("logs #{bootstrap_pod}")
           if index_of_json = rs.index('[{"type":')
             json = rs[index_of_json..-1]
@@ -173,23 +175,16 @@ module Ros
         # NOTE: only goes with 'logs' for now
         def command(cmd); "#{cmd}#{options.tail ? ' -f' : ''}" end
 
-        def pod(service, return_one = true, labels = {})
-          cmd = "get pod -l app=#{service} -l app.kubernetes.io/instance=#{service} #{labels.map{ |k, v| "-l #{k}=#{v}" }.join(' ')} -o yaml"
+        def pod(labels = {}); get_pods(labels, true) end
+        def pods(labels = {}); get_pods(labels) end
+
+        def get_pods(labels = {}, return_one = false)
+          # cmd = "get pod -l app=#{service} -l app.kubernetes.io/instance=#{service} #{labels.map{ |k, v| "-l #{k}=#{v}" }.join(' ')} -o yaml"
+          # cmd = "get pod #{labels.map{ |k, v| "-l app.kubernetes.io/#{k}=#{v}" }.join(' ')} -o yaml"
+          cmd = "get pod -l #{labels.map{ |k, v| "app.kubernetes.io/#{k}=#{v}" }.join(',')} -o yaml"
           result = svpr(cmd)
           return result.first if return_one
           result
-        end
-
-        def service_pods(service = nil, application_component = nil) # (status: nil, application_component: nil)
-          # status ||= 'running'
-          # TODO: these filters are more or less identical with instance so refactor to cli_base
-          filters = []
-          filters.append("-l stack.name=#{Settings.config.name}")
-          filters.append("-l application.component=#{application_component}") if application_component
-          filters.append("-l platform.feature_set=#{application.current_feature_set}")
-          filters.append("-l app.kubernetes.io/instance=#{service}") if service
-          cmd = "get pods #{filters.join(' ')} -o yaml"
-          svpr(cmd)
         end
 
         def svpr(cmd)
@@ -209,8 +204,9 @@ module Ros
         end
 
         def kubectl_x(cmd)
+          cmd= "kubectl -n #{namespace} #{cmd}"
           STDOUT.puts cmd if options.v
-          %x(kubectl -n #{namespace} #{cmd})
+          %x(#{cmd})
         end
 
         def skaffold(cmd, env = {})
@@ -235,10 +231,20 @@ module Ros
 
         def sync_secret(file)
           name = File.basename(file).chomp('.env')
-          # TODO: base64 decode values then do an md5 on the contents
-          # yaml = kubectl("get secret #{name} -o yaml")
-          kubectl("delete secret #{name}") if kubectl("get secret #{name}")
+          return if local_secrets_content(file) == k8s_secrets_content(name)
+          kubectl("delete secret #{name}") # if kubectl("get secret #{name}")
           kubectl("create secret generic #{name} --from-env-file #{file}")
+        end
+
+        def local_secrets_content(file)
+          File.read(file).split("\n").each_with_object({}) { |a, h| b = a.split('='); h[b[0]] = b[1] || '' }
+        end
+
+        def k8s_secrets_content(type = 'platform')
+          require 'base64'
+          result = kubectl_x("get secret #{type} -o yaml")
+          yml = YAML.load(result)
+          yml['data'].each_with_object({}) { |a, h| h[a[0]] = Base64.decode64(a[1]) }
         end
 
         def check; File.file?(kubeconfig) end

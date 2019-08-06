@@ -60,7 +60,6 @@ module Ros
         end
 
         def console(service)
-          generate_config if stale_config
           exec(service, 'rails console')
         end
 
