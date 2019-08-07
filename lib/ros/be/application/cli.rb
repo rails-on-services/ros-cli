@@ -81,6 +81,11 @@ module Ros
           context(options).up
         end
 
+        desc 'cmd', 'Run arbitrary command in context'
+        def cmd(*services)
+          context(options).cmd(services)
+        end
+
         desc 'ps', 'List running services'
         def ps
           context(options).ps

@@ -10,6 +10,10 @@ module Ros
           @options = options
         end
 
+        def cmd(services)
+          binding.pry
+        end
+
         def build(services)
           generate_config if stale_config
           compose("build #{services.join(' ')}")

@@ -21,4 +21,6 @@ deploy:
               cpu: 300m
               memory: 1Gi
         valuesFiles:
-          - ./fluentd/etc/requests.conf
+          - ./fluentd/etc/config.d/requests.conf
+          - ./fluentd/etc/config.d/cloud_events.conf
+          - ./fluentd/etc/config.d/tcp_source.conf

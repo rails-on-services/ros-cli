@@ -11,9 +11,9 @@ module Ros
           @options = options
         end
 
-        # def up(services)
-        #   x_services
-        # end
+        def cmd(services)
+          binding.pry
+        end
 
         def up(services)
           @services = services.empty? ? enabled_services : services
@@ -43,8 +43,12 @@ module Ros
         def deploy_services
           env_file = "#{services_root}/services.env"
           sync_secret(env_file) if File.exists?(env_file)
-          services.each do |service|
-            next unless application.services.components.keys.include?(service.to_sym)
+          application.services.components.keys.each do |service|
+            if service.eql?(:ingress)
+              next unless get_vs(name: :ingress).empty?
+            else
+              next if pod(name: service)
+            end
             env_file = "#{services_root}/#{service}.env"
             sync_secret(env_file) if File.exists?(env_file)
             service_file = "#{service}.yml"
@@ -63,8 +67,7 @@ module Ros
         end
 
         def deploy_platform
-          env_file = "#{platform_root}/platform.env"
-          sync_secret(env_file) if File.exists?(env_file)
+          update_platform_env
           services.each do |service|
             next unless platform.components.keys.include?(service.to_sym)
             env_file = "#{platform_root}/#{service}.env"
@@ -73,8 +76,9 @@ module Ros
             Dir.chdir(platform_root) do
               # skaffold cmds: build, deploy or run (build and deploy)
               base_cmd = options.build ? 'run' : 'deploy'
-              # next unless check and gem_version_check
-              profiles = options.profile.eql?('all') ? platform.components[service].config.profiles : [options.profile]
+              # TODO next unless check and gem_version_check
+              profiles = platform.components[service].config.profiles
+              profiles = [options.profile] if options.profile and not options.profile.eql?('all')
               replica_count = (options.replicas || 1).to_s
               build_count = 0
               profiles.each do |profile|
@@ -86,6 +90,11 @@ module Ros
               end
             end
           end
+        end
+
+        def update_platform_env
+          env_file = "#{platform_root}/platform.env"
+          sync_secret(env_file) if File.exists?(env_file)
         end
 
         def ps
@@ -116,8 +125,12 @@ module Ros
         # TODO: This isn't working quite as expected
         def restart(services)
           generate_config if stale_config
-          stop(services)
-          up(services)
+          update_platform_env
+          services.each do |service|
+            kubectl("rollout restart deploy #{service}")
+          end
+          # stop(services)
+          # up(services)
           # status
         end
 
@@ -187,6 +200,14 @@ module Ros
           result
         end
 
+        # TODO: DRY up with get_pods above
+        def get_vs(labels = {}, return_one = false)
+          cmd = "get virtualservice -l #{labels.map{ |k, v| "app.kubernetes.io/#{k}=#{v}" }.join(',')} -o yaml"
+          result = svpr(cmd)
+          return result.first if return_one
+          result
+        end
+
         def svpr(cmd)
           result = kubectl_x(cmd)
           # TODO: Does this effectively handle > 1 pod running
@@ -232,6 +253,7 @@ module Ros
         def sync_secret(file)
           name = File.basename(file).chomp('.env')
           return if local_secrets_content(file) == k8s_secrets_content(name)
+          STDOUT.puts "NOTICE: Updating cluster with new contents for secret #{name}"
           kubectl("delete secret #{name}") # if kubectl("get secret #{name}")
           kubectl("create secret generic #{name} --from-env-file #{file}")
         end
@@ -243,6 +265,7 @@ module Ros
         def k8s_secrets_content(type = 'platform')
           require 'base64'
           result = kubectl_x("get secret #{type} -o yaml")
+          return {} if result.empty?
           yml = YAML.load(result)
           yml['data'].each_with_object({}) { |a, h| h[a[0]] = Base64.decode64(a[1]) }
         end

@@ -8,6 +8,11 @@ deploy:
         chartPath: stable/postgresql
         skipBuildDependencies: true
         overrides:
+          master:
+            podLabels:
+              app.kubernetes.io/name: <%= @service.name %>
+              app.kubernetes.io/component: database
+              app.kubernetes.io/part-of: application-services
           image:
             repository: mdillon/postgis
             tag: 10

@@ -117,7 +117,9 @@ module Ros
           # end compose only methods
 
           def environment
-            @environment ||= application.environment.dup.merge!(settings.environment.to_hash)
+            @environment ||= application.environment.dup.merge!(settings.environment.to_hash).merge!(
+              { platform: { hosts: application.api_hostname } }
+            )
           end
 
           def config

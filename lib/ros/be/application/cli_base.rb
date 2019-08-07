@@ -82,11 +82,11 @@ module Ros
               end
             infra_services[name] = status
           end
-          buf = ' ' * 14
-          name_len = 21
+          buf = ' ' * 13
+          name_len = 20
           no_buf = -11
-          STDOUT.puts "\nPlatform Services    Status                   Core Services" \
-            "        Status                   Infra Services       Status\n#{'-' * 124}"
+          STDOUT.puts "\nPlatform Services   Status                  Core Services" \
+            "       Status                  Infra Services      Status\n#{'-' * 115}"
           (1..[infra_services.size, my_services.size, ros_services.size].max).each do |i|
             mn, ms = my_services.shift
             rn, rs = ros_services.shift
