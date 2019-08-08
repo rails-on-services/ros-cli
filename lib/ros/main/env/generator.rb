@@ -12,6 +12,7 @@ module Ros
         def self.source_paths; ["#{File.dirname(__FILE__)}/templates", File.dirname(__FILE__)] end
 
         def generate
+          FileUtils.mkdir_p(Ros.environments_dir)
           # If an encrypted version of the environment exists and a key is present
           # then decrypt and write the contents to config/environments
           if File.exists?("#{Ros.deployments_dir}/#{name}.yml.enc")
