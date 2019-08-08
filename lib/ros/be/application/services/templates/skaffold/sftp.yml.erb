@@ -8,6 +8,10 @@ deploy:
         chartPath: <%= @service.chart_path %>/sftp
         skipBuildDependencies: true
         overrides:
+          labels:
+            # app.kubernetes.io/name: <%= @service.name %>
+            app.kubernetes.io/component: sftp
+            app.kubernetes.io/part-of: application-services
           envFromSecrets:<% @service.sftp.secrets_files.each do |name| %>
             - <%= name %><% end %>
           image:
