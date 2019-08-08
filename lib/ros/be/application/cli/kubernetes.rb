@@ -82,7 +82,7 @@ module Ros
             Dir.chdir(platform_root) do
               # skaffold cmds: build, deploy or run (build and deploy)
               base_cmd = options.build ? 'run' : 'deploy'
-              # TODO next unless check and gem_version_check
+              # TODO: next unless check and gem_version_check
               profiles = platform.components[service].config.profiles
               profiles = [options.profile] if options.profile and not options.profile.eql?('all')
               replica_count = (options.replicas || 1).to_s
@@ -103,7 +103,7 @@ module Ros
 
         def update_platform_env
           env_file = "#{platform_root}/platform.env"
-          sync_secret(env_file) if File.exists?(env_file)
+          sync_secret(env_file) if File.exist?(env_file)
         end
 
         def ps
