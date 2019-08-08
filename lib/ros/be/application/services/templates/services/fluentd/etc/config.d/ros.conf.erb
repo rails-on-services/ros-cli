@@ -1,0 +1,60 @@
+<%= @service.fluentd.header %>
+    <% if @service.fluentd.include_tcp_source %>
+    <source>
+      @type forward
+      port 24224
+    </source>
+    <% end %>
+    <filter <%= @service.fluentd.request_log_tag %>>
+      @type record_modifier
+      # write a temporary field _unix_time
+      <record>
+        _unix_time ${Time.parse(record['request']['time']).to_i}
+      </record>
+    </filter>
+
+    <filter <%= @service.fluentd.request_log_tag %>>
+      @type record_transformer
+      enable_ruby true
+      renew_time_key _unix_time
+      remove_keys _unix_time
+    </filter>
+
+    <match <%= @service.fluentd.request_log_tag %>>
+      @type kafka_buffered
+      brokers <%= @service.fluentd.kafka_brokers %>
+      default_topic http_request_log
+    </match>
+
+    <filter <%= @service.fluentd.event_log_tag %>>
+      @type base64_decode
+      fields data
+    </filter>
+
+    <match <%= @service.fluentd.event_log_tag %>>
+      @type kafka2  
+      brokers kafkastack:9092
+      default_topic events-log
+      message_key_key id  
+      headers_from_record { "ce_specversion":"$.specversion", 
+                            "ce_type":"$.type", 
+                            "ce_source":"$.source", 
+                            "ce_id":"$.id", 
+                            "ce_time":"$.time", 
+                            "ce_datacontenttype":"$.datacontenttype", 
+                            "ce_schemaurl":"$.schemaurl", 
+                            "ce_subject":"$.subject" 
+                          }
+
+      <format>
+        @type single_value
+        add_newline false
+        message_key data
+      </format>
+
+      <buffer>
+        @type file
+        path /fluentd/log/buffer
+        flush_interval 3s
+      </buffer>
+    </match>
