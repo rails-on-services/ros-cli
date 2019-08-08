@@ -221,12 +221,12 @@ module Ros
         def svpr(cmd)
           result = kubectl_x(cmd)
           # TODO: Does this effectively handle > 1 pod running
-          YAML.load(result)['items'].map{ |i| i['metadata']['name'] }
+          YAML.safe_load(result)['items'].map { |i| i['metadata']['name'] }
         end
 
         # Supporting methods (2)
         def kubectl(cmd)
-          if not File.exists?(kubeconfig)
+          if not File.exist?(kubeconfig)
             STDOUT.puts "kubeconfig not found at #{kubeconfig}"
             return
           end
