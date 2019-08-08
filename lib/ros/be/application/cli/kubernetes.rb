@@ -15,29 +15,34 @@ module Ros
           binding.pry
         end
 
+        # TODO: Add ability for fail fast
         def up(services)
+          succ = []
           @services = services.empty? ? enabled_services : services
           generate_config if stale_config
           if options.force or not system_cmd(kube_env, "kubectl get ns #{namespace}")
             STDOUT.puts 'Forcing namespace create' if options.force
-            deploy_namespace
+            succ << deploy_namespace
           else
             STDOUT.puts 'Namespace exists. skipping create. Use -f to force'
           end
-          deploy_services
-          deploy_platform_environment
-          deploy_platform
+          succ << deploy_services
+          succ << deploy_platform_environment
+          succ << deploy_platform
           show_endpoint
+          succ.none? false
         end
 
         def deploy_namespace
+          succ = []
           # create namespace
-          system_cmd(kube_env, "kubectl create ns #{namespace}")
-          system_cmd(kube_env, "kubectl label namespace #{namespace} istio-injection=enabled --overwrite")
+          succ << system_cmd(kube_env, "kubectl create ns #{namespace}")
+          succ << system_cmd(kube_env, "kubectl label namespace #{namespace} istio-injection=enabled --overwrite")
 
           # deploy helm into namespace
-          kubectl("apply -f #{cluster.kubernetes_root}/tiller-rbac")
-          system_cmd(kube_env, 'helm init --upgrade --wait --service-account tiller')
+          succ << kubectl("apply -f #{cluster.kubernetes_root}/tiller-rbac")
+          succ << system_cmd(kube_env, 'helm init --upgrade --wait --service-account tiller')
+          succ.none? false
         end
 
         def deploy_services
@@ -81,15 +86,18 @@ module Ros
               profiles = [options.profile] if options.profile and not options.profile.eql?('all')
               replica_count = (options.replicas || 1).to_s
               build_count = 0
-              profiles.each do |profile|
+              serv_succ = profiles.map do |profile|
                 run_cmd = build_count.eql?(0) ? base_cmd : 'deploy'
                 skaffold("#{run_cmd} -f #{File.basename(service_file)} -p #{profile}",
                          { 'REPLICA_COUNT' => replica_count })
-                kubectl("scale deploy #{service} --replicas=#{replica_count}")
+                succ = kubectl("scale deploy #{service} --replicas=#{replica_count}")
                 build_count += 1
+                succ
               end
+              serv_succ.none? false
             end
           end
+          succ.none? false
         end
 
         def update_platform_env
