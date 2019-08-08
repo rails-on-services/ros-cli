@@ -47,21 +47,22 @@ module Ros
 
         def deploy_services
           env_file = "#{services_root}/services.env"
-          sync_secret(env_file) if File.exists?(env_file)
-          application.services.components.keys.each do |service|
+          sync_secret(env_file) if File.exist?(env_file)
+          succ = application.services.components.keys.map do |service|
             if service.eql?(:ingress)
-              next unless get_vs(name: :ingress).empty?
+              next true unless get_vs(name: :ingress).empty?
             else
-              next if pod(name: service)
+              next true if pod(name: service)
             end
             env_file = "#{services_root}/#{service}.env"
-            sync_secret(env_file) if File.exists?(env_file)
+            sync_secret(env_file) if File.exist?(env_file)
             service_file = "#{service}.yml"
             Dir.chdir(services_root) do
               base_cmd = options.build ? 'run' : 'deploy'
               skaffold("#{base_cmd} -f #{service_file}")
             end
           end
+          succ.none? false
         end
 
         def deploy_platform_environment
@@ -234,14 +235,15 @@ module Ros
         end
 
         def kubectl_x(cmd)
-          cmd= "kubectl -n #{namespace} #{cmd}"
+          cmd = "kubectl -n #{namespace} #{cmd}"
           STDOUT.puts cmd if options.v
           %x(#{cmd})
         end
 
         def skaffold(cmd, env = {})
-          system_cmd(skaffold_env.merge(env), "skaffold -n #{namespace} #{cmd}")
+          res = system_cmd(skaffold_env.merge(env), "skaffold -n #{namespace} #{cmd}")
           puts "with environment: #{env}" if options.v
+          res
         end
 
         def skaffold_env
