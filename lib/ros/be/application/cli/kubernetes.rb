@@ -75,7 +75,7 @@ module Ros
         def deploy_platform
           update_platform_env
           succ = services.map do |service|
-            next unless platform.components.keys.include?(service.to_sym)
+            next true unless platform.components.keys.include?(service.to_sym)
 
             env_file = "#{platform_root}/#{service}.env"
             sync_secret(env_file) if File.exist?(env_file)

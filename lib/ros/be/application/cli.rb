@@ -44,7 +44,7 @@ module Ros
         desc 'build IMAGE', 'build one or all images'
         map %w(b) => :build
         def build(*services)
-          context(options).build(services)
+          exit context(options).build(services)
         end
 
         desc 'test IMAGE', 'test one or all images'
@@ -68,7 +68,7 @@ module Ros
         option :seed, type: :boolean, aliases: '--seed', desc: 'Seed the database before starting the service'
         option :shell, type: :boolean, aliases: '--sh', desc: 'Connect to service shell after starting'
         def up(*services)
-          context(options).up(services)
+          exit context(options).up(services)
         end
 
         desc 'server PROFILE', 'Start all services (short-cut alias: "s")'

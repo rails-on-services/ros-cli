@@ -161,14 +161,19 @@ module Ros
           success
         end
 
-        def compose(cmd); switch!; system_cmd({}, "docker-compose #{cmd}") end
+        def compose(cmd)
+          switch!
+          system_cmd({}, "docker-compose #{cmd}")
+        end
 
         def switch!
           FileUtils.rm_f('.env')
           FileUtils.ln_s(application.compose_file, '.env')
         end
 
-        def namespace; @namespace ||= (ENV['ROS_PROFILE'] ? "#{ENV['ROS_PROFILE']}-" : '') + Ros::Generators::Stack.compose_project_name end
+        def namespace
+          @namespace ||= (ENV['ROS_PROFILE'] ? "#{ENV['ROS_PROFILE']}-" : '') + Ros::Generators::Stack.compose_project_name
+        end
 
         def config_files
           Dir[application.compose_file]
