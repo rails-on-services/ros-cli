@@ -1,0 +1,13 @@
+Metrics/LineLength:
+  Max: 120
+Style/Documentation:
+  Enabled: false
+Style/SingleLineMethods:
+  Enabled: false
+AllCops:
+  Exclude:
+    - '**/schema.rb'
+    - '**/*.gemspec'
+    - '**/Guardfile'
+    - '**/Rakefile'
+    - '**/Gemfile'
