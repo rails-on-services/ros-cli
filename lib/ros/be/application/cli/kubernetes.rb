@@ -73,10 +73,11 @@ module Ros
 
         def deploy_platform
           update_platform_env
-          services.each do |service|
+          succ = services.map do |service|
             next unless platform.components.keys.include?(service.to_sym)
+
             env_file = "#{platform_root}/#{service}.env"
-            sync_secret(env_file) if File.exists?(env_file)
+            sync_secret(env_file) if File.exist?(env_file)
             service_file = "#{platform_root}/#{service}.yml"
             Dir.chdir(platform_root) do
               # skaffold cmds: build, deploy or run (build and deploy)
