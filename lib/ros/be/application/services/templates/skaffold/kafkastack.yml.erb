@@ -47,7 +47,7 @@ deploy:
             enabled: true
             size: 5Gi
       - name: kafka-schema-registry
-        chartPath: .<%= @service.chart_path %>/kafkastack/cp-helm-charts/charts/cp-schema-registry
+        chartPath: <%= @service.chart_path %>/kafkastack/cp-helm-charts/charts/cp-schema-registry
         skipBuildDependencies: true        
         overrides:
           imageTag: 5.3.0  
