@@ -18,17 +18,17 @@ deploy:
             requests:
               cpu: 100m
               memory: 1024Mi
-            prometheus:
+          prometheus:
             jmx:
               enabled: true
             kafka:
               enabled: true
-            persistence:
-              enabled: true
-              size: 50Gi
-            zookeeper:
-              enabled: false
-              url: "zookeeper"            
+          persistence:
+            enabled: true
+            size: 50Gi
+          zookeeper:
+            enabled: false
+            url: "zookeeper"            
       - name: zookeeper 
         chartPath: <%= @service.chart_path %>/kafkastack/cp-helm-charts/charts/cp-zookeeper
         skipBuildDependencies: true
