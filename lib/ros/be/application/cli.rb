@@ -38,13 +38,17 @@ module Ros
 
         desc 'status', 'Show platform services status'
         def status
-          context(options).status
+          command = context(options)
+          command.status
+          command.exit
         end
 
         desc 'build IMAGE', 'build one or all images'
         map %w(b) => :build
         def build(*services)
-          exit context(options).build(services)
+          command = context(options)
+          command.build(services)
+          command.exit
         end
 
         desc 'test IMAGE', 'test one or all images'
@@ -54,7 +58,9 @@ module Ros
 
         desc 'push IMAGE', 'push one or all images'
         def push(*services)
-          context(options).push(services)
+          command = context(options)
+          command.push(services)
+          command.exit
         end
 
         desc 'up SERVICE', 'bring up service(s)'
@@ -68,7 +74,9 @@ module Ros
         option :seed, type: :boolean, aliases: '--seed', desc: 'Seed the database before starting the service'
         option :shell, type: :boolean, aliases: '--sh', desc: 'Connect to service shell after starting'
         def up(*services)
-          exit context(options).up(services)
+          command = context(options)
+          command.up(services)
+          command.exit
         end
 
         desc 'server PROFILE', 'Start all services (short-cut alias: "s")'
@@ -78,58 +86,74 @@ module Ros
         def server
           # TODO: Test this
           Ros.load_env(options.environment) if options.environment != Ros.default_env
-          context(options).up
+          command = context(options)
+          command.up(services)
+          command.exit
         end
 
         desc 'cmd', 'Run arbitrary command in context'
         def cmd(*services)
-          context(options).cmd(services)
+          command = context(options)
+          command.cmd(services)
+          command.exit
         end
 
         desc 'ps', 'List running services'
         def ps
-          context(options).ps
+          command = context(options)
+          command.ps
+          command.exit
         end
 
         desc 'show', 'show service config'
         def show(service)
-          context(options).show(service)
+          command = context(options)
+          command.show(service)
+          command.exit
         end
 
         desc 'credentials', 'show iam credentials'
         def credentials
-          context(options).credentials
+          command = context(options)
+          command.credentials
+          command.exit
         end
 
         desc 'console', 'Start the Ros console (short-cut alias: "c")'
         map %w(c) => :console
         def console(service)
-          context(options).console(service)
+          command = context(options)
+          command.console(service)
+          command.exit
         end
 
         desc 'exec SERVICE COMMAND', 'execute an interactive command on a service (short-cut alias: "e")'
         map %w(e) => :exec
-        def exec(service, command)
-          context(options).exec(service, command)
+        def exec(service, cmd)
+          command = context(options)
+          command.exec(service, cmd)
+          command.exit
         end
 
         # TODO: refactor to a rails specifc set of commands in a dedicated file
         desc 'rails SERVICE COMMAND', 'execute a rails command on a service (short-cut alias: "r")'
         map %w(r) => :rails
-        def rails(service, command)
-          context(options).exec(service, "rails #{command}")
+        def rails(service, cmd)
+          exec(service, "rails #{cmd}")
         end
 
         desc 'sh SERVICE', 'execute an interactive shell on a service'
         # NOTE: shell is a reserved word
         def sh(service)
-          context(options).exec(service, 'bash')
+          exec(service, 'bash')
         end
 
         desc 'logs', 'Tail logs of a running service'
         option :tail, type: :boolean, aliases: '-f'
         def logs(service)
-          context(options).logs(service)
+          command = context(options)
+          command.logs(service)
+          command.exit
         end
 
         desc 'restart SERVICE', 'Start and stop one or more services'
@@ -137,17 +161,23 @@ module Ros
         option :seed, type: :boolean, aliases: '--seed', desc: 'Seed the database before starting the service'
         option :shell, type: :boolean, aliases: '--sh', desc: 'Connect to service shell after starting'
         def restart(*services)
-          context(options).restart(services)
+          command = context(options)
+          command.restart(services)
+          command.exit
         end
 
         desc 'stop SERVICE', 'Stop a service'
         def stop(*services)
-          context(options).stop(services)
+          command = context(options)
+          command.stop(services)
+          command.exit
         end
 
         desc 'down', 'bring down platform'
         def down(*services)
-          context(options).down(services)
+          command = context(options)
+          command.down(services)
+          command.exit
         end
 
         desc 'list', 'List backend application configuration objects'
@@ -159,7 +189,9 @@ module Ros
 
         desc 'publish', 'Publish API documentation to Postman'
         def publish
-          context(options).publish
+          command = context(options)
+          command.publish
+          command.exit
         end
 
         private

@@ -23,8 +23,8 @@ module Ros
               # TODO: raise error if ~/.aws/credentials doesn't exist
               cmd_string = "aws eks update-kubeconfig --name #{name}"
               cmd_string = "#{cmd_string} --role-arn arn:aws:iam::#{provider.account_id}:role/#{provider.cluster.role_name}" if cli.options.long
-              cli.system_cmd({}, cmd_string)
-              cli.system_cmd({}, 'kubectl cluster-info')
+              cli.system_cmd(:update_kube_config, {}, cmd_string)
+              cli.system_cmd(:get_cluster_info, {}, 'kubectl cluster-info')
             end
           end
         end
