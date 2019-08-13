@@ -30,7 +30,7 @@ deploy:
             enabled: false
             url: "zookeeper"            
       - name: zookeeper 
-        chartPath: <%= @service.chart_path %>/kafkastack/cp-helm-charts/charts/cp-zookeeper
+        chartPath: <%= @service.chart_path %>/cp-helm-charts/cp-zookeeper
         skipBuildDependencies: true
         overrides:
           imageTag: 5.3.0
@@ -47,7 +47,7 @@ deploy:
             enabled: true
             size: 5Gi
       - name: kafka-schema-registry
-        chartPath: <%= @service.chart_path %>/kafkastack/cp-helm-charts/charts/cp-schema-registry
+        chartPath: <%= @service.chart_path %>/cp-helm-charts/cp-schema-registry
         skipBuildDependencies: true        
         overrides:
           imageTag: 5.3.0  
