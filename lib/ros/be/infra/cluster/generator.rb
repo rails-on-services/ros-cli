@@ -15,7 +15,6 @@ module Ros
             def provider; Stack.config.infra[config.provider] end
             def name; config.name end
             def infra; Infra::Model end
-            def kubernetes_root; "#{deploy_path}/kubernetes" end
 
             def init(cli); send("init_#{config.provider}", cli) end
 
@@ -34,11 +33,6 @@ module Ros
           include Ros::Be::CommonGenerator
 
           def self.a_path; File.dirname(__FILE__) end
-
-          def copy_kubernetes_files
-            return unless infra.cluster_type.eql?('kubernetes')
-            directory('../files/kubernetes', "#{cluster.deploy_path}/kubernetes")
-          end
 
           def execute
             [Service::Generator].each do |klass|

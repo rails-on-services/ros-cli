@@ -26,6 +26,7 @@ module Ros
           else
             STDOUT.puts 'Namespace exists. skipping create. Use -f to force'
           end
+          return if options.skip
           deploy_services
           deploy_platform_environment
           deploy_platform
@@ -38,7 +39,7 @@ module Ros
           system_cmd(:kubectl_label_namespace, kube_env, "kubectl label namespace #{namespace} istio-injection=enabled --overwrite")
 
           # deploy helm into namespace
-          kubectl(:deploy_tiller, "apply -f #{cluster.kubernetes_root}/tiller-rbac")
+          kubectl(:deploy_tiller, "apply -f #{application.deploy_path}/services/kubernetes/tiller-rbac")
           system_cmd(:initialize_helm, kube_env, 'helm init --upgrade --wait --service-account tiller')
         end
 
@@ -162,7 +163,7 @@ module Ros
         def down(services)
           if services.empty?
             cmd = "kubectl delete ns #{namespace}"
-            system(cmd)
+            system_cmd(:delete_namespace, {}, cmd)
             remove_cache
           else
             base_cmd = 'delete'
