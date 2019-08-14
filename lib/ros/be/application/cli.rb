@@ -53,7 +53,9 @@ module Ros
 
         desc 'test IMAGE', 'test one or all images'
         def test(*services)
-          exit context(options).test(services)
+          command = context(options)
+          command.test(services)
+          command.exit
         end
 
         desc 'push IMAGE', 'push one or all images'
