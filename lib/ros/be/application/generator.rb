@@ -95,7 +95,9 @@ module Ros
         def self.a_path; File.dirname(__FILE__) end
 
         def execute
-          [Ros::Be::Application::Platform::Generator, Ros::Be::Application::Services::Generator].each do |klass|
+          # NOTE: Important to invoke the services before the platform generator so the compose.env includes
+          # both the services and application compose files
+          [Ros::Be::Application::Services::Generator, Ros::Be::Application::Platform::Generator].each do |klass|
             generator = klass.new
             generator.behavior = behavior
             generator.destination_root = destination_root

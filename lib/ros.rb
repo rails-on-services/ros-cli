@@ -36,7 +36,7 @@ module Ros
     end
 
     def install_templates
-      %w(platform services).each do |type|
+      %w(services platform).each do |type|
         require "ros/generators/be/application/#{type}/#{type}_generator"
         klass = Object.const_get("Ros::Generators::Be::Application::#{type.capitalize}::#{type.capitalize}Generator")
         klass.install_templates

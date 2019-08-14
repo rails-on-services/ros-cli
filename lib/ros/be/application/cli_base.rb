@@ -27,6 +27,7 @@ module Ros
         end
 
         def test(services)
+          switch!
           services = enabled_services if services.empty?
           generate_config if stale_config
           services.each do |service|
@@ -42,6 +43,7 @@ module Ros
         def svc_config(service); Settings.components.be.components.application.components.platform.components.dig(service) end
 
         def show(service_name)
+          switch!
           service = service_name.split('/')[0]
           service_name = "#{service_name}.yml" unless service_name.index('.')
           %w(services platform).each do |type|
@@ -54,6 +56,7 @@ module Ros
         end
 
         def status
+          switch!
           ros_services = {}
           my_services = {}
           infra_services = {}
@@ -104,6 +107,7 @@ module Ros
         end
 
         def credentials
+          switch!
           get_credentials if not File.exists?(creds_file)
           generate_config if stale_config
           postman = JSON.parse(json.each_with_object([]) { |j, a| a.append(Credential.new(j).to_postman) }.to_json)
