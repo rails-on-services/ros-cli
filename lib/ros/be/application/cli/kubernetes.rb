@@ -62,7 +62,7 @@ module Ros
         end
 
         def deploy_platform_environment
-          return if kubectl("get secret #{Stack.registry_secret_name}") unless options.force
+          return if kubectl(:get_secret, "get secret #{Stack.registry_secret_name}") unless options.force
           kube_cmd = "create secret generic #{Stack.registry_secret_name} " \
             "--from-file=.dockerconfigjson=#{Dir.home}/.docker/config.json --type=kubernetes.io/dockerconfigjson"
           kubectl(:registry_secret, kube_cmd)
@@ -102,7 +102,7 @@ module Ros
 
         def ps
           generate_config if stale_config
-          kubectl('get pods')
+          kubectl(:get_pods, 'get pods')
         end
 
         def console(service)
@@ -111,7 +111,7 @@ module Ros
 
         def exec(service, command)
           generate_config if stale_config
-          kubectl("exec -it #{service_pod(service)} -c #{service} #{command}")
+          kubectl(:exec, "exec -it #{service_pod(service)} -c #{service} #{command}")
         end
 
         def service_pod(service); pod(name: service, component: :server) end
@@ -119,7 +119,7 @@ module Ros
         def logs(service)
           generate_config if stale_config
           trap("SIGINT") { throw StandardError } if options.tail
-          kubectl("#{command('logs')} #{service_pod(service)} -c #{service}")
+          kubectl(:logs, "#{command('logs')} #{service_pod(service)} -c #{service}")
         rescue StandardError
         end
 
@@ -140,16 +140,16 @@ module Ros
         def stop(services)
           generate_config if stale_config
           services.each do |service|
-            kubectl("scale deploy #{service} --replicas=0")
+            kubectl(:scale, "scale deploy #{service} --replicas=0")
             pods(name: service).each do |pod|
-              kubectl("delete pod #{pod}")
+              kubectl(:delete_pod, "delete pod #{pod}")
             end
           end
         end
 
         def get_credentials
           bootstrap_pod = pod(name: 'iam', component: 'bootstrap')
-          rs = kubectl_x("logs #{bootstrap_pod}")
+          rs = kubectl_x(:logs, "logs #{bootstrap_pod}")
           if index_of_json = rs.index('[{"type":')
             json = rs[index_of_json..-1]
             FileUtils.mkdir_p("#{runtime_dir}/platform")
@@ -174,7 +174,7 @@ module Ros
               # binding.pry
               Dir.chdir(platform_root) do
                 profiles.each do |profile|
-                  skaffold("#{base_cmd} -f #{File.basename(service_file)} -p #{profile}")
+                  skaffold(base_cmd, "#{base_cmd} -f #{File.basename(service_file)} -p #{profile}")
                 end
               end
             end
@@ -261,8 +261,8 @@ module Ros
           name = File.basename(file).chomp('.env')
           return if local_secrets_content(file) == k8s_secrets_content(name)
           STDOUT.puts "NOTICE: Updating cluster with new contents for secret #{name}"
-          kubectl("delete secret #{name}") # if kubectl("get secret #{name}")
-          kubectl("create secret generic #{name} --from-env-file #{file}")
+          kubectl(:delete_secret, "delete secret #{name}") # if kubectl("get secret #{name}")
+          kubectl(:create_secret, "create secret generic #{name} --from-env-file #{file}")
         end
 
         def local_secrets_content(file)
@@ -271,7 +271,7 @@ module Ros
 
         def k8s_secrets_content(type = 'platform')
           require 'base64'
-          result = kubectl_x("get secret #{type} -o yaml")
+          result = kubectl_x(:get_secret, "get secret #{type} -o yaml")
           return {} if result.empty?
           yml = YAML.load(result)
           yml['data'].each_with_object({}) { |a, h| h[a[0]] = Base64.decode64(a[1]) }
