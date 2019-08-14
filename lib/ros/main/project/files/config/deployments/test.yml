@@ -21,9 +21,10 @@ components:
             subdomain: test
         components:
           services:
-            ingress:
-            postgres:
-            redis:
+            components:
+              ingress:
+              postgres:
+              redis:
           platform:
             config:
               images:

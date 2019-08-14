@@ -1,15 +1,39 @@
 # frozen_string_literal: true
 
 module Ros
+  class Errors
+    attr_reader :messages, :details
+
+    def initialize
+      @messages = {}
+      @details = {}
+    end
+
+    def add(attribute, message = :invalid, options = {})
+      @messages[attribute] = message
+      @details[attribute] = options
+    end
+
+    def size; @messages.size end
+  end
+
   module CliBase
     attr_accessor :options
     def test_for_project
       raise Error, set_color("ERROR: Not a Ros project", :red) if Ros.root.nil?
     end
 
-    def system_cmd(env = {}, cmd)
+    def system_cmd(label = :unknown, env = {}, cmd)
       puts cmd if options.v
-      system(env, cmd) unless options.n
+      return if options.n
+      result = system(env, cmd)
+      errors.add(label) unless result
+      result
+    end
+
+    def exit
+      STDOUT.puts(errors.messages.map{|(k,v)| "#{k}=#{v}"}) unless errors.size.zero?
+      Kernel.exit(errors.size)
     end
 
     # TODO: the namespace needs to be configurable; don't assume 'be'

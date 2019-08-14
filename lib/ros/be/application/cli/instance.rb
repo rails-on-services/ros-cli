@@ -5,9 +5,11 @@ module Ros
     module Application
       class Instance
         include CliBase
+        attr_accessor :services, :errors
 
         def initialize(options = {})
           @options = options
+          @errors = Ros::Errors.new
         end
 
         def cmd(services)
@@ -16,13 +18,13 @@ module Ros
 
         def build(services)
           generate_config if stale_config
-          compose("build #{services.join(' ')}")
+          compose(:build, "build #{services.join(' ')}")
         end
 
         def push(services)
           services = enabled_services if services.empty?
           generate_config if stale_config
-          compose("push #{services.join(' ')}")
+          compose(:push, "push #{services.join(' ')}")
         end
 
         def up(services)
@@ -40,9 +42,9 @@ module Ros
               config = ref.dig(:config) || Config::Options.new
               next unless database_check(service, config)
             end
-            compose("build #{service}") if options.build
+            compose(:build, "build #{service}") if options.build
             service = "#{service} 'tail -f log/development.log'" unless options.process
-            compose("up #{compose_options} #{service}")
+            compose(:up, "up #{compose_options} #{service}")
           end
           reload_nginx(services)
           status
@@ -57,9 +59,13 @@ module Ros
 
         def get_credentials
           file = "#{Ros.is_ros? ? '' : 'ros/'}services/iam/tmp/#{application.current_feature_set}/credentials.json"
+          unless File.exists?(file)
+            errors.add(:get_credentials, "file not found: #{file}")
+            return
+          end
           FileUtils.mkdir_p("#{runtime_dir}/platform")
-          # TODO: This coule be mv
-          # and the tmp file on iam should probably be ROS_ENV (as passed to image vi ENV var) / feature_set
+          # TODO: the tmp file on iam should probably be ROS_ENV (as passed to image vi ENV var) / feature_set
+          # TODO: when IAM service is brought down the credentials file should be removed
           FileUtils.cp(file, creds_file)
         end
 
@@ -85,8 +91,8 @@ module Ros
 
         def restart(services)
           generate_config if stale_config
-          compose("stop #{services.join(' ')}")
-          compose("up -d #{services.join(' ')}")
+          compose(:stop, "stop #{services.join(' ')}")
+          compose(:up, "up -d #{services.join(' ')}")
           services.each do |service|
             if ref = Settings.components.be.components.application.components.platform.components.dig(service)
               config = ref.dig(:config) || Config::Options.new
@@ -102,7 +108,7 @@ module Ros
 
         def stop(services)
           generate_config if stale_config
-          compose("stop #{services.join(' ')}")
+          compose(:stop, "stop #{services.join(' ')}")
           reload_nginx(services)
         end
 
@@ -119,8 +125,8 @@ module Ros
           silence_output do
             Ros::Be::Application::Services::Generator.new.invoke(:nginx_conf, [running_services])
           end
-          compose('stop nginx')
-          compose('up -d nginx')
+          compose(:stop_nginx, 'stop nginx')
+          compose(:up_nginx, 'up -d nginx')
           # NOTE: nginx seems not to notice changes in the mounted file (at least on NFS share) so can't just reload
           # compose('up -d nginx') unless system("docker container exec #{namespace}_nginx_1 nginx -s reload")
         end
@@ -151,7 +157,7 @@ module Ros
           migration_file = "#{application.compose_dir}/#{name}-migrated"
           return true if File.exists?(migration_file) unless options.seed
           FileUtils.rm(migration_file) if File.exists?(migration_file)
-          if success = compose("run --rm #{name} rails #{prefix}ros:db:reset:seed")
+          if success = compose(:seed, "run --rm #{name} rails #{prefix}ros:db:reset:seed")
             FileUtils.touch(migration_file)
             if name.eql?('iam')
               publish_env_credentials
@@ -161,14 +167,19 @@ module Ros
           success
         end
 
-        def compose(cmd); switch!; system_cmd({}, "docker-compose #{cmd}") end
+        def compose(label, cmd = nil)
+          switch!
+          system_cmd(label, {}, "docker-compose #{cmd || label}")
+        end
 
         def switch!
           FileUtils.rm_f('.env')
           FileUtils.ln_s(application.compose_file, '.env')
         end
 
-        def namespace; @namespace ||= (ENV['ROS_PROFILE'] ? "#{ENV['ROS_PROFILE']}-" : '') + Ros::Generators::Stack.compose_project_name end
+        def namespace
+          @namespace ||= (ENV['ROS_PROFILE'] ? "#{ENV['ROS_PROFILE']}-" : '') + Ros::Generators::Stack.compose_project_name
+        end
 
         def config_files
           Dir[application.compose_file]

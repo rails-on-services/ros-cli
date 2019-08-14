@@ -4,17 +4,19 @@ module Ros
   module Be
     module Application
       class Kubernetes
-        include Ros::Be::Application::CliBase
-        attr_accessor :services
+        include CliBase
+        attr_accessor :services, :errors
 
         def initialize(options = {})
           @options = options
+          @errors = Ros::Errors.new
         end
 
         def cmd(services)
           binding.pry
         end
 
+        # TODO: Add ability for fail fast
         def up(services)
           @services = services.empty? ? enabled_services : services
           generate_config if stale_config
@@ -32,29 +34,29 @@ module Ros
 
         def deploy_namespace
           # create namespace
-          system_cmd(kube_env, "kubectl create ns #{namespace}")
-          system_cmd(kube_env, "kubectl label namespace #{namespace} istio-injection=enabled --overwrite")
+          system_cmd(:kubectl_create_namespace, kube_env,  "kubectl create ns #{namespace}")
+          system_cmd(:kubectl_label_namespace, kube_env, "kubectl label namespace #{namespace} istio-injection=enabled --overwrite")
 
           # deploy helm into namespace
-          kubectl("apply -f #{cluster.kubernetes_root}/tiller-rbac")
-          system_cmd(kube_env, 'helm init --upgrade --wait --service-account tiller')
+          kubectl(:deploy_tiller, "apply -f #{cluster.kubernetes_root}/tiller-rbac")
+          system_cmd(:initialize_helm, kube_env, 'helm init --upgrade --wait --service-account tiller')
         end
 
         def deploy_services
           env_file = "#{services_root}/services.env"
-          sync_secret(env_file) if File.exists?(env_file)
+          sync_secret(env_file) if File.exist?(env_file)
           application.services.components.keys.each do |service|
             if service.eql?(:ingress)
-              next unless get_vs(name: :ingress).empty?
+              next true unless get_vs(name: :ingress).empty?
             else
-              next if pod(name: service)
+              next true if pod(name: service)
             end
             env_file = "#{services_root}/#{service}.env"
-            sync_secret(env_file) if File.exists?(env_file)
+            sync_secret(env_file) if File.exist?(env_file)
             service_file = "#{service}.yml"
             Dir.chdir(services_root) do
               base_cmd = options.build ? 'run' : 'deploy'
-              skaffold("#{base_cmd} -f #{service_file}")
+              skaffold(base_cmd, "#{base_cmd} -f #{service_file}")
             end
           end
         end
@@ -63,29 +65,30 @@ module Ros
           return if kubectl("get secret #{Stack.registry_secret_name}") unless options.force
           kube_cmd = "create secret generic #{Stack.registry_secret_name} " \
             "--from-file=.dockerconfigjson=#{Dir.home}/.docker/config.json --type=kubernetes.io/dockerconfigjson"
-          kubectl(kube_cmd)
+          kubectl(:registry_secret, kube_cmd)
         end
 
         def deploy_platform
           update_platform_env
           services.each do |service|
-            next unless platform.components.keys.include?(service.to_sym)
+            next true unless platform.components.keys.include?(service.to_sym)
+
             env_file = "#{platform_root}/#{service}.env"
-            sync_secret(env_file) if File.exists?(env_file)
+            sync_secret(env_file) if File.exist?(env_file)
             service_file = "#{platform_root}/#{service}.yml"
             Dir.chdir(platform_root) do
               # skaffold cmds: build, deploy or run (build and deploy)
               base_cmd = options.build ? 'run' : 'deploy'
-              # TODO next unless check and gem_version_check
+              # TODO: next unless check and gem_version_check
               profiles = platform.components[service].config.profiles
               profiles = [options.profile] if options.profile and not options.profile.eql?('all')
               replica_count = (options.replicas || 1).to_s
               build_count = 0
               profiles.each do |profile|
                 run_cmd = build_count.eql?(0) ? base_cmd : 'deploy'
-                skaffold("#{run_cmd} -f #{File.basename(service_file)} -p #{profile}",
+                skaffold(run_cmd, "#{run_cmd} -f #{File.basename(service_file)} -p #{profile}",
                          { 'REPLICA_COUNT' => replica_count })
-                kubectl("scale deploy #{service} --replicas=#{replica_count}")
+                kubectl(:scale, "scale deploy #{service} --replicas=#{replica_count}")
                 build_count += 1
               end
             end
@@ -94,7 +97,7 @@ module Ros
 
         def update_platform_env
           env_file = "#{platform_root}/platform.env"
-          sync_secret(env_file) if File.exists?(env_file)
+          sync_secret(env_file) if File.exist?(env_file)
         end
 
         def ps
@@ -126,11 +129,11 @@ module Ros
         def restart(services)
           generate_config if stale_config
           update_platform_env
-          services.each do |service|
-            kubectl("rollout restart deploy #{service}")
-          end
-          # stop(services)
-          # up(services)
+          # services.each do |service|
+          #   kubectl("rollout restart deploy #{service}")
+          # end
+          down(services)
+          up(services)
           # status
         end
 
@@ -209,30 +212,34 @@ module Ros
         end
 
         def svpr(cmd)
-          result = kubectl_x(cmd)
+          result = kubectl_x(:running_services, cmd)
           # TODO: Does this effectively handle > 1 pod running
-          YAML.load(result)['items'].map{ |i| i['metadata']['name'] }
+          YAML.safe_load(result)['items'].map { |i| i['metadata']['name'] }
         end
 
         # Supporting methods (2)
-        def kubectl(cmd)
-          if not File.exists?(kubeconfig)
+        def kubectl(label, cmd)
+          if not File.exist?(kubeconfig)
             STDOUT.puts "kubeconfig not found at #{kubeconfig}"
             return
           end
           STDOUT.puts "Using kubeconfig file: #{kubeconfig}" if options.v
-          system_cmd(kube_env, "kubectl -n #{namespace} #{cmd}")
+          system_cmd(label, kube_env, "kubectl -n #{namespace} #{cmd}")
         end
 
-        def kubectl_x(cmd)
-          cmd= "kubectl -n #{namespace} #{cmd}"
+        def kubectl_x(label, cmd)
+          cmd = "kubectl -n #{namespace} #{cmd}"
           STDOUT.puts cmd if options.v
-          %x(#{cmd})
+          return if options.n
+          result = %x(#{cmd})
+          errors.add(label) # unless result
+          result
         end
 
-        def skaffold(cmd, env = {})
-          system_cmd(skaffold_env.merge(env), "skaffold -n #{namespace} #{cmd}")
+        def skaffold(label, cmd, env = {})
+          res = system_cmd(label, skaffold_env.merge(env), "skaffold -n #{namespace} #{cmd}")
           puts "with environment: #{env}" if options.v
+          res
         end
 
         def skaffold_env
