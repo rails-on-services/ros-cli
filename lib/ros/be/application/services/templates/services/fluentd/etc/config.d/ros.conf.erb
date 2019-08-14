@@ -33,8 +33,8 @@
 
     <match <%= @service.fluentd.event_log_tag %>>
       @type kafka2  
-      brokers kafkastack:9092
-      default_topic events-log
+      brokers <%= @service.fluentd.kafka_brokers %>      
+      topic_key source
       message_key_key id  
       headers_from_record { "ce_specversion":"$.specversion", 
                             "ce_type":"$.type", 
