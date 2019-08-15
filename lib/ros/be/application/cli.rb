@@ -206,12 +206,12 @@ module Ros
             %x(git clone git@github.com:rails-on-services/ros.git) unless ros_repo
             require 'ros/main/env/generator'
             environments.each do |env|
-              Ros::Main::Env::Generator.new([env]).invoke_all if not File.exists?("#{Ros.environments_dir}/#{env}.yml")
+              Ros::Main::Env::Generator.new([env]).invoke_all if not File.exist?("#{Ros.environments_dir}/#{env}.yml")
             end
           else
             STDOUT.puts "ros repo: #{ros_repo ? 'ok' : 'missing'}"
             env_ok = environments.each do |env|
-              break false if not File.exists?("#{Ros.environments_dir}/#{env}.yml")
+              break false if not File.exist?("#{Ros.environments_dir}/#{env}.yml")
             end
             STDOUT.puts "environment configuration: #{env_ok ? 'ok' : 'missing'}"
           end
@@ -219,7 +219,8 @@ module Ros
 
         def context(options = {})
           return @context if @context
-          raise Error, set_color("ERROR: Not a Ros project", :red) if Ros.root.nil?
+          raise Error, set_color('ERROR: Not a Ros project', :red) if Ros.root.nil?
+
           require "ros/be/application/cli/#{infra_x.cluster_type}"
           @context = Ros::Be::Application.const_get(infra_x.cluster_type.capitalize).new(options)
           @context

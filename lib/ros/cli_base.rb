@@ -18,28 +18,36 @@ module Ros
   end
 
   module CliBase
-    attr_accessor :options
+    attr_accessor :options, :errors
+
+    def initialize(*_args)
+      super
+      @errors = Ros::Errors.new
+    end
+
     def test_for_project
-      raise Error, set_color("ERROR: Not a Ros project", :red) if Ros.root.nil?
+      raise Error, set_color('ERROR: Not a Ros project', :red) if Ros.root.nil?
     end
 
     def system_cmd(label = :unknown, env = {}, cmd)
       puts cmd if options.v
       return if options.n
+
       result = system(env, cmd)
       errors.add(label) unless result
       result
     end
 
     def exit
-      STDOUT.puts(errors.messages.map{|(k,v)| "#{k}=#{v}"}) unless errors.size.zero?
+      STDOUT.puts(errors.messages.map{ |(k, v)| "#{k}=#{v}" }) unless errors.size.zero?
       Kernel.exit(errors.size)
     end
 
     # TODO: the namespace needs to be configurable; don't assume 'be'
     def stale_config
       return true if config_files.empty?
-      mtime = config_files.map{ |f| File.mtime(f) }.min
+
+      mtime = config_files.map { |f| File.mtime(f) }.min
       # Check config files
       Dir["#{Ros.root}/config/**/*.yml"].each { |f| return true if mtime < File.mtime(f) }
       # Check template files
@@ -54,6 +62,7 @@ module Ros
     end
 
     def config_files; raise NotImplementedError end
+
     def generate_config; raise NotImplementedError end
 
     def silence_output

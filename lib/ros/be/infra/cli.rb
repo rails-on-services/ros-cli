@@ -9,6 +9,7 @@ module Ros
     module Infra
       class Cli < Thor
         include CliBase
+
         check_unknown_options!
         class_option :v, type: :boolean, default: false, desc: 'verbose output'
         class_option :n, type: :boolean, default: false, desc: "run but don't execute action"
@@ -71,7 +72,7 @@ module Ros
         end
 
         def show_json
-          if File.exists?('output.json')
+          if File.exist?('output.json')
             json = JSON.parse(File.read('output.json'))
             # TODO: This will need to change for two things:
             # 1. when deploying to cluster these values will be different

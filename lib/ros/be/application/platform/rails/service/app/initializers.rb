@@ -19,7 +19,7 @@ inject_into_file 'config/application.rb', after: ".api_only = true\n" do <<-RUBY
 
   initializer 'service.set_platform_config', before: 'ros_core.load_platform_config' do |app|
     settings_path = root.join('config/settings.yml')
-    Settings.prepend_source!(settings_path) if File.exists? settings_path
+    Settings.prepend_source!(settings_path) if File.exist? settings_path
     name = self.class.name.split('::').first.downcase
     Settings.prepend_source!({ service: { name: name, policy_name: name.capitalize } })
     app.config.hosts << name

@@ -7,7 +7,7 @@ elsif ARGV[0]&.include? ':'
   require 'rake'
   tasks = ARGV.each_with_object([]) { |arg, tasks| tasks.append(arg) if arg.index(':') }
   args = ARGV.each_with_object([]) { |arg, args| args.append(arg) unless arg.index(':') }
-  Rake.load_rakefile('Rakefile') if File.exists?('Rakefile')
+  Rake.load_rakefile('Rakefile') if File.exist?('Rakefile')
   tasks.each { |task| Rake::Task[task].invoke(args) }
 else
   require 'bundler/setup'
