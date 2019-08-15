@@ -18,7 +18,12 @@ module Ros
   end
 
   module CliBase
-    attr_accessor :options
+    attr_accessor :options, :errors
+
+    def initialize(*args)
+      @errors = Ros::Errors.new
+    end
+
     def test_for_project
       raise Error, set_color("ERROR: Not a Ros project", :red) if Ros.root.nil?
     end

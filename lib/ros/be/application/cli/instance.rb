@@ -5,11 +5,10 @@ module Ros
     module Application
       class Instance
         include CliBase
-        attr_accessor :services, :errors
+        attr_accessor :services
 
         def initialize(options = {})
           @options = options
-          @errors = Ros::Errors.new
         end
 
         def cmd(services)
