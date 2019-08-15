@@ -28,7 +28,7 @@ module Ros
           def env_files
             ary = []
             ary.append('../platform/platform.env')
-            ary.append('../platform/credentials.env') if File.exists?("#{deploy_path}/credentials.env")
+            ary.append('../platform/credentials.env') if File.exist?("#{deploy_path}/credentials.env")
             ary.append("../platform/#{name}.env") if has_envs
             ary
           end

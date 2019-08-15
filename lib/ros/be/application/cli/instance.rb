@@ -59,7 +59,7 @@ module Ros
 
         def get_credentials
           file = "#{Ros.is_ros? ? '' : 'ros/'}services/iam/tmp/#{application.current_feature_set}/credentials.json"
-          unless File.exists?(file)
+          unless File.exist?(file)
             errors.add(:get_credentials, "file not found: #{file}")
             return
           end
@@ -155,8 +155,8 @@ module Ros
         def database_check(name, config)
           prefix = config.ros ? 'app:' : ''
           migration_file = "#{application.compose_dir}/#{name}-migrated"
-          return true if File.exists?(migration_file) unless options.seed
-          FileUtils.rm(migration_file) if File.exists?(migration_file)
+          return true if File.exist?(migration_file) unless options.seed
+          FileUtils.rm(migration_file) if File.exist?(migration_file)
           if success = compose(:seed, "run --rm #{name} rails #{prefix}ros:db:reset:seed")
             FileUtils.touch(migration_file)
             if name.eql?('iam')

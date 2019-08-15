@@ -12,10 +12,21 @@ module Ros
         include Ros::CliBase
         attr_accessor :options
 
-        def infra; Ros::Be::Infra::Model end
-        def cluster; Ros::Be::Infra::Cluster::Model end
-        def application; Ros::Be::Application::Model end
-        def platform ; Ros::Be::Application::Platform::Model end
+        def infra
+          Ros::Be::Infra::Model
+        end
+
+        def cluster
+          Ros::Be::Infra::Cluster::Model
+        end
+
+        def application
+          Ros::Be::Application::Model
+        end
+
+        def platform
+          Ros::Be::Application::Platform::Model
+        end
 
         def generate_config
           silence_output do
@@ -100,7 +111,6 @@ module Ros
           show_endpoint
         end
 
-
         def show_endpoint
           STDOUT.puts "\n*** Services available at #{application.api_uri} ***"
           STDOUT.puts "*** API Docs available at [TO IMPLEMENT] ***\n\n"
@@ -108,7 +118,7 @@ module Ros
 
         def credentials
           switch!
-          get_credentials if not File.exists?(creds_file)
+          get_credentials if not File.exist?(creds_file)
           generate_config if stale_config
           postman = JSON.parse(json.each_with_object([]) { |j, a| a.append(Credential.new(j).to_postman) }.to_json)
           envs = json.each_with_object([]) { |j, a| a.append(Credential.new(j).to_env) }
@@ -123,7 +133,7 @@ module Ros
         end
 
         def json
-          @json ||= File.exists?(creds_file) ? JSON.parse(File.read(creds_file)) : []
+          @json ||= File.exist?(creds_file) ? JSON.parse(File.read(creds_file)) : []
         end
 
         def creds_file; @creds_file ||= "#{runtime_dir}/platform/credentials.json" end
@@ -147,7 +157,8 @@ module Ros
         # TODO: ros generate:docs:erd
         # NOTE: if these are cli commands then can take one or more services
         def publish_env_credentials
-          return unless File.exists?(creds_file)
+          return unless File.exist?(creds_file)
+
           content = json.each_with_object([]) { |j, a| a.append(Credential.new(j).to_env) }.join("\n")
           File.open("#{application.deploy_path}/platform/credentials.env", 'w') { |f| f.puts "#{content}\n" }
         end
@@ -159,7 +170,7 @@ module Ros
           FileUtils.mkdir_p(documents_dir)
           services.each do |service|
             exec(service, 'rails app:ros:erd:generate')
-            if File.exists?("services/#{service}/spec/dummy/erd.pdf")
+            if File.exist?("services/#{service}/spec/dummy/erd.pdf")
               FileUtils.mv("services/#{service}/spec/dummy/erd.pdf", "#{documents_dir}/#{service}.erd")
             end
           end

@@ -59,7 +59,7 @@ module Ros
         files.append("#{Ros.root}/config/#{type}s/#{Ros.env}.yml")
         if ENV['ROS_PROFILE']
           profile_file = "#{Ros.root}/config/#{type}s/#{Ros.env}-#{ENV['ROS_PROFILE']}.yml"
-          files.append(profile_file) if File.exists?(profile_file)
+          files.append(profile_file) if File.exist?(profile_file)
         end
       end
       Config.load_and_set_settings(files)
@@ -85,7 +85,7 @@ module Ros
     def root
       @root ||= (cwd = Dir.pwd
         while not cwd.eql?('/')
-          break Pathname.new(cwd) if File.exists?("#{cwd}/config/deployment.yml")
+          break Pathname.new(cwd) if File.exist?("#{cwd}/config/deployment.yml")
           cwd = File.expand_path('..', cwd)
         end)
     end
