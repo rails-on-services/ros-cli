@@ -11,6 +11,8 @@ deploy:
           imageTag: 5.3.0
           replicas: 1
           fullnameOverride: kafka
+          podAnnotations:
+            app.kubernetes.io/name: kafka
           resources:
             limits:
               cpu: 200m
@@ -20,9 +22,9 @@ deploy:
               memory: 1024Mi
           prometheus:
             jmx:
-              enabled: true
+              enabled: false
             kafka:
-              enabled: true
+              enabled: false
           persistence:
             enabled: true
             size: 50Gi
@@ -35,7 +37,9 @@ deploy:
         overrides:
           imageTag: 5.3.0
           servers: 1  
-          fullnameOverride: zookeeper                  
+          fullnameOverride: zookeeper
+          podAnnotations:
+            app.kubernetes.io/name: zookeeper
           resources:
             limits:
               cpu: 1
@@ -52,7 +56,9 @@ deploy:
         overrides:
           imageTag: 5.3.0  
           replicaCount: 1          
-          fullnameOverride: kafka-schema-registry          
+          fullnameOverride: kafka-schema-registry
+          podAnnotations:
+            app.kubernetes.io/name: kafka-schema-registry
           kafka:
             bootstrapServers: "PLAINTEXT://kafka-headless:9092"
           heapOptions: "-Xms1024M -Xmx1024M"
