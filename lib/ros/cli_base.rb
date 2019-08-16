@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+require 'open3'
 
 module Ros
   class Errors
@@ -18,28 +19,41 @@ module Ros
   end
 
   module CliBase
-    attr_accessor :options, :errors
-
-    def initialize(*_args)
-      super
-      @errors = Ros::Errors.new
-    end
+    attr_accessor :options, :errors, :stdout, :stderr, :exit_code
 
     def test_for_project
       raise Error, set_color('ERROR: Not a Ros project', :red) if Ros.root.nil?
     end
 
-    def system_cmd(label = :unknown, env = {}, cmd)
-      puts cmd if options.v
-      return if options.n
+    # run command with output captured to variables
+    # returns boolean true if command successful, false otherwise
+    def capture_cmd(cmd, envs = {})
+      return if setup_cmd(cmd)
+      @stdout, @stderr, process_status = Open3.capture3(envs, cmd)
+      @exit_code = process_status.exitstatus
+      @exit_code.zero?
+    end
 
-      result = system(env, cmd)
-      errors.add(label) unless result
-      result
+    # run command with output captured unless verbose (options.v) then to terminal
+    # returns boolean true if command successful, false otherwise
+    def system_cmd(cmd, envs = {})
+      return capture_cmd(cmd, envs) unless options.v
+      return if setup_cmd(cmd)
+      system(envs, cmd)
+      @exit_code = $?.exitstatus
+      @exit_code.zero?
+    end
+
+    def setup_cmd(cmd)
+      puts cmd if options.v
+			@stdout = nil
+			@stderr = nil
+      @exit_code = 0
+      options.n
     end
 
     def exit
-      STDOUT.puts(errors.messages.map{ |(k, v)| "#{k}=#{v}" }) unless errors.size.zero?
+      STDOUT.puts(errors.messages.map{ |(k, v)| "#{k} error:\n---\n#{v}\n---" }) if errors.size.positive?
       Kernel.exit(errors.size)
     end
 

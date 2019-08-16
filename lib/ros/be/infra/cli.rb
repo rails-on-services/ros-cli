@@ -20,6 +20,11 @@ module Ros
           cluster.init(self)
         end
 
+        def initialize(*args)
+          @errors = Ros::Errors.new
+          super
+        end
+
         desc 'plan', 'Show the terraform infrastructure plan'
         def plan
           generate_config if stale_config

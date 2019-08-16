@@ -9,6 +9,7 @@ module Ros
 
         def initialize(options = {})
           @options = options
+          @errors = Ros::Errors.new
         end
 
         def cmd(services)
@@ -17,13 +18,15 @@ module Ros
 
         def build(services)
           generate_config if stale_config
-          compose(:build, "build #{services.join(' ')}")
+          compose("build #{services.join(' ')}")
+          errors.add(:build, 'see terminal output') unless exit_code.zero?
         end
 
         def push(services)
           services = enabled_services if services.empty?
           generate_config if stale_config
-          compose(:push, "push #{services.join(' ')}")
+          compose("push #{services.join(' ')}")
+          errors.add(:push, 'see terminal output') unless exit_code.zero?
         end
 
         def up(services)
@@ -41,9 +44,16 @@ module Ros
               config = ref.dig(:config) || Config::Options.new
               next unless database_check(service, config)
             end
-            compose(:build, "build #{service}") if options.build
+            if options.build
+              compose("build #{service}")
+              if exit_code.positive?
+                errors.add(:build, 'see terminal output')
+                next
+              end
+            end
             service = "#{service} 'tail -f log/development.log'" unless options.process
-            compose(:up, "up #{compose_options} #{service}")
+            compose("up #{compose_options} #{service}")
+            errors.add(:up, 'see terminal output') if exit_code.positive?
           end
           reload_nginx(services)
           status
@@ -90,8 +100,8 @@ module Ros
 
         def restart(services)
           generate_config if stale_config
-          compose(:stop, "stop #{services.join(' ')}")
-          compose(:up, "up -d #{services.join(' ')}")
+          compose("stop #{services.join(' ')}")
+          compose("up -d #{services.join(' ')}")
           services.each do |service|
             if ref = Settings.components.be.components.application.components.platform.components.dig(service)
               config = ref.dig(:config) || Config::Options.new
@@ -107,7 +117,7 @@ module Ros
 
         def stop(services)
           generate_config if stale_config
-          compose(:stop, "stop #{services.join(' ')}")
+          compose("stop #{services.join(' ')}")
           reload_nginx(services)
         end
 
@@ -124,8 +134,8 @@ module Ros
           silence_output do
             Ros::Be::Application::Services::Generator.new.invoke(:nginx_conf, [running_services])
           end
-          compose(:stop_nginx, 'stop nginx')
-          compose(:up_nginx, 'up -d nginx')
+          compose('stop nginx')
+          compose('up -d nginx')
           # NOTE: nginx seems not to notice changes in the mounted file (at least on NFS share) so can't just reload
           # compose('up -d nginx') unless system("docker container exec #{namespace}_nginx_1 nginx -s reload")
         end
@@ -144,11 +154,10 @@ module Ros
           filters.append("--filter 'label=application.component=#{application_component}'") if application_component
           filters.append("--filter 'label=platform.feature_set=#{application.current_feature_set}'")
           filters.append("--format '{{.Names}}'")
-          cmd = "docker ps #{filters.join(' ')}"
-          ar = %x(#{cmd})
+          capture_cmd("docker ps #{filters.join(' ')}")
           # TODO: _server is only one profile; fix
           # TODO: _1 is assumed; there could be > 1
-          ar.split("\n").map{ |a| a.gsub("#{application.compose_project_name}_", '').chomp('_1') }
+          stdout.split("\n").map{ |a| a.gsub("#{application.compose_project_name}_", '').chomp('_1') }
         end
 
         def database_check(name, config)
@@ -156,19 +165,22 @@ module Ros
           migration_file = "#{application.compose_dir}/#{name}-migrated"
           return true if File.exist?(migration_file) unless options.seed
           FileUtils.rm(migration_file) if File.exist?(migration_file)
-          if success = compose(:seed, "run --rm #{name} rails #{prefix}ros:db:reset:seed")
+          if success = compose("run --rm #{name} rails #{prefix}ros:db:reset:seed")
             FileUtils.touch(migration_file)
             if name.eql?('iam')
+              remove_cache
               publish_env_credentials
               credentials
             end
+          else
+            errors.add(:database_check, stderr)
           end
           success
         end
 
-        def compose(label, cmd = nil)
+        def compose(cmd, envs = {})
           switch!
-          system_cmd(label, {}, "docker-compose #{cmd || label}")
+          system_cmd("docker-compose #{cmd}", envs)
         end
 
         def switch!

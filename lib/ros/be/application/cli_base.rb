@@ -12,29 +12,20 @@ module Ros
         include Ros::CliBase
         attr_accessor :options
 
-        def infra
-          Ros::Be::Infra::Model
-        end
-
-        def cluster
-          Ros::Be::Infra::Cluster::Model
-        end
-
-        def application
-          Ros::Be::Application::Model
-        end
-
-        def platform
-          Ros::Be::Application::Platform::Model
-        end
-
         def generate_config
           silence_output do
-            Ros::Be::Application::Services::Generator.new([], {}, {behavior: :revoke}).invoke_all
+            Ros::Be::Application::Services::Generator.new([], {}, { behavior: :revoke }).invoke_all
             Ros::Be::Application::Services::Generator.new.invoke_all
-            Ros::Be::Application::Platform::Generator.new([], {}, {behavior: :revoke}).invoke_all
+            Ros::Be::Application::Platform::Generator.new([], {}, { behavior: :revoke }).invoke_all
             Ros::Be::Application::Platform::Generator.new.invoke_all
           end
+        end
+
+        # TODO: fully implement so when down is called that all runtime and docs are revmoed
+        # TODO: Iam cached credentials should also be remvoed when IAM service is brought down
+        def remove_cache
+          binding.pry
+          FileUtils.rm_rf(runtime_dir)
         end
 
         def test(services)
@@ -245,6 +236,22 @@ module Ros
           File.open("#{cli_credentials_dir}/credentials", 'a') do |f|
             # TODO: implement
           end
+        end
+
+        def infra
+          Ros::Be::Infra::Model
+        end
+
+        def cluster
+          Ros::Be::Infra::Cluster::Model
+        end
+
+        def application
+          Ros::Be::Application::Model
+        end
+
+        def platform
+          Ros::Be::Application::Platform::Model
         end
       end
 

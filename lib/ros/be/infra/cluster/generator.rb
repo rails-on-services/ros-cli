@@ -16,10 +16,20 @@ module Ros
             def name; config.name end
             def infra; Infra::Model end
 
-            def init(cli); send("init_#{config.provider}", cli) end
+            def init(cli)
+              unless infra.cluster_type.eql?('kubernetes')
+                STDOUT.puts 'command only applicable to kubernetes deployments'
+                return
+              end
+              send("init_#{config.provider}", cli)
+            end
 
             def init_aws(cli)
-              # TODO: raise error if ~/.aws/credentials doesn't exist
+              credentials_file = "#{Dir.home}/.aws/credentials"
+              unless File.exist?(credentials_file)
+                STDOUT.puts "missing #{credentials_file}"
+                return
+              end
               cmd_string = "aws eks update-kubeconfig --name #{name}"
               cmd_string = "#{cmd_string} --role-arn arn:aws:iam::#{provider.account_id}:role/#{provider.cluster.role_name}" if cli.options.long
               cli.system_cmd(:update_kube_config, {}, cmd_string)
