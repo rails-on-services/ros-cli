@@ -26,7 +26,7 @@ module Ros
 
             def init_aws(cli)
               credentials_file = "#{Dir.home}/.aws/credentials"
-              unless File.exist?(credentials_file)
+              unless (File.exist?(credentials_file) or ENV['AWS_ACCESS_KEY_ID'])
                 STDOUT.puts "missing #{credentials_file}"
                 return
               end
