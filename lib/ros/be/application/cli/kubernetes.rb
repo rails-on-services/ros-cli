@@ -13,13 +13,7 @@ module Ros
         end
 
         def cmd(services)
-          # binding.pry
-          # ak = k8s_secrets_content('platform')
-          # system_cmd("kubectl create ns dork", kube_env)
           binding.pry
-          # kubectl("get secret #{Stack.registry_secret_name}")
-          # system_cmd(:get_secret, kube_env, "kubectl -n master-whistler get secret x#{Stack.registry_secret_name}")
-          # system_cmd(:initialize_helm, kube_env, 'helm init --upgrade --wait --service-account tiller')
         end
 
         def build(services)
@@ -48,7 +42,6 @@ module Ros
             STDOUT.puts 'Namespace exists. skipping create. Use -f to force'
           end
           return if options.skip
-          remove_cache if options.seed and services.include?('iam')
           deploy_services
           deploy_platform_environment
           deploy_platform
@@ -72,7 +65,7 @@ module Ros
         def deploy_services
           env_file = "#{services_root}/services.env"
           sync_secret(env_file) if File.exist?(env_file)
-          application.services.components.keys.each do |service|
+          enabled_application_services.each do |service|
             if service.eql?(:ingress)
               next true unless get_vs(name: :ingress).empty?
             else
@@ -113,7 +106,7 @@ module Ros
               replica_count = (options.replicas || 1).to_s
               build_count = 0
               profiles.each do |profile|
-                run_cmd = build_count.eql?(0) ? base_cmd : 'deploy'
+                run_cmd = build_count.zero? ? base_cmd : 'deploy'
                 skaffold("#{run_cmd} -f #{File.basename(service_file)} -p #{profile}",
                          { 'REPLICA_COUNT' => replica_count })
                 errors.add("skaffold_#{run_cmd}", stderr) if exit_code.positive?
@@ -132,7 +125,7 @@ module Ros
 
         def ps
           generate_config if stale_config
-          kubectl('get pods')
+          kubectl('get pods', true)
         end
 
         def console(service)
@@ -141,7 +134,7 @@ module Ros
 
         def exec(service, command)
           generate_config if stale_config
-          kubectl("exec -it #{service_pod(service)} -c #{service} #{command}")
+          kubectl("exec -it #{service_pod(service)} -c #{service} #{command}", true)
         end
 
         def service_pod(service); pod(name: service, component: :server) end
@@ -149,21 +142,23 @@ module Ros
         def logs(service)
           generate_config if stale_config
           trap("SIGINT") { throw StandardError } if options.tail
-          kubectl("#{command('logs')} #{service_pod(service)} -c #{service}")
+          kubectl("#{command('logs')} #{service_pod(service)} -c #{service}", true)
         rescue StandardError
         end
 
         def running_services; @running_services ||= pods(component: :server).map{ |svc| svc.split('-').first }.uniq end
 
         # TODO: This isn't working quite as expected
+        # NOTE: restart should not remove a service, just restart it
+        # This is the same behavior as with compose (at least it should be)
         def restart(services)
           generate_config if stale_config
           update_platform_env
-          # services.each do |service|
-          #   kubectl("rollout restart deploy #{service}")
-          # end
-          down(services)
-          up(services)
+          services.each do |service|
+            kubectl("rollout restart deploy #{service}")
+          end
+          # down(services)
+          # up(services)
           # status
         end
 
@@ -207,6 +202,7 @@ module Ros
                   skaffold("#{base_cmd} -f #{File.basename(service_file)} -p #{profile}")
                 end
               end
+              remove_cache if service.eql?('iam')
             end
           end
         end
@@ -242,27 +238,19 @@ module Ros
         end
 
         # Supporting methods (2)
-        def kubectl(cmd)
-          return if setup_kubectl(cmd)
-          system_cmd("kubectl -n #{namespace} #{cmd}", kube_env)
+        def kubectl(cmd, never_capture = false)
+          raise StandardError.new("kubeconfig not found at #{kubeconfig}") unless File.exist?(kubeconfig)
+          system_cmd("kubectl -n #{namespace} #{cmd}", kube_env, never_capture)
         end
 
         def kubectl_capture(cmd)
-          return if setup_kubectl(cmd)
+          raise StandardError.new("kubeconfig not found at #{kubeconfig}") unless File.exist?(kubeconfig)
           capture_cmd("kubectl -n #{namespace} #{cmd}")
         end
 
-        def setup_kubectl(cmd)
-          if not File.exist?(kubeconfig)
-            STDOUT.puts "kubeconfig not found at #{kubeconfig}"
-            return true
-          end
-          STDOUT.puts "Using kubeconfig file: #{kubeconfig}" if options.v
-        end
-
         def skaffold(cmd, envs = {})
+          puts "run skaffold with environment: #{skaffold_env.merge(envs)}" if options.v
           system_cmd("skaffold -n #{namespace} #{cmd}", skaffold_env.merge(envs))
-          puts "with environment: #{envs}" if options.v
         end
 
         def skaffold_env
@@ -284,8 +272,9 @@ module Ros
           name = File.basename(file).chomp('.env')
           return if local_secrets_content(file) == k8s_secrets_content(name)
           STDOUT.puts "NOTICE: Updating cluster with new contents for secret #{name}"
-          # kubectl(:delete_secret, "delete secret #{name}") # if kubectl("get secret #{name}")
-          # kubectl(:create_secret, "create secret generic #{name} --from-env-file #{file}")
+          kubectl("delete secret #{name}") # if kubectl("get secret #{name}")
+          kubectl("create secret generic #{name} --from-env-file #{file}")
+          errors.add(:create_secret, stderr) if exit_code.positive?
         end
 
         def local_secrets_content(file)

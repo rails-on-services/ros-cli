@@ -36,8 +36,8 @@ module Ros
 
     # run command with output captured unless verbose (options.v) then to terminal
     # returns boolean true if command successful, false otherwise
-    def system_cmd(cmd, envs = {})
-      return capture_cmd(cmd, envs) unless options.v
+    def system_cmd(cmd, envs = {}, never_capture = false)
+      return capture_cmd(cmd, envs) unless (options.v or never_capture)
       return if setup_cmd(cmd)
       system(envs, cmd)
       @exit_code = $?.exitstatus

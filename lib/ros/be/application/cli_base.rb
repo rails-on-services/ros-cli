@@ -22,9 +22,7 @@ module Ros
         end
 
         # TODO: fully implement so when down is called that all runtime and docs are revmoed
-        # TODO: Iam cached credentials should also be remvoed when IAM service is brought down
         def remove_cache
-          binding.pry
           FileUtils.rm_rf(runtime_dir)
         end
 
@@ -138,7 +136,7 @@ module Ros
           end.keys
         end
 
-        def enabled_services_f
+        def enabled_application_services
           application.components.services.components.to_hash.select do |k, v|
             v.nil? || v.dig(:config, :enabled).nil? || v.dig(:config, :enabled)
           end.keys

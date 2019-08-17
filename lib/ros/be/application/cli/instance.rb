@@ -63,7 +63,7 @@ module Ros
 
         def ps
           generate_config if stale_config
-          compose(:ps)
+          compose(:ps, true)
         end
 
         def get_credentials
@@ -85,14 +85,14 @@ module Ros
         def exec(service, command)
           generate_config if stale_config
           run_string = services.include?(service) ? 'exec' : 'run --rm'
-          compose("#{run_string} #{service} #{command}")
+          compose("#{run_string} #{service} #{command}", true)
         end
 
         def logs(service)
           generate_config if stale_config
           compose_options = options.tail ? '-f' : ''
           trap("SIGINT") { throw StandardError } if options.tail
-          compose("logs #{compose_options} #{service}")
+          compose("logs #{compose_options} #{service}", true)
         rescue StandardError
         end
 
@@ -178,9 +178,9 @@ module Ros
           success
         end
 
-        def compose(cmd, envs = {})
+        def compose(cmd, never_capture = false)
           switch!
-          system_cmd("docker-compose #{cmd}", envs)
+          system_cmd("docker-compose #{cmd}", {}, never_capture)
         end
 
         def switch!

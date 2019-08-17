@@ -43,7 +43,10 @@ module Ros
           # skaffold only methods
           def relative_path; @relative_path ||= ('../' * deploy_path.split('/').size).chomp('/') end
           def context_path; "#{relative_path}#{config.ros ? '/ros' : ''}" end
-          def dockerfile_path; "#{relative_path}/#{config.ros ? 'ros/' : ''}Dockerfile" end
+          # NOTE: from skaffold v0.36.0 the dockerfile_path is relative to context_path
+          # leaving this in in case the behvior reverts back
+          # def dockerfile_path; "#{relative_path}/#{config.ros ? 'ros/' : ''}Dockerfile" end
+          def dockerfile_path; 'Dockerfile' end
           def chart_path; "helm-charts/service" end
           def is_ros_service; config.ros end
           def pull_policy; 'Always' end
