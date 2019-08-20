@@ -75,7 +75,13 @@ module Ros
           FileUtils.mkdir_p("#{runtime_dir}/platform")
           # TODO: the tmp file on iam should probably be ROS_ENV (as passed to image vi ENV var) / feature_set
           # TODO: when IAM service is brought down the credentials file should be removed
-          FileUtils.cp(file, creds_file)
+          FileUtils.cp(src, dest)
+        end
+
+        def copy_service_file(service, src, dest)
+          fs_prefix = (!Ros.is_ros? and application.components.platform.components.dig(service, :config, :ros)) ? 'ros/' : ''
+          source = "#{fs_prefix}services/#{service}/#{src}"
+          FileUtils.cp(source, dest)
         end
 
         def console(service)
@@ -155,6 +161,7 @@ module Ros
           filters.append("--filter 'label=platform.feature_set=#{application.current_feature_set}'")
           filters.append("--format '{{.Names}}'")
           capture_cmd("docker ps #{filters.join(' ')}")
+          return [] if options.n
           # TODO: _server is only one profile; fix
           # TODO: _1 is assumed; there could be > 1
           stdout.split("\n").map{ |a| a.gsub("#{application.compose_project_name}_", '').chomp('_1') }

@@ -55,3 +55,8 @@ components:
                     encryption_key: <%= SecureRandom.hex %>
                   twilio_account_sid: placeholder
                   twilio_auth_token: replace-with-valid-credentials
+              cognito:
+                environment:
+                  platform:
+                    metabase:
+                      encryption_key: <%= SecureRandom.hex %>

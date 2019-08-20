@@ -23,6 +23,26 @@ module Ros
   end
 
   class << self
+    def exec_from_rake(task_name, args, cmd = :exec)
+      require 'ros/be/application/cli'
+      services = args.select{ |a| !a.start_with?('-') }
+      options = args.select{ |a| a.start_with?('-') }
+      services.each do |service|
+        prefix = application.components.platform.components.dig(service, :config, :ros) ? 'app:' : ''
+        Ros::Be::Application::Cli.new([], options).send(cmd, service, "rails #{prefix}#{task_name}")
+      end
+    end
+
+    def enabled_services
+      application.components.platform.components.to_hash.select do |k, v|
+        v.nil? || v.dig(:config, :enabled).nil? || v.dig(:config, :enabled)
+      end.keys
+    end
+
+    def application
+      Ros::Be::Application::Model
+    end
+
     def from_rake(task_name, args)
       behavior, *stack = task_name.split(':')
       require 'ros/stack'

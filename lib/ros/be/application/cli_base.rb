@@ -152,28 +152,30 @@ module Ros
           File.open("#{application.deploy_path}/platform/credentials.env", 'w') { |f| f.puts "#{content}\n" }
         end
 
-        # TODO: support the proprietary project
-        # TODO: each type, instance and k8s need to get their files
-        # TODO: For now just change the host in the API docs
-        def publish
+        def publish_erd(services)
           FileUtils.mkdir_p(documents_dir)
           services.each do |service|
-            exec(service, 'rails app:ros:erd:generate')
-            if File.exist?("services/#{service}/spec/dummy/erd.pdf")
-              FileUtils.mv("services/#{service}/spec/dummy/erd.pdf", "#{documents_dir}/#{service}.erd")
+            prefix = application.components.platform.components.dig(service, :config, :ros) ? 'app:' : ''
+            file = application.components.platform.components.dig(service, :config, :ros) ? 'spec/dummy/' : ''
+            if exec(service, "rails db:setup #{prefix}ros:erd:generate")
+              copy_service_file(service, "#{file}erd.pdf", "#{documents_dir}/#{service}-erd.pdf")
             end
           end
           # TODO publish to slack, confluence or someother
         end
 
-        def convert
+        # TODO: For now just change the host in the API docs
+        def convert(services)
+          services = enabled_services if services.empty?
           require 'ros/postman/open_api'
           postman_dir = "tmp/api/#{application.api_hostname}/postman"
           openapi_dir = "tmp/api/#{application.api_hostname}/openapi"
           FileUtils.mkdir_p(openapi_dir)
           services.each do |service|
-            if exec(service, 'rails app:ros:apidoc:generate')
-              FileUtils.mv("services/#{service}/tmp/docs/openapi/ros-api.json", "#{openapi_dir}/#{service}.json")
+            prefix = application.components.platform.components.dig(service, :config, :ros) ? 'app:' : ''
+            if exec(service, "rails db:setup #{prefix}ros:apidoc:generate")
+              # copy_service_file is implemented in both instance and kubernetes
+              copy_service_file(service, 'tmp/docs/openapi/ros-api.json', "#{openapi_dir}/#{service}.json")
             end
           end
           Dir["#{openapi_dir}/*.json"].each do |file|
@@ -181,8 +183,16 @@ module Ros
           end
         end
 
-        # desc 'Publish docs to Postman'
-        # task publish: :environment do
+        # Publish Postman API docs or generate an ERD
+        def publish(type, services)
+          if type.eql?('postman')
+            convert(services)
+            publish_to_postman
+          elsif type.eql?('erd')
+            publish_erd(services)
+          end
+        end
+
         def publish_to_postman
           require 'faraday'
           require 'ros/postman/comm'

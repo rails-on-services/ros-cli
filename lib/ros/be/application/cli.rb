@@ -191,9 +191,11 @@ module Ros
         end
 
         desc 'publish', 'Publish API documentation to Postman'
-        def publish
+        option :force, type: :boolean, aliases: '-f', desc: 'Force generation of new documentation'
+        def publish(type, *services)
+          raise Error, set_color("types are 'postman' and 'erd'", :red) unless %w(postman erd).include?(type)
           command = context(options)
-          command.publish
+          command.publish(type, services)
           command.exit
         end
 
