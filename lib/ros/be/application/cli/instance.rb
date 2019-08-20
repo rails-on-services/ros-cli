@@ -40,16 +40,16 @@ module Ros
           services.each do |service|
             # if the service name is without a profile extension, e.g. 'iam' then load config and check db migration
             # If the database check is ok then bring up the service and trigger a reload of nginx
-            if ref = svc_config(service)
-              config = ref.dig(:config) || Config::Options.new
-              next unless database_check(service, config)
-            end
             if options.build
               compose("build #{service}")
               if exit_code.positive?
                 errors.add(:build, 'see terminal output')
                 next
               end
+            end
+            if ref = svc_config(service)
+              config = ref.dig(:config) || Config::Options.new
+              next unless database_check(service, config)
             end
             service = "#{service} 'tail -f log/development.log'" unless options.process
             compose("up #{compose_options} #{service}")
