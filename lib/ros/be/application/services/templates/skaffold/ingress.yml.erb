@@ -8,11 +8,14 @@ deploy:
         chartPath: <%= @service.chart_path %>/ingress
         overrides:
           labels:
-            stack.name: <%= @service.stack_name %>
-            stack.component: be
-            be.component: application
-            application.component: services
-            platform.feature_set: <%= @service.current_feature_set %>
+            # app.kubernetes.io/name: <%= @service.name %>
+            app.kubernetes.io/component: routing
+            app.kubernetes.io/part-of: application-services
+            # stack.name: <%= @service.stack_name %>
+            # stack.component: be
+            # be.component: application
+            # application.component: services
+            # platform.feature_set: <%= @service.current_feature_set %>
           hosts:
             - <%= @service.api_hostname %>
           services:<% platform_service_names.each do |service| %>

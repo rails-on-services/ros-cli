@@ -5,9 +5,11 @@ module Ros
     module Application
       class Instance
         include CliBase
+        attr_accessor :services
 
         def initialize(options = {})
           @options = options
+          @errors = Ros::Errors.new
         end
 
         def cmd(services)
@@ -17,12 +19,14 @@ module Ros
         def build(services)
           generate_config if stale_config
           compose("build #{services.join(' ')}")
+          errors.add(:build, 'see terminal output') unless exit_code.zero?
         end
 
         def push(services)
           services = enabled_services if services.empty?
           generate_config if stale_config
           compose("push #{services.join(' ')}")
+          errors.add(:push, 'see terminal output') unless exit_code.zero?
         end
 
         def up(services)
@@ -40,9 +44,16 @@ module Ros
               config = ref.dig(:config) || Config::Options.new
               next unless database_check(service, config)
             end
-            compose("build #{service}") if options.build
+            if options.build
+              compose("build #{service}")
+              if exit_code.positive?
+                errors.add(:build, 'see terminal output')
+                next
+              end
+            end
             service = "#{service} 'tail -f log/development.log'" unless options.process
             compose("up #{compose_options} #{service}")
+            errors.add(:up, 'see terminal output') if exit_code.positive?
           end
           reload_nginx(services)
           status
@@ -52,15 +63,25 @@ module Ros
 
         def ps
           generate_config if stale_config
-          compose(:ps)
+          compose(:ps, true)
         end
 
         def get_credentials
           file = "#{Ros.is_ros? ? '' : 'ros/'}services/iam/tmp/#{application.current_feature_set}/credentials.json"
+          unless File.exist?(file)
+            errors.add(:get_credentials, "file not found: #{file}")
+            return
+          end
           FileUtils.mkdir_p("#{runtime_dir}/platform")
-          # TODO: This coule be mv
-          # and the tmp file on iam should probably be ROS_ENV (as passed to image vi ENV var) / feature_set
-          FileUtils.cp(file, creds_file)
+          # TODO: the tmp file on iam should probably be ROS_ENV (as passed to image vi ENV var) / feature_set
+          # TODO: when IAM service is brought down the credentials file should be removed
+          FileUtils.cp(src, dest)
+        end
+
+        def copy_service_file(service, src, dest)
+          fs_prefix = (!Ros.is_ros? and application.components.platform.components.dig(service, :config, :ros)) ? 'ros/' : ''
+          source = "#{fs_prefix}services/#{service}/#{src}"
+          FileUtils.cp(source, dest)
         end
 
         def console(service)
@@ -70,14 +91,14 @@ module Ros
         def exec(service, command)
           generate_config if stale_config
           run_string = services.include?(service) ? 'exec' : 'run --rm'
-          compose("#{run_string} #{service} #{command}")
+          compose("#{run_string} #{service} #{command}", true)
         end
 
         def logs(service)
           generate_config if stale_config
           compose_options = options.tail ? '-f' : ''
           trap("SIGINT") { throw StandardError } if options.tail
-          compose("logs #{compose_options} #{service}")
+          compose("logs #{compose_options} #{service}", true)
         rescue StandardError
         end
 
@@ -139,36 +160,44 @@ module Ros
           filters.append("--filter 'label=application.component=#{application_component}'") if application_component
           filters.append("--filter 'label=platform.feature_set=#{application.current_feature_set}'")
           filters.append("--format '{{.Names}}'")
-          cmd = "docker ps #{filters.join(' ')}"
-          ar = %x(#{cmd})
+          capture_cmd("docker ps #{filters.join(' ')}")
+          return [] if options.n
           # TODO: _server is only one profile; fix
           # TODO: _1 is assumed; there could be > 1
-          ar.split("\n").map{ |a| a.gsub("#{application.compose_project_name}_", '').chomp('_1') }
+          stdout.split("\n").map{ |a| a.gsub("#{application.compose_project_name}_", '').chomp('_1') }
         end
 
         def database_check(name, config)
           prefix = config.ros ? 'app:' : ''
           migration_file = "#{application.compose_dir}/#{name}-migrated"
-          return true if File.exists?(migration_file) unless options.seed
-          FileUtils.rm(migration_file) if File.exists?(migration_file)
+          return true if File.exist?(migration_file) unless options.seed
+          FileUtils.rm(migration_file) if File.exist?(migration_file)
           if success = compose("run --rm #{name} rails #{prefix}ros:db:reset:seed")
             FileUtils.touch(migration_file)
             if name.eql?('iam')
+              remove_cache
               publish_env_credentials
               credentials
             end
+          else
+            errors.add(:database_check, stderr)
           end
           success
         end
 
-        def compose(cmd); switch!; system_cmd({}, "docker-compose #{cmd}") end
+        def compose(cmd, never_capture = false)
+          switch!
+          system_cmd("docker-compose #{cmd}", {}, never_capture)
+        end
 
         def switch!
           FileUtils.rm_f('.env')
           FileUtils.ln_s(application.compose_file, '.env')
         end
 
-        def namespace; @namespace ||= (ENV['ROS_PROFILE'] ? "#{ENV['ROS_PROFILE']}-" : '') + Ros::Generators::Stack.compose_project_name end
+        def namespace
+          @namespace ||= (ENV['ROS_PROFILE'] ? "#{ENV['ROS_PROFILE']}-" : '') + Ros::Generators::Stack.compose_project_name
+        end
 
         def config_files
           Dir[application.compose_file]

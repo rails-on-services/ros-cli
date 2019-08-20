@@ -1,5 +1,5 @@
 require 'ros'
-require 'ros/exec'
+# require 'ros/exec'
 require 'pry'
 
 namespace :install do
@@ -61,43 +61,13 @@ end
 namespace :ros do
   namespace :iam do
     namespace :credentials do
-      desc 'Display IAM credentials for the current deployment'
-      task :show do |task|
-        Ros::Exec.new.execute(task.name, [:iam])
-      end
+      # TODO: Is this necessary? OR could be implemented as a CLI command?
       desc 'Link IAM credentials for the current deployment'
       task :link do |task|
-        Ros::Exec.new.execute(task.name, [:iam])
+        # Ros.exec_from_rake(task.name, args.extras.flatten)
+        # Ros::Exec.new.execute(task.name, [:iam])
+        Ros.exec_from_rake(task.name, [:iam])
       end
-    end
-  end
-
-  namespace :apidoc do
-    desc 'Generate, convert and publish'
-    task :all do |task|
-      Ros::Exec.new.execute(task.name)
-    end
-
-    desc 'Create OpenAPI V 3.0 docuementation'
-    task :generate do |task|
-      Ros::Exec.new.execute(task.name)
-    end
-
-    desc 'Convert OpenAPI V 3.0 docuementation to Postman'
-    task :convert do |task|
-      Ros::Exec.new.execute(task.name)
-    end
-
-    desc 'Publish docs to Postman'
-    task :publish do |task|
-      Ros::Exec.new.execute(task.name)
-    end
-  end
-
-  namespace :erd do
-    desc 'Generate ERD'
-    task :generate, %i(service)  do |task, args|
-      Ros::Exec.new.execute(task.name, args[:service])
     end
   end
 

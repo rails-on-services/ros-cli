@@ -9,11 +9,14 @@ deploy:
         skipBuildDependencies: true
         overrides:
           labels:
-            stack.name: <%= @service.stack_name %>
-            stack.component: be
-            be.component: application
-            application.component: services
-            platform.feature_set: <%= @service.current_feature_set %>
+            # app.kubernetes.io/name: <%= @service.name %>
+            app.kubernetes.io/component: logging
+            app.kubernetes.io/part-of: application-services
+            # stack.name: <%= @service.stack_name %>
+            # stack.component: be
+            # be.component: application
+            # application.component: services
+            # platform.feature_set: <%= @service.current_feature_set %>
           image:
             pullPolicy: Always
           replicaCount: 1

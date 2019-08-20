@@ -12,21 +12,22 @@ module Ros
         include Ros::CliBase
         attr_accessor :options
 
-        def infra; Ros::Be::Infra::Model end
-        def cluster; Ros::Be::Infra::Cluster::Model end
-        def application; Ros::Be::Application::Model end
-        def platform ; Ros::Be::Application::Platform::Model end
-
         def generate_config
           silence_output do
-            Ros::Be::Application::Services::Generator.new([], {}, {behavior: :revoke}).invoke_all
+            Ros::Be::Application::Services::Generator.new([], {}, { behavior: :revoke }).invoke_all
             Ros::Be::Application::Services::Generator.new.invoke_all
-            Ros::Be::Application::Platform::Generator.new([], {}, {behavior: :revoke}).invoke_all
+            Ros::Be::Application::Platform::Generator.new([], {}, { behavior: :revoke }).invoke_all
             Ros::Be::Application::Platform::Generator.new.invoke_all
           end
         end
 
+        # TODO: fully implement so when down is called that all runtime and docs are revmoed
+        def remove_cache
+          FileUtils.rm_rf(runtime_dir)
+        end
+
         def test(services)
+          switch!
           services = enabled_services if services.empty?
           generate_config if stale_config
           services.each do |service|
@@ -42,6 +43,7 @@ module Ros
         def svc_config(service); Settings.components.be.components.application.components.platform.components.dig(service) end
 
         def show(service_name)
+          switch!
           service = service_name.split('/')[0]
           service_name = "#{service_name}.yml" unless service_name.index('.')
           %w(services platform).each do |type|
@@ -54,6 +56,7 @@ module Ros
         end
 
         def status
+          switch!
           ros_services = {}
           my_services = {}
           infra_services = {}
@@ -97,14 +100,14 @@ module Ros
           show_endpoint
         end
 
-
         def show_endpoint
           STDOUT.puts "\n*** Services available at #{application.api_uri} ***"
           STDOUT.puts "*** API Docs available at [TO IMPLEMENT] ***\n\n"
         end
 
         def credentials
-          get_credentials if not File.exists?(creds_file)
+          switch!
+          get_credentials if not File.exist?(creds_file)
           generate_config if stale_config
           postman = JSON.parse(json.each_with_object([]) { |j, a| a.append(Credential.new(j).to_postman) }.to_json)
           envs = json.each_with_object([]) { |j, a| a.append(Credential.new(j).to_env) }
@@ -119,7 +122,7 @@ module Ros
         end
 
         def json
-          @json ||= File.exists?(creds_file) ? JSON.parse(File.read(creds_file)) : []
+          @json ||= File.exist?(creds_file) ? JSON.parse(File.read(creds_file)) : []
         end
 
         def creds_file; @creds_file ||= "#{runtime_dir}/platform/credentials.json" end
@@ -133,7 +136,7 @@ module Ros
           end.keys
         end
 
-        def enabled_services_f
+        def enabled_application_services
           application.components.services.components.to_hash.select do |k, v|
             v.nil? || v.dig(:config, :enabled).nil? || v.dig(:config, :enabled)
           end.keys
@@ -143,33 +146,36 @@ module Ros
         # TODO: ros generate:docs:erd
         # NOTE: if these are cli commands then can take one or more services
         def publish_env_credentials
-          return unless File.exists?(creds_file)
+          return unless File.exist?(creds_file)
+
           content = json.each_with_object([]) { |j, a| a.append(Credential.new(j).to_env) }.join("\n")
           File.open("#{application.deploy_path}/platform/credentials.env", 'w') { |f| f.puts "#{content}\n" }
         end
 
-        # TODO: support the proprietary project
-        # TODO: each type, instance and k8s need to get their files
-        # TODO: For now just change the host in the API docs
-        def publish
+        def publish_erd(services)
           FileUtils.mkdir_p(documents_dir)
           services.each do |service|
-            exec(service, 'rails app:ros:erd:generate')
-            if File.exists?("services/#{service}/spec/dummy/erd.pdf")
-              FileUtils.mv("services/#{service}/spec/dummy/erd.pdf", "#{documents_dir}/#{service}.erd")
+            prefix = application.components.platform.components.dig(service, :config, :ros) ? 'app:' : ''
+            file = application.components.platform.components.dig(service, :config, :ros) ? 'spec/dummy/' : ''
+            if exec(service, "rails db:setup #{prefix}ros:erd:generate")
+              copy_service_file(service, "#{file}erd.pdf", "#{documents_dir}/#{service}-erd.pdf")
             end
           end
           # TODO publish to slack, confluence or someother
         end
 
-        def convert
+        # TODO: For now just change the host in the API docs
+        def convert(services)
+          services = enabled_services if services.empty?
           require 'ros/postman/open_api'
           postman_dir = "tmp/api/#{application.api_hostname}/postman"
           openapi_dir = "tmp/api/#{application.api_hostname}/openapi"
           FileUtils.mkdir_p(openapi_dir)
           services.each do |service|
-            if exec(service, 'rails app:ros:apidoc:generate')
-              FileUtils.mv("services/#{service}/tmp/docs/openapi/ros-api.json", "#{openapi_dir}/#{service}.json")
+            prefix = application.components.platform.components.dig(service, :config, :ros) ? 'app:' : ''
+            if exec(service, "rails db:setup #{prefix}ros:apidoc:generate")
+              # copy_service_file is implemented in both instance and kubernetes
+              copy_service_file(service, 'tmp/docs/openapi/ros-api.json', "#{openapi_dir}/#{service}.json")
             end
           end
           Dir["#{openapi_dir}/*.json"].each do |file|
@@ -177,8 +183,16 @@ module Ros
           end
         end
 
-        # desc 'Publish docs to Postman'
-        # task publish: :environment do
+        # Publish Postman API docs or generate an ERD
+        def publish(type, services)
+          if type.eql?('postman')
+            convert(services)
+            publish_to_postman
+          elsif type.eql?('erd')
+            publish_erd(services)
+          end
+        end
+
         def publish_to_postman
           require 'faraday'
           require 'ros/postman/comm'
@@ -230,6 +244,22 @@ module Ros
           File.open("#{cli_credentials_dir}/credentials", 'a') do |f|
             # TODO: implement
           end
+        end
+
+        def infra
+          Ros::Be::Infra::Model
+        end
+
+        def cluster
+          Ros::Be::Infra::Cluster::Model
+        end
+
+        def application
+          Ros::Be::Application::Model
+        end
+
+        def platform
+          Ros::Be::Application::Platform::Model
         end
       end
 

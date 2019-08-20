@@ -116,6 +116,11 @@ module Ros
             template("services/nginx/nginx.conf.erb", "#{destination_root}/#{deploy_path}/nginx/nginx.conf")
           end
 
+          def copy_kubernetes_files
+            return unless infra.cluster_type.eql?('kubernetes')
+            directory('../files/kubernetes', "#{deploy_path}/kubernetes")
+          end
+
           def copy_kubernetes_helm_charts
             return unless infra.cluster_type.eql?('kubernetes')
             directory('../files/helm-charts', "#{deploy_path}/helm-charts")
