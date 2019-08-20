@@ -14,6 +14,9 @@ module Ros
         def generate
           # If an encrypted version of the environment exists and a key is present
           # then decrypt and write the contents to config/environments
+          if File.exist?("#{Ros.deployments_dir}/big_query_credentials.json.enc") and ENV['ROS_MASTER_KEY']
+            system("ansible-vault decrypt #{Ros.deployments_dir}/big_query_credentials.json.enc --output #{Ros.environments_dir}/big_query_credentials.json")
+          end
           if File.exists?("#{Ros.deployments_dir}/#{name}.yml.enc")
             if ENV['ROS_MASTER_KEY']
               system("ansible-vault decrypt #{Ros.deployments_dir}/#{name}.yml.enc --output #{Ros.environments_dir}/#{name}.yml")
