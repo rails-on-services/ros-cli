@@ -51,7 +51,6 @@ module Ros
               config = ref.dig(:config) || Config::Options.new
               next unless database_check(service, config)
             end
-            service = "#{service} 'tail -f log/development.log'" unless options.process
             compose("up #{compose_options} #{service}")
             errors.add(:up, 'see terminal output') if exit_code.positive?
           end
@@ -67,21 +66,17 @@ module Ros
         end
 
         def get_credentials
-          file = "#{Ros.is_ros? ? '' : 'ros/'}services/iam/tmp/#{application.current_feature_set}/credentials.json"
-          unless File.exist?(file)
-            errors.add(:get_credentials, "file not found: #{file}")
-            return
-          end
+          file = "/home/rails/services/app/tmp/#{application.current_feature_set}/credentials.json"
           FileUtils.mkdir_p("#{runtime_dir}/platform")
           # TODO: the tmp file on iam should probably be ROS_ENV (as passed to image vi ENV var) / feature_set
           # TODO: when IAM service is brought down the credentials file should be removed
-          FileUtils.cp(src, dest)
+          capture_cmd("docker-compose ps -q iam")
+          errors.add(:get_credentials, "file not found: #{file}") if exit_code.positive?
+          copy_service_file(stdout.chomp, file, creds_file) if exit_code.zero?
         end
 
-        def copy_service_file(service, src, dest)
-          fs_prefix = (!Ros.is_ros? and application.components.platform.components.dig(service, :config, :ros)) ? 'ros/' : ''
-          source = "#{fs_prefix}services/#{service}/#{src}"
-          FileUtils.cp(source, dest)
+        def copy_service_file(container_id, src, dest)
+          system_cmd("docker cp #{container_id}:#{src} #{dest}")
         end
 
         def console(service)
@@ -127,7 +122,10 @@ module Ros
           reload_nginx(services)
         end
 
-        def down(services); compose(:down) end
+        def down(services)
+          compose(:down)
+          remove_cache
+        end
 
         # Supporting methods
         def reload_nginx(services)
@@ -175,9 +173,9 @@ module Ros
           if success = compose("run --rm #{name} rails #{prefix}ros:db:reset:seed")
             FileUtils.touch(migration_file)
             if name.eql?('iam')
-              remove_cache
-              publish_env_credentials
-              credentials
+              FileUtils.rm(creds_file) if File.exist?(creds_file)
+              # publish_env_credentials
+              # credentials
             end
           else
             errors.add(:database_check, stderr)
