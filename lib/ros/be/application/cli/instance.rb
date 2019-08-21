@@ -68,6 +68,7 @@ module Ros
         def get_credentials
           file = "/home/rails/services/app/tmp/#{application.current_feature_set}/credentials.json"
           FileUtils.mkdir_p("#{runtime_dir}/platform")
+          #
           # TODO: the tmp file on iam should probably be ROS_ENV (as passed to image vi ENV var) / feature_set
           # TODO: when IAM service is brought down the credentials file should be removed
           capture_cmd("docker-compose ps -q iam")
