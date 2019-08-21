@@ -1,0 +1,29 @@
+locals{  
+  region      = "us-central1"
+  zone        = "us-central1-a"
+  credentials = "${file("My First Project-8e8facfced19.json")}"
+  project     = "mimetic-shape-247710"  
+}
+
+provider "google" {
+  credentials = local.credentials
+  project     = local.project
+  region      = local.region
+}
+
+module "vpc" {
+  source              = "./gcp/vpc"
+  vpc_name            = "<%= tf.vpc.config.vpc_name %>" 
+  create_subnetworks  = false  
+  subnet_name         = "<%= tf.vpc.config.subnet_name %>"
+  cidr                = "<%= tf.vpc.config.cidr %>"
+}
+
+module "gci" {
+  source       = "./gcp/gci"
+  name         = "<%= tf.gci.name %>"
+  machine_type = "<%= tf.gci.machine_type %>"
+  disk_image   = "<%= tf.gci.disk_image %>"
+  zone         = local.zone
+  subnetwork   = module.vpc.private_subnetworks[0].self_link
+}
