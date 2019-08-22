@@ -2,6 +2,8 @@
 
 This is the CLI tool for the project
 
+See [guides](https://guides.rails-on-services.org)
+
 ## Installation
 
 Add this line to your application's Gemfile:
