@@ -7,7 +7,7 @@ jobs:
       - run:
           name: "Trigger rails-on-services/images"
           command: |
-            curl -X POST "https://circleci.com/api/v1.1/project/gh/rails-on-services/images/build?branch=master&circle-token=$CIRCLE_TOKEN"
+            curl -X POST "https://circleci.com/api/v1.1/project/gh/rails-on-services/images/build?branch=testing&circle-token=$CIRCLE_TOKEN"
 
 workflows:
   build:
