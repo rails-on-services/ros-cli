@@ -1,0 +1,22 @@
+provider "google" {
+  credentials = "${file("<%= tf.provider_settings.config.credentials_file %>")}"
+  project     = "<%= tf.provider_settings.config.project %>"
+  region      = "<%= tf.provider_settings.config.region %>"
+}
+
+module "vpc" {
+  source              = "./gcp/vpc"
+  vpc_name            = "<%= tf.vpc.config.vpc_name %>" 
+  create_subnetworks  = false  
+  subnet_name         = "<%= tf.vpc.config.subnet_name %>"
+  cidr                = "<%= tf.vpc.config.cidr %>"
+}
+
+module "gci" {
+  source       = "./gcp/gci"
+  name         = "<%= tf.instance.config.name %>"
+  machine_type = "<%= tf.instance.config.machine_type %>"
+  disk_image   = "<%= tf.instance.config.disk_image %>"
+  zone         = "<%= tf.provider_settings.config.zone %>"
+  subnetwork   = module.vpc.subnetwork.self_link
+}
