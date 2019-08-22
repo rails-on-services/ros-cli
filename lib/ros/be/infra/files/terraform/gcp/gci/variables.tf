@@ -8,7 +8,7 @@ variable "machine_type" {
     type        = string
 }
 
-variable "dick_image" {
+variable "disk_image" {
     description = "Instance disk image"
     type        = string    
 }

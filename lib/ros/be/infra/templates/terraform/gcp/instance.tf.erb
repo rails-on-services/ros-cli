@@ -1,14 +1,7 @@
-locals{  
-  region      = "us-central1"
-  zone        = "us-central1-a"
-  credentials = "${file("My First Project-8e8facfced19.json")}"
-  project     = "mimetic-shape-247710"  
-}
-
 provider "google" {
-  credentials = local.credentials
-  project     = local.project
-  region      = local.region
+  credentials = "${file("<%= tf.provider_settings.config.credentials_file %>")}"
+  project     = "<%= tf.provider_settings.config.project %>"
+  region      = "<%= tf.provider_settings.config.region %>"
 }
 
 module "vpc" {
@@ -21,9 +14,9 @@ module "vpc" {
 
 module "gci" {
   source       = "./gcp/gci"
-  name         = "<%= tf.gci.name %>"
-  machine_type = "<%= tf.gci.machine_type %>"
-  disk_image   = "<%= tf.gci.disk_image %>"
-  zone         = local.zone
-  subnetwork   = module.vpc.private_subnetworks[0].self_link
+  name         = "<%= tf.instance.config.name %>"
+  machine_type = "<%= tf.instance.config.machine_type %>"
+  disk_image   = "<%= tf.instance.config.disk_image %>"
+  zone         = "<%= tf.provider_settings.config.zone %>"
+  subnetwork   = module.vpc.subnetwork.self_link
 }
