@@ -29,8 +29,8 @@ module Ros
         def plan
           generate_config if stale_config
           Dir.chdir(infra.deploy_path) do
-            system_cmd(cmd_environment, 'terraform init')
-            system_cmd(cmd_environment, 'terraform plan')
+            system_cmd('terraform init', cmd_environment)
+            system_cmd('terraform plan', cmd_environment)
           end
         end
 
@@ -38,9 +38,9 @@ module Ros
         def apply
           generate_config if stale_config
           Dir.chdir(infra.deploy_path) do
-            system_cmd(cmd_environment, 'terraform init')
-            system_cmd(cmd_environment, 'terraform apply')
-            system_cmd(cmd_environment, 'terraform output -json > output.json')
+            system_cmd('terraform init', cmd_environment)
+            system_cmd('terraform apply', cmd_environment)
+            system_cmd('terraform output -json > output.json', cmd_environment)
             show_json
           end
         end
@@ -55,7 +55,7 @@ module Ros
         desc 'destory', 'Destroy infrastructure'
         def destroy
           Dir.chdir(infra.deploy_path) do
-            system_cmd({}, 'terraform destroy')
+            system_cmd('terraform destroy', {})
           end
         end
 
