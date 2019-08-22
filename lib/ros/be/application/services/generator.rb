@@ -124,6 +124,9 @@ module Ros
           def copy_kubernetes_helm_charts
             return unless infra.cluster_type.eql?('kubernetes')
             directory('../files/helm-charts', "#{deploy_path}/helm-charts")
+            #binding.pry
+            FileUtils.mkdir_p("#{destination_root}/#{deploy_path}") unless File.directory?("#{destination_root}/#{deploy_path}") 
+            FileUtils.cp("#{Ros.environments_dir}/big_query_credentials.json", "#{destination_root}/#{deploy_path}") if true
           end
 
           private

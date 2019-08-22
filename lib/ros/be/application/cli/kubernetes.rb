@@ -42,6 +42,7 @@ module Ros
             STDOUT.puts 'Namespace exists. skipping create. Use -f to force'
           end
           return if options.skip
+          deploy_gcp_bigquery_secret
           deploy_services
           deploy_platform_environment
           deploy_platform
@@ -80,6 +81,13 @@ module Ros
               errors.add("skaffold_#{run_cmd}", stderr) if exit_code.positive?
             end
           end
+        end
+
+        def deploy_gcp_bigquery_secret
+          return if kubectl("get secret jcp-jsonkey") unless options.force
+          kube_cmd = "create secret generic gcp-jsonkey " \
+          "--from-file=application_default_credentials.json=#{services_root}/big_query_credentials.json"
+          kubectl(kube_cmd)
         end
 
         def deploy_platform_environment

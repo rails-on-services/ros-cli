@@ -1,0 +1,29 @@
+---
+apiVersion: <%= @service.skaffold_version %>
+kind: Config
+deploy:
+  helm:
+    releases:
+      - name: kafka-zookeeper 
+        chartPath: <%= @service.chart_path %>/cp-helm-charts/cp-zookeeper
+        skipBuildDependencies: true
+        overrides:
+          imageTag: 5.3.0
+          servers: 1  
+          fullnameOverride: kafka-zookeeper
+          podAnnotations:
+            app.kubernetes.io/name: kafka-zookeeper
+          resources:
+            limits:
+              cpu: 1
+              memory: 1.2Gi
+            requests:
+              cpu: 100m
+              memory: 1Gi
+          persistence:
+            enabled: true
+            dataDirSize: 1Gi
+            dataLogDirSize: 1Gi 
+          prometheus:
+            jmx:
+              enabled: false

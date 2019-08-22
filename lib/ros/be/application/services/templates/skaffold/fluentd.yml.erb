@@ -19,7 +19,7 @@ deploy:
             # platform.feature_set: <%= @service.current_feature_set %>
           image:
             pullPolicy: Always
-          replicaCount: 2
+          replicaCount: 1
           fullnameOverride: fluentd
           resources:
             requests:
