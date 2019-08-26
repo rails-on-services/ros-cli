@@ -84,7 +84,7 @@ module Ros
         end
 
         def deploy_gcp_bigquery_secret
-          return if kubectl("get secret jcp-jsonkey") unless options.force
+          return if kubectl("get secret gcp-jsonkey") unless options.force
           kube_cmd = "create secret generic gcp-jsonkey " \
           "--from-file=application_default_credentials.json=#{services_root}/big_query_credentials.json"
           kubectl(kube_cmd)

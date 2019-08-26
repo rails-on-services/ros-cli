@@ -12,7 +12,8 @@ deploy:
           image: railsonservices/kafka-connect
           imageTag: latest
           nameOverride: kafka-connect
-
+          podLabels:
+            app.kubernetes.io/name: kafka-connect
           ## Kafka Connect JVM Heap Option
           heapOptions: "-Xms1024M -Xmx1024M"
           resources:
