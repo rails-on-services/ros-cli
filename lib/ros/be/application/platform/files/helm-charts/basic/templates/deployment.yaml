@@ -36,6 +36,17 @@ spec:
               value: {{ $value | quote }}
             {{- end }}
           {{- end }}
+          {{- if or (.Values.envFromSecrets) (.Values.envFromConfigMaps) }}
+          envFrom:
+            {{- range .Values.envFromConfigMaps }}
+            - configMapRef:
+                name: {{ . | quote }}
+            {{- end }}
+            {{- range .Values.envFromSecrets }}
+            - secretRef:
+                name: {{ . | quote }}
+            {{- end }}
+          {{- end }}
           {{- with .Values.containerCommand }}
           command:
             {{- toYaml . | nindent 12 }}
