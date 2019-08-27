@@ -1,0 +1,32 @@
+---
+apiVersion: <%= @service.skaffold_version %>
+kind: Config
+deploy:
+  helm:
+    releases:
+      - name: <%= @service.name %>
+        chartPath: helm-charts/basic
+        skipBuildDependencies: true
+        wait: false
+        setValueTemplates:
+          replicaCount: "{{.REPLICA_COUNT}}"
+          image.tag: <%= @service.tag %>
+          image.repository: "{{.SKAFFOLD_DEFAULT_REPO}}/<%= @service.repository %>"
+        overrides:
+          labels:
+            app.kubernetes.io/component: <%= @service.profile %>
+            app.kubernetes.io/part-of: application-platform
+          imagePullSecrets:
+            - name: <%= @service.pull_secret %>
+          image:
+            pullPolicy: Always
+          nameOverride: engagements
+          envFromSecrets:<% @service.secrets_files.each do |name| %>
+            - <%= name %><% end %>
+          httpProbePath: /healthz
+          containerPort: 8000
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+

@@ -22,6 +22,10 @@ module Ros
             @deploy_path = deploy_path
           end
 
+          def tag; config&.tag || 'latest' end
+          def repository; config&.repository || name end
+          def profile; config&.profile || name end
+          def ports; config&.ports || [] end
           def use_ros_context_dir; (not Ros.is_ros? and config.ros) end
           def context_dir; use_ros_context_dir ? 'ROS_CONTEXT_DIR' : 'CONTEXT_DIR' end
           def has_envs; !environment.nil? end
@@ -35,7 +39,7 @@ module Ros
           # NOTE: Update image_type
           def image; Stack.config.platform.config.images.rails end
           def mount_ros; (not Ros.is_ros? and not config.ros) end
-          def profiles; config.profiles || [] end
+          def profiles; config&.profiles || [] end
 
           def stack_name; Stack.name end
           def current_feature_set; Ros::Be::Application::Model.current_feature_set end
@@ -66,7 +70,9 @@ module Ros
             empty_directory("#{destination_root}/#{deploy_path}")
             components.each do |service, definition|
               @service = Service.new(service, definition, deploy_path)
-              template("#{template_dir}/service.yml.erb", "#{destination_root}/#{deploy_path}/#{service}.yml")
+              # The default template type is config.type or else look for 'service.yml.erb'
+              template_type = definition.dig(:config, :type) || 'service'
+              template("#{template_dir}/#{template_type}.yml.erb", "#{destination_root}/#{deploy_path}/#{service}.yml")
               next unless envs = @service.environment
               content = Ros.format_envs('', envs).join("\n")
               create_file("#{destination_root}/#{deploy_path}/#{service}.env", "#{content}\n")

@@ -49,7 +49,8 @@ module Ros
             end
             if ref = svc_config(service)
               config = ref.dig(:config) || Config::Options.new
-              next unless database_check(service, config)
+              binding.pry
+              next unless database_check(service, config) unless config.type&.eql?('basic')
             end
             compose("up #{compose_options} #{service}")
             errors.add(:up, 'see terminal output') if exit_code.positive?

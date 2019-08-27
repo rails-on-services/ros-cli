@@ -22,7 +22,7 @@ profiles:<% @service.profiles.each do |profile| %>
     deploy:
       helm:
         releases:
-        - name: <%= @service.name %><%= xname %>
+        - name: <%= @service.name.to_s.gsub('_', '-') %><%= xname.gsub('_', '-') %>
           chartPath: <%= @service.chart_path %>
           skipBuildDependencies: true
           # values:
@@ -45,7 +45,7 @@ profiles:<% @service.profiles.each do |profile| %>
               # application.component: platform
               # platform.feature_set: <%= @service.current_feature_set %>
               # service.type: <%= profile %>
-            nameOverride: <%= @service.name %><%= xname %>
+            nameOverride: <%= @service.name.to_s.gsub('_', '-') %><%= xname.gsub('_', '-') %>
             image:
               pullPolicy: <%= @service.pull_policy %>
             imagePullSecrets:

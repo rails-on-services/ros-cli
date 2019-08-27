@@ -70,7 +70,7 @@ module Ros
         option :console, type: :boolean, aliases: '-c', desc: 'Connect to service console after starting'
         option :daemon, type: :boolean, aliases: '-d', desc: 'Run in the background'
         option :force, type: :boolean, default: false, aliases: '-f', desc: 'Force cluster creation'
-        option :profile, type: :string, default: 'server', aliases: '-p', desc: 'Service profile to bring up'
+        option :profile, type: :string, aliases: '-p', desc: 'Service profile to bring up'
         option :replicas, type: :numeric, aliases: '-r', desc: 'Number of containers (instance) or pods (kubernetes) to run'
         option :seed, type: :boolean, aliases: '--seed', desc: 'Seed the database before starting the service'
         option :shell, type: :boolean, aliases: '--sh', desc: 'Connect to service shell after starting'

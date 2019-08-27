@@ -1,0 +1,16 @@
+---
+version: '3.0'
+services:
+  <%= @service.name %>:
+    labels:
+      stack.name: <%= @service.stack_name %>
+      stack.component: be
+      be.component: application
+      application.component: platform
+      platform.feature_set: <%= @service.current_feature_set %>
+      service.type: <%= @service.profile %>
+    image: "${IMAGE_REPOSITORY}/<%= @service.repository %>:<%= @service.tag %>"<% if @service.ports.any? %>
+    ports:<% @service.ports.each do |ports| %>
+      - "<%= ports %>"<% end %><% end %>
+    env_file:<% @service.env_files.each do |env_file| %>
+      - <%= env_file %><% end %>

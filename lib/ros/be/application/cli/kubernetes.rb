@@ -68,7 +68,7 @@ module Ros
           sync_secret(env_file) if File.exist?(env_file)
           enabled_application_services.each do |service|
             if service.eql?(:ingress)
-              next true unless get_vs(name: :ingress).empty?
+              next true unless get_vs(name: :ingress).empty? or options.force
             else
               next true if pod(name: service)
             end
@@ -109,13 +109,14 @@ module Ros
               # skaffold cmds: build, deploy or run (build and deploy)
               base_cmd = options.build ? 'run' : 'deploy'
               # TODO: next unless check and gem_version_check
-              profiles = platform.components[service].config.profiles
-              profiles = [options.profile] if options.profile and not options.profile.eql?('all')
+              profiles = [options.profile] if options.profile
+              profiles ||= platform.components[service].dig(:config, :profiles) || [:none]
               replica_count = (options.replicas || 1).to_s
               build_count = 0
               profiles.each do |profile|
                 run_cmd = build_count.zero? ? base_cmd : 'deploy'
-                skaffold("#{run_cmd} -f #{File.basename(service_file)} -p #{profile}",
+                profile_cmd = " -p #{profile}" unless profile.eql?(:none)
+                skaffold("#{run_cmd} -f #{File.basename(service_file)}#{profile_cmd}",
                          { 'REPLICA_COUNT' => replica_count })
                 errors.add("skaffold_#{run_cmd}", stderr) if exit_code.positive?
                 kubectl("scale deploy #{service} --replicas=#{replica_count}")

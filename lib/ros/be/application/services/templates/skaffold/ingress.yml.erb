@@ -19,6 +19,6 @@ deploy:
           hosts:
             - <%= @service.api_hostname %>
           services:<% platform_service_names.each do |service| %>
-            - name: <%= service %>
+            - name: <%= service.to_s.gsub('_', '-') %>
               port: 80
               prefix: /<%= service %><% end %>
