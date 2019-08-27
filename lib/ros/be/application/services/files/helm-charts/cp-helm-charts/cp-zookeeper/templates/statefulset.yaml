@@ -18,6 +18,10 @@ spec:
       labels:
         app: {{ template "cp-zookeeper.name" . }}
         release: {{ .Release.Name }}
+        {{- if .Values.podLabels }}
+        ## Custom pod labels
+{{ toYaml .Values.podLabels | indent 8 }}
+        {{- end }}
       {{- if or .Values.podAnnotations .Values.prometheus.jmx.enabled }}
       annotations:
       {{- range $key, $value := .Values.podAnnotations }}
