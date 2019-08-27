@@ -37,6 +37,10 @@ module Ros
             })
           end
 
+          def kafka_connect
+            @kafka_connect ||= application.components.services.components[:'kafka-connect']
+          end
+
           # def self.aws_environment
           #   {
           #     aws_access_key_id: Ros::Generators::Be::Cluster.provider.credentials.access_key_id,
