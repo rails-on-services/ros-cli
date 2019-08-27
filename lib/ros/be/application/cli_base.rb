@@ -57,9 +57,9 @@ module Ros
 
         def status
           switch!
-          ros_services = {}
-          my_services = {}
-          infra_services = {}
+          my_services = { 'Platform Services' => 'Status' }
+          ros_services = { 'Core Services' => 'Status' }
+          infra_services = { 'Infra Services' => 'Status' }
           application.components.platform.components.keys.sort.each do |name|
             svc = application.components.platform.components[name.to_s]
             status =
@@ -77,25 +77,32 @@ module Ros
             svc = application.components.services.components[name.to_s]
             status =
               if running_services.include?(name.to_s)
-                'Running    '
+                'Running'
               elsif svc&.dig(:config, :enabled).nil? || svc&.dig(:config, :enabled)
-                'Stopped    '
+                'Stopped'
               else
                 'Not Enabled'
               end
             infra_services[name] = status
           end
-          buf = ' ' * 13
-          name_len = 20
+          buf_len = 15
+          name_len = (my_services.keys + ros_services.keys + infra_services.keys).max_by(&:length).length + 1
           no_buf = -11
-          STDOUT.puts "\nPlatform Services   Status                  Core Services" \
-            "       Status                  Infra Services      Status\n#{'-' * 115}"
+          header_printed = false
           (1..[infra_services.size, my_services.size, ros_services.size].max).each do |i|
             mn, ms = my_services.shift
             rn, rs = ros_services.shift
             fn, fs = infra_services.shift
-            STDOUT.puts "#{mn}#{' ' * (name_len - (mn&.length || no_buf))}#{ms}#{buf}#{rn}" \
-              "#{' ' * (name_len - (rn&.length || no_buf))}#{rs}#{buf}#{fn}#{' ' * (name_len - (fn&.length || no_buf))}#{fs}"
+            STDOUT.puts \
+              "#{mn}#{' ' * (name_len - (mn&.length || no_buf))}#{ms}#{' ' * (buf_len - (ms&.length || no_buf))}" \
+              "#{rn}#{' ' * (name_len - (rn&.length || no_buf))}#{rs}#{' ' * (buf_len - (rs&.length || no_buf))}" \
+              "#{fn}#{' ' * (name_len - (fn&.length || no_buf))}#{fs}"
+            STDOUT.puts \
+              "#{'-' * mn.length}#{' ' * (name_len - (mn&.length || no_buf))}#{'-' * ms.length}#{' ' * (buf_len - (ms&.length || no_buf))}" \
+              "#{'-' * rn.length}#{' ' * (name_len - (rn&.length || no_buf))}#{'-' * rs.length}#{' ' * (buf_len - (rs&.length || no_buf))}" \
+              "#{'-' * fn.length}#{' ' * (name_len - (fn&.length || no_buf))}#{'-' * fs.length}" unless header_printed
+            # STDOUT.puts '-' * 100 unless header_printed
+            header_printed = true
           end
           show_endpoint
         end
