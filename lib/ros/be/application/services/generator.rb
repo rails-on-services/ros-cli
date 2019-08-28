@@ -95,6 +95,7 @@ module Ros
           def service_files
             empty_directory("#{destination_root}/#{deploy_path}")
             base_service_template_dir = "#{File.dirname(__FILE__)}/templates/services"
+            base_job_template_dir = "#{File.dirname(__FILE__)}/templates/jobs"
             components.each do |service, definition|
               @service = Model.new(service, definition, deploy_path, runtime_path)
               template("#{template_dir}/#{service}.yml.erb", "#{destination_root}/#{deploy_path}/#{service}.yml")
@@ -107,6 +108,16 @@ module Ros
                   template(template_file, destination_file)
                 end
               end
+
+              # Generate K8s jobs
+              job_template_dir = "#{base_job_template_dir}/#{service}"
+              if infra.cluster_type.eql?('kubernetes') and Dir.exists?(job_template_dir)
+                Dir["#{job_template_dir}/**/*"].reject{ |fn| File.directory?(fn) }.each do |template_file|
+                  destination_file = "#{destination_root}/#{deploy_path}/jobs/#{service}/#{template_file.gsub("#{job_template_dir}/", '')}".chomp('.erb')
+                  template(template_file, destination_file)
+                end
+              end
+
               next unless envs = @service.environment
               content = Ros.format_envs('', envs).join("\n")
               create_file("#{destination_root}/#{deploy_path}/#{service}.env", "#{content}\n")
@@ -128,7 +139,6 @@ module Ros
           def copy_kubernetes_helm_charts
             return unless infra.cluster_type.eql?('kubernetes')
             directory('../files/helm-charts', "#{deploy_path}/helm-charts")
-            #binding.pry
             FileUtils.mkdir_p("#{destination_root}/#{deploy_path}") unless File.directory?("#{destination_root}/#{deploy_path}") 
             FileUtils.cp("#{Ros.environments_dir}/big_query_credentials.json", "#{destination_root}/#{deploy_path}") if File.exists?("#{Ros.environments_dir}/big_query_credentials.json")
           end

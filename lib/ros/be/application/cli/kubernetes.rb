@@ -50,7 +50,7 @@ module Ros
             @infra_services = application.services.components.keys
           # infra service(s) specified - force update
           elsif @platform_services.empty? and not @infra_services.empty?
-            @force_infra_update = true
+            @force_infra_deploy = true
           end
 
           generate_config if stale_config
@@ -89,14 +89,14 @@ module Ros
             if service.eql?(:ingress)
               next true unless get_vs(name: :ingress).empty? or options.force
             else
-              next if pod(name: service) unless @force_infra_update
+              next if pod(name: service) unless @force_infra_deploy
             end
             env_file = "#{services_root}/#{service}.env"
             sync_secret(env_file) if File.exist?(env_file)
             service_file = "#{service}.yml"
             Dir.chdir(services_root) do
               base_cmd = options.build ? 'run' : 'deploy'
-              force = @force_infra_update ? '--force' : ''
+              force = @force_infra_deploy ? '--force=true' : ''
               skaffold("#{base_cmd} #{force} -f #{service_file}")
               errors.add("skaffold_#{run_cmd}", stderr) if exit_code.positive?
             end
@@ -106,7 +106,7 @@ module Ros
 
         def deploy_jobs(service)
           if File.directory?("#{services_root}/jobs/#{service}")
-            Dir.glob("#{services_root}/jobs/#{service}/*.yaml") do |job_file|
+            Dir.glob("#{services_root}/jobs/#{service}/*.yml") do |job_file|
               kube_cmd = "apply -f #{job_file} --force"
               kubectl(kube_cmd)
             end
