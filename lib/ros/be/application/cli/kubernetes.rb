@@ -33,7 +33,26 @@ module Ros
 
         # TODO: Add ability for fail fast
         def up(services)
-          @services = services.empty? ? enabled_services : services
+          #@services = services.empty? ? enabled_services : services
+          @platform_services = []
+          @infra_services = []
+          services.each do |service|
+            @platform_services.push(service) if platform.components.keys.include?(service.to_sym)
+            @infra_services.push(service) if application.services.components.keys.include?(service.to_sym)
+          end
+
+          # No services specified - launch whole app stack
+          if @platform_services.empty? and @infra_services.empty?
+            @platform_services = enabled_services
+            @infra_services = application.services.components.keys
+          # app service(s) specified - launch app and ensure required infra services are up and running
+          elsif not @platform_services.empty? and @infra_services.empty?
+            @infra_services = application.services.components.keys
+          # infra service(s) specified - force update
+          elsif @platform_services.empty? and not @infra_services.empty?
+            @force_infra_deploy = true
+          end
+
           generate_config if stale_config
           if options.force or not system_cmd("kubectl get ns #{namespace}", kube_env)
             STDOUT.puts 'Forcing namespace create' if options.force
@@ -65,20 +84,31 @@ module Ros
 
         def deploy_services
           env_file = "#{services_root}/services.env"
-          sync_secret(env_file) if File.exist?(env_file)
-          enabled_application_services.each do |service|
+          sync_secret(env_file) if File.exists?(env_file)
+          @infra_services.each do |service|
             if service.eql?(:ingress)
               next true unless get_vs(name: :ingress).empty? or options.force
             else
-              next true if pod(name: service)
+              next if pod(name: service) unless @force_infra_deploy
             end
             env_file = "#{services_root}/#{service}.env"
             sync_secret(env_file) if File.exist?(env_file)
             service_file = "#{service}.yml"
             Dir.chdir(services_root) do
-              run_cmd = options.build ? 'run' : 'deploy'
-              skaffold("#{run_cmd} -f #{service_file}")
+              base_cmd = options.build ? 'run' : 'deploy'
+              force = @force_infra_deploy ? '--force=true' : ''
+              skaffold("#{base_cmd} #{force} -f #{service_file}")
               errors.add("skaffold_#{run_cmd}", stderr) if exit_code.positive?
+            end
+            deploy_jobs(service)
+          end
+        end
+
+        def deploy_jobs(service)
+          if File.directory?("#{services_root}/jobs/#{service}")
+            Dir.glob("#{services_root}/jobs/#{service}/*.yml") do |job_file|
+              kube_cmd = "apply -f #{job_file} --force"
+              kubectl(kube_cmd)
             end
           end
         end
@@ -99,9 +129,8 @@ module Ros
 
         def deploy_platform
           update_platform_env
-          services.each do |service|
-            next true unless platform.components.keys.include?(service.to_sym)
-
+          @platform_services.each do |service|
+            #next unless platform.components.keys.include?(service.to_sym)
             env_file = "#{platform_root}/#{service}.env"
             sync_secret(env_file) if File.exist?(env_file)
             service_file = "#{platform_root}/#{service}.yml"

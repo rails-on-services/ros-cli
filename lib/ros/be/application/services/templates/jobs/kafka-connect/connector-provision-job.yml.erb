@@ -1,0 +1,52 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kafka-connect-connector-provision
+spec:
+  template:
+    metadata:
+      name: kafka-connect-connector-provision
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      restartPolicy: OnFailure
+      initContainers:
+        <% @service.kafka_connect.config.connectors.each do |connector| -%>
+        - image: gcr.io/cloud-builders/curl
+          name: <%= connector[0] %>
+          command:
+            - curl
+            - -X
+            - PUT
+            - http://kafka-connect:8083/connectors/<%= connector[0] %>/config
+            - -H
+            - "Content-Type: application/json"
+            - -H
+            - "Accept: application/json"
+            - -d
+            - >
+              {
+                "connector.class": <% if connector[1].type == 'bigquery' -%>"com.wepay.kafka.connect.bigquery.BigQuerySinkConnector",
+                <%# elsif connector[1].type == 'foo' -%>
+                <%# elsif connector[1].type == 'blah' -%><% end -%>
+                "autoUpdateSchemas": "false",
+                "bigQueryMessageTimePartitioning": "false",
+                "autoCreateTables": "true",
+                "sanitizeTopics": "true",
+                "tasks.max": "<%= connector[1].tasks ? connector[1].tasks : 2 %>",
+                "topics": "<%= connector[1].topics %>",
+                "schemaRegistryLocation": "http://kafka-schema-registry:8081",
+                "topicsToTables": "(\\w+)\\.(\\w+)=$1_$2",
+                "project": "<%= connector[1].project %>",
+                "datasets": ".*=<%= connector[1].dataset %>",
+                "keyfile": "/etc/google/auth/application_default_credentials.json",
+                "schemaRetriever": <% if connector[1].type == 'bigquery' -%>"com.wepay.kafka.connect.bigquery.schemaregistry.schemaretriever.SchemaRegistrySchemaRetriever",
+                <%# elsif connector[1].type == 'foo' -%>
+                <%# elsif connector[1].type == 'blah' -%><% end -%>
+                "key.converter": "org.apache.kafka.connect.storage.StringConverter"
+              }
+        <% end -%>
+      containers:
+        - image: busybox:latest
+          name: echo
+          command: ['sh', '-c', 'echo Connectors created. Check above logs!']
