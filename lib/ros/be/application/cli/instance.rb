@@ -13,7 +13,9 @@ module Ros
         end
 
         def cmd(services)
-          binding.pry
+          # binding.pry
+          # TODO: update service labels so can check for them rather than deploying each time
+          STDOUT.puts 'Not implemented on cli/instance' if options.v
         end
 
         def build(services)
@@ -49,7 +51,7 @@ module Ros
             end
             if ref = svc_config(service)
               config = ref.dig(:config) || Config::Options.new
-              binding.pry
+              # binding.pry
               next unless database_check(service, config) unless config.type&.eql?('basic')
             end
             compose("up #{compose_options} #{service}")
