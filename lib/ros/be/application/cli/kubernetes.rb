@@ -43,7 +43,7 @@ module Ros
             elsif enabled_application_services.include?(service.to_sym)
               @infra_services.push(service)
             else
-              STDERR.puts "Services specified not found or enabled: #{services}, exit"
+              STDERR.puts "Services specified not found or enabled: #{service}, exit"
               return
             end
           end
