@@ -36,13 +36,21 @@ module Ros
           #@services = services.empty? ? enabled_services : services
           @platform_services = []
           @infra_services = []
+
           services.each do |service|
-            @platform_services.push(service) if platform.components.keys.include?(service.to_sym)
-            @infra_services.push(service) if application.services.components.keys.include?(service.to_sym)
+            if enabled_services.include?(service.to_sym)
+              @platform_services.push(service)
+            elsif enabled_application_services.include?(service.to_sym)
+              @infra_services.push(service)
+            else
+              STDERR.puts "Services specified not found or enabled: #{services}, exit"
+              return
+            end
           end
 
           # No services specified - launch whole app stack
           if @platform_services.empty? and @infra_services.empty?
+            STDOUT.puts "No specific service specified, deploy all enabled services"
             @platform_services = enabled_services
             @infra_services = enabled_application_services
           # app service(s) specified - launch app and ensure required infra services are up and running
