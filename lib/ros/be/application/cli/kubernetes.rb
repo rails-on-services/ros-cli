@@ -44,10 +44,10 @@ module Ros
           # No services specified - launch whole app stack
           if @platform_services.empty? and @infra_services.empty?
             @platform_services = enabled_services
-            @infra_services = application.services.components.keys
+            @infra_services = enabled_application_services
           # app service(s) specified - launch app and ensure required infra services are up and running
           elsif not @platform_services.empty? and @infra_services.empty?
-            @infra_services = application.services.components.keys
+            @infra_services = enabled_application_services
           # infra service(s) specified - force update
           elsif @platform_services.empty? and not @infra_services.empty?
             @force_infra_deploy = true
