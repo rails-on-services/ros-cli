@@ -183,10 +183,19 @@ module Ros
         end
 
         desc 'list', 'List backend application configuration objects'
+        option :show_enabled, type: :boolean, aliases: '--enabled', desc: 'Only show services enabled in current config file'
         map %w(ls) => :list
         def list(what = nil)
           STDOUT.puts 'Options: infra, services, platform' if what.nil?
-          STDOUT.puts "#{Settings.components.be.components.application.components[what].components.keys.join("\n")}" unless what.nil?
+          STDOUT.puts "#{Settings.components.be.components.application.components[what].components.keys.join("\n")}" unless what.nil? or options.show_enabled
+          if options.show_enabled
+            case what
+            when 'platform'
+              STDOUT.puts enabled_services
+            when 'services'
+              STDOUT.puts enabled_application_services
+            end
+          end
         end
 
         desc 'publish', 'Publish API documentation to Postman'
