@@ -69,8 +69,8 @@ module Ros
             STDOUT.puts 'Namespace exists. skipping create. Use -f to force'
           end
           return if options.skip
-          deploy_gcp_bigquery_secret
-          deploy_services
+          deploy_gcp_bigquery_secret unless options.skip_infra
+          deploy_services unless options.skip_infra
           deploy_platform_environment
           deploy_platform
           show_endpoint

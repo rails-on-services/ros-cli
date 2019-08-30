@@ -75,6 +75,7 @@ module Ros
         option :seed, type: :boolean, aliases: '--seed', desc: 'Seed the database before starting the service'
         option :shell, type: :boolean, aliases: '--sh', desc: 'Connect to service shell after starting'
         option :skip, type: :boolean, aliases: '--skip', desc: 'Skip starting services (just initialize cluster)'
+        option :skip_infra, type: :boolean, aliases: '--skip-infra', desc: 'Skip deploy infra services'
         def up(*services)
           command = context(options)
           command.up(services)
