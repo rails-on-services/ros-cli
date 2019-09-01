@@ -1,0 +1,113 @@
+provider "aws" {
+  region  = "ap-southeast-1"
+  profile = "perx-whistler"
+}
+
+#provider "aws" {
+#  alias   = "us-west-2"
+#  region  = "us-west-2"
+#  profile = "perx-whistler"
+#}
+
+locals {
+  vpc_cidr                            = "<%= tf.vpc.config.cidr.nil? ? "10.0.0.0/16" : tf.vpc.config.cidr %>"
+  vpc_create_database_subnet_group    = <%= tf.vpc.config.create_database_subnet_group.nil? ? false : true %>
+  vpc_create_redshift_subnet_group    = <%= tf.vpc.config.create_redshift_subnet_group.nil? ? false : true %>
+  vpc_create_elasticache_subnet_group = <%= tf.vpc.config.create_elasticache_subnet_group.nil? ? false : true %>
+  vpc_name                            = join("-", ["stack", "<%= tf.kubernetes.config.name.nil? ? 'terraform.workspace' : tf.kubernetes.config.name %>"])
+  cluster_name                        = join("-", ["stack", "<%= tf.kubernetes.config.name.nil? ? 'terraform.workspace' : tf.kubernetes.config.name %>"])
+  accelerator_name                    = join("-", ["stack", "<%= tf.kubernetes.config.name.nil? ? 'terraform.workspace' : tf.kubernetes.config.name %>"])
+  environment                         = "<%= tf.kubernetes.config.name.nil? ? 'terraform.workspace' : tf.kubernetes.config.name %>"
+}
+
+data "aws_availability_zones" "available" {}
+
+module "vpc" {
+  source  = "terraform-aws-modules/vpc/aws"
+  version = "~> 2.9.0"
+
+  name = local.vpc_name 
+  cidr = local.vpc_cidr
+
+  enable_nat_gateway              = true
+  enable_dns_hostnames            = true
+  enable_dns_support              = true
+  enable_s3_endpoint              = true
+  create_database_subnet_group    = local.vpc_create_database_subnet_group
+  create_redshift_subnet_group    = local.vpc_create_redshift_subnet_group
+  create_elasticache_subnet_group = local.vpc_create_elasticache_subnet_group
+
+  azs                 = slice(data.aws_availability_zones.available.names, 0, 3)
+  public_subnets      = [for i in range(1, 4) : cidrsubnet(local.vpc_cidr, 8, i)] 
+  private_subnets     = [for i in range(11, 14) : cidrsubnet(local.vpc_cidr, 8, i)]
+
+  tags = {
+    "Environment" = local.environment
+  }
+
+  vpc_tags = {
+    "kubernetes.io/cluster/${local.cluster_name}" = "shared"
+  }
+
+  public_subnet_tags = {
+    "kubernetes.io/cluster/${local.cluster_name}" = "shared"
+    "kubernetes.io/role/elb"                          = "1"
+  }
+
+  private_subnet_tags = {
+    "kubernetes.io/cluster/${local.cluster_name}" = "shared"
+    "kubernetes.io/role/internal-elb"                 = "1"
+  }
+}
+
+module "iam" {
+  source = "./aws/eks/modules/iam"
+}
+
+module "eks-cluster" {
+  source                    = "./aws/eks/modules/eks-cluster"
+  cluster_name              = local.cluster_name
+  vpc_id                    = module.vpc.vpc_id
+  public_subnets            = module.vpc.public_subnets
+  private_subnets           = module.vpc.private_subnets
+  default_security_group_id = module.vpc.default_security_group_id
+  
+  eks_worker_groups = {
+<% unless tf.kubernetes.config.worker_groups.nil? -%>
+<% tf.kubernetes.config.worker_groups.each do |k, v| -%>
+    <%= k %> = <% if v.is_a?(String) %>"<%= v %>"<% else %><%= v %><% end %> 
+<% end -%>
+<% end -%>
+  }  
+
+  eks_map_users = []
+  eks_map_roles = module.iam.eks_map_roles
+  
+  tags = {
+    "Environment" = local.environment
+  }
+}
+
+<% unless tf.globalaccelerator.nil? || tf.globalaccelerator.config.nil? || ! tf.globalaccelerator.config.enabled -%>
+module "globalaccelerator" {
+  source                      = "./aws/eks/modules/globalaccelerator"
+  name                        = local.accelerator_name
+  route53_zone_id             = "<%= tf.globalaccelerator.config.route53_zone_id.nil? || tf.globalaccelerator.config.route53_zone_id.empty? ? '' : tf.globalaccelerator.config.route53_zone_id %>"
+  global_accelerator_hostname = "<%= tf.globalaccelerator.config.hostname.nil? || tf.globalaccelerator.config.hostname.empty? ? '' : tf.globalaccelerator.config.hostname %>"
+}
+
+output "globalaccelerator_ips" {
+  value = module.globalaccelerator.globalaccelerator_ips
+}
+<% end -%>
+
+/*
+output "vpc" {
+  value = module.vpc.*
+}
+*/
+
+output "iam" {
+  value = module.iam.*
+}
+
