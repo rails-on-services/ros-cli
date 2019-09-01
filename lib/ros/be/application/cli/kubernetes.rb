@@ -106,7 +106,7 @@ module Ros
               base_cmd = options.build ? 'run' : 'deploy'
               force = @force_infra_deploy ? '--force=true' : ''
               skaffold("#{base_cmd} #{force} -f #{service_file}")
-              errors.add("skaffold_#{run_cmd}", stderr) if exit_code.positive?
+              errors.add("skaffold_#{base_cmd}", stderr) if exit_code.positive?
             end
             deploy_jobs(service)
           end
