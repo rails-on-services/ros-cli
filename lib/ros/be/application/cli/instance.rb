@@ -189,7 +189,16 @@ module Ros
 
         def compose(cmd, never_capture = false)
           switch!
-          system_cmd("docker-compose #{cmd}", {}, never_capture)
+          hash = {}
+          if gem_cache = gem_cache_server
+            hash = { 'GEM_SERVER' => "http://#{gem_cache}:9292" }
+          end
+          system_cmd("docker-compose #{cmd}", hash, never_capture)
+        end
+
+        def gem_cache_server
+          return unless %x(docker ps).index('gem_server')
+          %x(ip -o -4 addr show dev docker0).split[3].split('/')[0]
         end
 
         def switch!

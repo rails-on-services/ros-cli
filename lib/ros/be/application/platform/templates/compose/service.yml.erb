@@ -37,6 +37,7 @@ services:
       args:<% @service.image.build_args.each_pair do |name, value| %>
         <%= name %>: <%= value.is_a?(Array) ? value.join(' ') : value %><% end %>
         project: <%= @service.name %>
+        GEM_SERVER: "${GEM_SERVER:-https://rubygems.org}"
         PUID: "${PUID:-1000}"
         PGID: "${PGID:-1000}"
 <% end %>

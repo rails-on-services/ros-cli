@@ -109,17 +109,20 @@ module Ros
 
           # continue compose only methods
           def compose_environment
-            user_info = Etc.getlogin ? Etc.getpwnam(Etc.getlogin) : OpenStruct.new(uid: 1000, gid: 1000)
+            ext_info = OpenStruct.new
+            if (RbConfig::CONFIG['host_os'] =~ /linux/ and Etc.getlogin)
+              shell_info = Etc.getpwnam(Etc.getlogin)
+              ext_info.puid = shell_info.uid
+              ext_info.pgid = shell_info.gid
+            end
             {
-              puid: user_info.uid,
-              pgid: user_info.gid,
               compose_file: Dir["#{application.deploy_path}/**/*.yml"].map{ |p| p.gsub("#{Ros.root}/", '') }.sort.join(':'),
               compose_project_name: application.compose_project_name,
               context_dir: relative_path,
               ros_context_dir: "#{relative_path}/ros",
               image_repository: Stack.config.platform.config.image_registry,
               image_tag: Stack.image_tag
-            }
+            }.merge(ext_info.to_h)
           end
 
           def relative_path; @relative_path ||= ('../' * deploy_path.split('/').size).chomp('/') end
