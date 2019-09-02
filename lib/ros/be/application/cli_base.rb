@@ -64,9 +64,9 @@ module Ros
             svc = application.components.platform.components[name.to_s]
             status =
               if running_services.include?(name.to_s)
-                'Running    '
+                'Running'
               elsif svc.dig(:config, :enabled).nil? || svc.dig(:config, :enabled)
-                'Stopped    '
+                'Stopped'
               else
                 'Not Enabled'
               end
@@ -91,8 +91,14 @@ module Ros
           header_printed = false
           (1..[infra_services.size, my_services.size, ros_services.size].max).each do |i|
             mn, ms = my_services.shift
+            mn ||= ''
+            ms ||= ''
             rn, rs = ros_services.shift
+            rn ||= ''
+            rs ||= ''
             fn, fs = infra_services.shift
+            fn ||= ''
+            fs ||= ''
             STDOUT.puts \
               "#{mn}#{' ' * (name_len - (mn&.length || no_buf))}#{ms}#{' ' * (buf_len - (ms&.length || no_buf))}" \
               "#{rn}#{' ' * (name_len - (rn&.length || no_buf))}#{rs}#{' ' * (buf_len - (rs&.length || no_buf))}" \
