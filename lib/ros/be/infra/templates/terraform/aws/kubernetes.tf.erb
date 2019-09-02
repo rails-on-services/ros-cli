@@ -1,15 +1,50 @@
+# Providers
 provider "aws" {
   region  = "ap-southeast-1"
-  profile = "perx-whistler"
+  profile = local.aws_profile
 }
 
-#provider "aws" {
-#  alias   = "us-west-2"
-#  region  = "us-west-2"
-#  profile = "perx-whistler"
-#}
+provider "kubernetes" {
+  version                = "~> 1.9"
+  host                   = module.eks-cluster.cluster_endpoint #data.aws_eks_cluster.cluster.endpoint
+  cluster_ca_certificate = base64decode(module.eks-cluster.cluster_certificate_authority_data) #base64decode(data.aws_eks_cluster.cluster.certificate_authority[0].data)
+  token                  = data.aws_eks_cluster_auth.cluster-auth.token
+  load_config_file       = false
+}
 
+provider "helm" {
+  version         = "~> 0.10"
+  namespace       = "kube-system"
+  install_tiller  = true
+  tiller_image    = "gcr.io/kubernetes-helm/tiller:v2.14.3"
+  service_account = "tiller"
+
+  kubernetes {
+    host                   = module.eks-cluster.cluster_endpoint #data.aws_eks_cluster.cluster.endpoint
+    cluster_ca_certificate = base64decode(module.eks-cluster.cluster_certificate_authority_data) #base64decode(data.aws_eks_cluster.cluster.certificate_authority[0].data)
+    token                  = data.aws_eks_cluster_auth.cluster-auth.token
+  }
+}
+
+provider "local" {
+  version = "~> 1.3"
+}
+
+provider "null" {
+  version = "~> 2.1"
+}
+
+provider "random" {
+  version = "~> 2.2"
+}
+
+provider "template" {
+  version = "~> 2.1"
+}
+
+# Locals
 locals {
+  aws_profile                         = "perx-whistler"  # This should help to fix 'error: unable to recognize "aws_auth_configmap.yaml": Unauthorized'
   vpc_cidr                            = "<%= tf.vpc.config.cidr.nil? ? "10.0.0.0/16" : tf.vpc.config.cidr %>"
   vpc_create_database_subnet_group    = <%= tf.vpc.config.create_database_subnet_group.nil? ? false : true %>
   vpc_create_redshift_subnet_group    = <%= tf.vpc.config.create_redshift_subnet_group.nil? ? false : true %>
@@ -20,6 +55,7 @@ locals {
   environment                         = "<%= tf.kubernetes.config.name.nil? ? 'terraform.workspace' : tf.kubernetes.config.name %>"
 }
 
+# VPC
 data "aws_availability_zones" "available" {}
 
 module "vpc" {
@@ -60,10 +96,12 @@ module "vpc" {
   }
 }
 
+# IAM
 module "iam" {
   source = "./aws/eks/modules/iam"
 }
 
+# EKS cluster
 module "eks-cluster" {
   source                    = "./aws/eks/modules/eks-cluster"
   cluster_name              = local.cluster_name
@@ -71,7 +109,8 @@ module "eks-cluster" {
   public_subnets            = module.vpc.public_subnets
   private_subnets           = module.vpc.private_subnets
   default_security_group_id = module.vpc.default_security_group_id
-  
+  aws_profile               = local.aws_profile
+
   eks_worker_groups = {
 <% unless tf.kubernetes.config.worker_groups.nil? -%>
 <% tf.kubernetes.config.worker_groups.each do |k, v| -%>
@@ -89,6 +128,7 @@ module "eks-cluster" {
 }
 
 <% unless tf.globalaccelerator.nil? || tf.globalaccelerator.config.nil? || ! tf.globalaccelerator.config.enabled -%>
+# Global accelerator
 module "globalaccelerator" {
   source                      = "./aws/eks/modules/globalaccelerator"
   name                        = local.accelerator_name
@@ -100,6 +140,39 @@ output "globalaccelerator_ips" {
   value = module.globalaccelerator.globalaccelerator_ips
 }
 <% end -%>
+
+# EKS resources
+
+#data "aws_eks_cluster" "cluster" {
+#  name = local.cluster_name
+#}
+
+data "aws_eks_cluster_auth" "cluster-auth" {
+  name = local.cluster_name
+}
+
+module "eks-resources" {
+  source                     = "./aws/eks/modules/eks-resources"
+  cluster_name               = local.cluster_name
+  extra_namespaces           = []
+  clusterrolebindings        = module.iam.kubernetes_clusterrolebindings
+  perx_helm_server_username  = "<%= tf.kubernetes.config.cluster_resources.perx_helm_server_username %>"
+  perx_helm_server_password  = "<%= tf.kubernetes.config.cluster_resources.perx_helm_server_password %>"
+  enable_external_dns        = <%= tf.kubernetes.config.cluster_resources.enable_external_dns %>
+  external_dns_domainFilters = <%= tf.kubernetes.config.cluster_resources.external_dns_domainFilters %>
+  external_dns_zoneIdFilters = <%= tf.kubernetes.config.cluster_resources.external_dns_zoneIdFilters %>
+  istio_version              = "<%= tf.kubernetes.config.cluster_resources.istio_version %>"
+
+  istio_ingressgateway_alb_cert_arn                 = "" #local.aws_acm_cert
+  enable_fluentd_gcp_logging                        = false
+  #fluentd_gcp_logging_service_account_json_key_path = var.fluentd_gcp_logging_service_account_json_key_path
+}
+
+
+output "eks" {
+  value = module.eks-cluster.this
+}
+
 
 /*
 output "vpc" {

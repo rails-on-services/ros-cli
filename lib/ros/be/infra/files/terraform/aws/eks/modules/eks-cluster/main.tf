@@ -52,6 +52,10 @@ module "eks" {
     additional_security_group_ids = var.default_security_group_id #data.terraform_remote_state.eks-vpc.outputs.vpc.default_security_group_id #module.eks-vpc.default_security_group_id #
   }
 
+  kubeconfig_aws_authenticator_env_variables = {
+    AWS_PROFILE = var.aws_profile
+  }
+
   # using launch configuration
   worker_groups = [merge(local.worker_groups, var.eks_worker_groups)]
 
