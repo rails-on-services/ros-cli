@@ -198,7 +198,7 @@ module Ros
 
         def gem_cache_server
           return unless %x(docker ps).index('gem_server')
-          host = (RbConfig::CONFIG['host_os']
+          host = RbConfig::CONFIG['host_os']
           return %x(ifconfig vboxnet1).split[7] if host =~ /darwin/
           %x(ip -o -4 addr show dev docker0).split[3].split('/')[0]
         end
