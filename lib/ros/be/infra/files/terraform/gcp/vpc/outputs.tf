@@ -5,3 +5,7 @@ output "network" {
 output "subnetwork" {
   value = google_compute_subnetwork.this
 }
+
+output "firewall" {
+  value = google_compute_firewall.this
+}

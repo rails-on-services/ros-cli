@@ -13,10 +13,12 @@ module "vpc" {
 }
 
 module "gci" {
-  source       = "./gcp/gci"
-  name         = "<%= tf.instance.config.name %>"
-  machine_type = "<%= tf.instance.config.machine_type %>"
-  disk_image   = "<%= tf.instance.config.disk_image %>"
-  zone         = "<%= tf.provider_settings.config.zone %>"
-  subnetwork   = module.vpc.subnetwork.self_link
+  source         = "./gcp/gci"
+  name           = "<%= tf.instance.config.name %>"
+  machine_type   = "<%= tf.instance.config.machine_type %>"
+  disk_image     = "<%= tf.instance.config.disk_image %>"
+  zone           = "<%= tf.provider_settings.config.zone %>"
+  subnetwork     = module.vpc.subnetwork.self_link
+  project_name   = "<%= tf.instance.config.project_name %>"
+  ssh_public_key = "${file("<%= tf.instance.config.ssh_public_key %>")}"
 }
