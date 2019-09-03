@@ -24,6 +24,10 @@ module Ros
         )
       end
 
+      def tag_name
+        @tag_name ||= %x(git tag --points-at HEAD).chomp
+      end
+
       def branch_name
         return unless system('git rev-parse --git-dir > /dev/null 2>&1')
         @branch_name ||= %x(git rev-parse --abbrev-ref HEAD).strip.gsub(/[^A-Za-z0-9-]/, '-')
