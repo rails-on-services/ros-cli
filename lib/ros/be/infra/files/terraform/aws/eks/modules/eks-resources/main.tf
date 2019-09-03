@@ -8,15 +8,15 @@ resource "null_resource" "helm-repository-incubator" {
   }
 }
 
-resource "null_resource" "helm-repository-kube-eagle" {
-  triggers = {
-    always = timestamp()
-  }
-
-  provisioner "local-exec" {
-    command = "helm repo add kube-eagle https://raw.githubusercontent.com/google-cloud-tools/kube-eagle-helm-chart/master"
-  }
-}
+#resource "null_resource" "helm-repository-kube-eagle" {
+#  triggers = {
+#    always = timestamp()
+#  }
+#
+#  provisioner "local-exec" {
+#    command = "helm repo add kube-eagle https://raw.githubusercontent.com/google-cloud-tools/kube-eagle-helm-chart/master"
+#  }
+#}
 
 resource "null_resource" "helm-repository-perx" {
   triggers = {
@@ -59,24 +59,24 @@ data "template_file" "cluster-autoscaler-value" {
   }
 }
 
-#resource "helm_release" "cluster-autoscaler" {
-#  name      = "cluster-autoscaler"
-#  chart     = "stable/cluster-autoscaler"
-#  namespace = "kube-system"
-#  wait      = true
-#
-#  values = [data.template_file.cluster-autoscaler-value.rendered]
-#}
-#
-#resource "helm_release" "metrics-server" {
-#  name      = "metrics-server"
-#  chart     = "stable/metrics-server"
-#  namespace = "kube-system"
-#  wait      = true
-#
-#  values = [file("${path.module}/files/helm-metrics-server.yaml")]
-#}
-#
+resource "helm_release" "cluster-autoscaler" {
+  name      = "cluster-autoscaler"
+  chart     = "stable/cluster-autoscaler"
+  namespace = "kube-system"
+  wait      = true
+
+  values = [data.template_file.cluster-autoscaler-value.rendered]
+}
+
+resource "helm_release" "metrics-server" {
+  name      = "metrics-server"
+  chart     = "stable/metrics-server"
+  namespace = "kube-system"
+  wait      = true
+
+  values = [file("${path.module}/files/helm-metrics-server.yaml")]
+}
+
 #resource "helm_release" "kube-eagle" {
 #  depends_on = [null_resource.helm-repository-kube-eagle]
 #  repository = "kube-eagle"
@@ -135,16 +135,16 @@ data "template_file" "aws-alb-ingress-controller-value" {
   }
 }
 
-#resource "helm_release" "aws-alb-ingress-controller" {
-#  depends_on = [null_resource.helm-repository-incubator]
-#  name       = "aws-alb-ingress-controller"
-#  repository = "incubator"
-#  chart      = "aws-alb-ingress-controller"
-#  namespace  = "kube-system"
-#  wait       = true
-#
-#  values = [data.template_file.aws-alb-ingress-controller-value.rendered]
-#}
+resource "helm_release" "aws-alb-ingress-controller" {
+  depends_on = [null_resource.helm-repository-incubator]
+  name       = "aws-alb-ingress-controller"
+  repository = "incubator"
+  chart      = "aws-alb-ingress-controller"
+  namespace  = "kube-system"
+  wait       = true
+
+  values = [data.template_file.aws-alb-ingress-controller-value.rendered]
+}
 
 data "template_file" "external-dns-value" {
   template = file("${path.module}/templates/helm-external-dns.tpl")
@@ -210,34 +210,51 @@ resource "kubernetes_cluster_role_binding" "this" {
   }
 }
 
-#resource "helm_release" "istio-init" {
-#  count      = var.enable_istio ? 1 : 0
-#  depends_on = [null_resource.helm-repository-istio]
-#  name       = "istio-init"
-#  repository = "istio"
-#  chart      = "istio-init"
-#  version    = var.istio_version
-#  namespace  = "istio-system"
-#  wait       = true
-#
-#  force_update = true
-#}
-#
-#resource "helm_release" "istio" {
-#  count = var.enable_istio ? 1 : 0
-#  depends_on = [
-#    null_resource.helm-repository-istio,
-#    helm_release.istio-init,
-#  ]
-#  name       = "istio"
-#  repository = "istio"
-#  chart      = "istio"
-#  version    = var.istio_version
-#  namespace  = "istio-system"
-#  wait       = true
-#  values     = [file("${path.module}/files/helm-istio.yaml")]
-#}
-#
+resource "helm_release" "istio-init" {
+  count      = var.enable_istio ? 1 : 0
+  depends_on = [null_resource.helm-repository-istio]
+  name       = "istio-init"
+  repository = "istio"
+  chart      = "istio-init"
+  namespace  = "istio-system"
+  wait       = true
+
+  force_update = true
+}
+
+resource "null_resource" "delay" {
+  provisioner "local-exec" {
+    command = <<EOS
+for i in `seq 1 20`; do \
+echo "${var.kubeconfig}" > ~/.kube/"${var.cluster_name}"_config.yaml & \
+CRDS=`kubectl get crds --kubeconfig ~/.kube/"${var.cluster_name}"_config.yaml | grep 'istio.io\|certmanager.k8s.io' | wc -l`; \
+echo "crds=$CRDS"; \
+[ $CRDS -ge 23 ] && break || sleep 10; \
+done; 
+EOS
+  }
+  
+  depends_on = [
+    helm_release.istio-init,
+  ]
+}
+
+resource "helm_release" "istio" {
+  count = var.enable_istio ? 1 : 0
+  depends_on = [
+    null_resource.helm-repository-istio,
+    helm_release.istio-init,
+    null_resource.delay,
+  ]
+  name       = "istio"
+  repository = "istio"
+  chart      = "istio"
+  version    = var.istio_version
+  namespace  = "istio-system"
+  wait       = true
+  values     = [file("${path.module}/files/helm-istio.yaml")]
+}
+
 #resource "helm_release" "istio-alb-ingressgateway" {
 #  count      = var.enable_istio && var.istio_ingressgateway_alb_cert_arn != "" ? 1 : 0
 #  depends_on = [helm_release.istio]
@@ -282,5 +299,3 @@ resource "kubernetes_cluster_role" "developer" {
     verbs      = ["create"]
   }
 }
-
-

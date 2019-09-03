@@ -36,15 +36,15 @@ module "eks" {
   subnets         = concat(var.public_subnets, var.private_subnets) #concat(data.terraform_remote_state.eks-vpc.outputs.vpc.public_subnets, data.terraform_remote_state.eks-vpc.outputs.vpc.private_subnets)
   vpc_id          = var.vpc_id #data.terraform_remote_state.eks-vpc.outputs.vpc.vpc_id #var.vpc_id
 
-  cluster_create_security_group   = "false"
-  cluster_endpoint_private_access = "true"
-  cluster_endpoint_public_access  = "true"
+  cluster_create_security_group   = false
+  cluster_endpoint_private_access = true
+  cluster_endpoint_public_access  = true
   cluster_security_group_id       = aws_security_group.eks-cluster.id
   worker_ami_name_filter          = var.eks_worker_ami_name_filter
   cluster_enabled_log_types       = var.eks_cluster_enabled_log_types
 
-  manage_aws_auth    = "true"
-  write_kubeconfig   = "true"
+  manage_aws_auth    = true
+  write_kubeconfig   = true
   config_output_path = "./"
 
   workers_group_defaults = {

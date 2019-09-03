@@ -44,7 +44,7 @@ provider "template" {
 
 # Locals
 locals {
-  aws_profile                         = "perx-whistler"  # This should help to fix 'error: unable to recognize "aws_auth_configmap.yaml": Unauthorized'
+  aws_profile                         = "<%= tf.kubernetes.config.aws_profile.nil? ? "default" : tf.kubernetes.config.aws_profile %>"
   vpc_cidr                            = "<%= tf.vpc.config.cidr.nil? ? "10.0.0.0/16" : tf.vpc.config.cidr %>"
   vpc_create_database_subnet_group    = <%= tf.vpc.config.create_database_subnet_group.nil? ? false : true %>
   vpc_create_redshift_subnet_group    = <%= tf.vpc.config.create_redshift_subnet_group.nil? ? false : true %>
@@ -101,6 +101,14 @@ module "iam" {
   source = "./aws/eks/modules/iam"
 }
 
+<% if tf.kubernetes.config.worker_groups.key_name.nil? || tf.kubernetes.config.worker_groups.key_name.empty? -%>
+# AWS key pair
+resource "aws_key_pair" "this" {
+  key_name   = local.cluster_name
+  public_key = file("~/.ssh/id_rsa.pub")
+}
+<% end -%>
+
 # EKS cluster
 module "eks-cluster" {
   source                    = "./aws/eks/modules/eks-cluster"
@@ -114,7 +122,12 @@ module "eks-cluster" {
   eks_worker_groups = {
 <% unless tf.kubernetes.config.worker_groups.nil? -%>
 <% tf.kubernetes.config.worker_groups.each do |k, v| -%>
+<% unless v.nil? || v.is_a?(String) && v.empty? -%>
     <%= k %> = <% if v.is_a?(String) %>"<%= v %>"<% else %><%= v %><% end %> 
+<% end -%>
+<% end -%>
+<% if tf.kubernetes.config.worker_groups.key_name.nil? || tf.kubernetes.config.worker_groups.key_name.empty? -%>
+    key_name = aws_key_pair.this.key_name
 <% end -%>
 <% end -%>
   }  
@@ -166,21 +179,29 @@ module "eks-resources" {
   istio_ingressgateway_alb_cert_arn                 = "" #local.aws_acm_cert
   enable_fluentd_gcp_logging                        = false
   #fluentd_gcp_logging_service_account_json_key_path = var.fluentd_gcp_logging_service_account_json_key_path
+  kubeconfig = module.eks-cluster.kubeconfig
 }
 
+output "cluster_endpoint" {
+  value = module.eks-cluster.cluster_endpoint
+}
+
+output "cluster_certificate_authority_data" {
+  value = module.eks-cluster.cluster_certificate_authority_data
+}
 
 output "eks" {
-  value = module.eks-cluster.this
+  value     = module.eks-cluster.this
+  sensitive = true
 }
 
-
-/*
 output "vpc" {
-  value = module.vpc.*
+  value     = module.vpc.*
+  sensitive = true
 }
-*/
 
 output "iam" {
-  value = module.iam.*
+  value     = module.iam.*
+  sensitive = true
 }
 

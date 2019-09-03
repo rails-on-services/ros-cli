@@ -3,6 +3,12 @@ variable "region" {
   type    = string
 }
 
+variable "kubeconfig" {
+  default = ""
+  type    = string
+}
+
+
 variable "perx_helm_server_url" {
   type    = string
   default = "https://chartmuseum.perxtech.io"

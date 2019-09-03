@@ -2,7 +2,6 @@ locals {
   worker_groups = {
     instance_type         = "m5.xlarge"
     name                  = "eks_workers_a"
-    key_name              = "perx-whistler"
     asg_max_size          = 10
     asg_min_size          = 2
     root_volume_size      = 30
