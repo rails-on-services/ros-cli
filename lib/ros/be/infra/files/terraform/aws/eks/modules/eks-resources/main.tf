@@ -18,20 +18,6 @@ resource "null_resource" "helm-repository-incubator" {
 #  }
 #}
 
-resource "null_resource" "helm-repository-perx" {
-  triggers = {
-    always = timestamp()
-  }
-
-  provisioner "local-exec" {
-    environment = {
-      "PASSWORD" = var.perx_helm_server_password
-    }
-
-    command = "helm repo add --username ${var.perx_helm_server_username} --password $${PASSWORD} perx ${var.perx_helm_server_url}"
-  }
-}
-
 resource "null_resource" "helm-repository-istio" {
   triggers = {
     always = timestamp()
@@ -88,42 +74,40 @@ resource "helm_release" "metrics-server" {
 #  values = [file("${path.module}/files/helm-kube-eagle.yaml")]
 #}
 
-resource "kubernetes_secret" "fluentd-gcp-google-service-account" {
-  count = var.enable_fluentd_gcp_logging ? 1 : 0
+#resource "kubernetes_secret" "fluentd-gcp-google-service-account" {
+#  count = var.enable_fluentd_gcp_logging ? 1 : 0
+#
+#  metadata {
+#    name      = "fluentd-gcp-google-service-account"
+#    namespace = "kube-system"
+#  }
+#
+#  data = {
+#    "application_default_credentials.json" = file(var.fluentd_gcp_logging_service_account_json_key_path)
+#  }
+#}
 
-  metadata {
-    name      = "fluentd-gcp-google-service-account"
-    namespace = "kube-system"
-  }
-
-  data = {
-    "application_default_credentials.json" = file(var.fluentd_gcp_logging_service_account_json_key_path)
-  }
-}
-
-data "template_file" "fluentd-gcp-value" {
-  template = file("${path.module}/templates/helm-fluentd-gcp.tpl")
-
-  vars = {
-    cluster_name     = var.cluster_name
-    cluster_location = var.region
-  }
-}
-
-resource "helm_release" "fluentd-gcp" {
-  depends_on = [
-    kubernetes_secret.fluentd-gcp-google-service-account,
-    null_resource.helm-repository-perx,
-  ]
-  count      = var.enable_fluentd_gcp_logging ? 1 : 0
-  repository = "perx"
-  chart      = "fluentd-gcp"
-  name       = "fluentd-gcp"
-  namespace  = "kube-system"
-  wait       = true
-
-  values = [data.template_file.fluentd-gcp-value.rendered]
-}
+#data "template_file" "fluentd-gcp-value" {
+#  template = file("${path.module}/templates/helm-fluentd-gcp.tpl")
+#
+#  vars = {
+#    cluster_name     = var.cluster_name
+#    cluster_location = var.region
+#  }
+#}
+#
+#resource "helm_release" "fluentd-gcp" {
+#  depends_on = [
+#    kubernetes_secret.fluentd-gcp-google-service-account,
+#    ]
+#  count      = var.enable_fluentd_gcp_logging ? 1 : 0
+#  chart      = "./files/fluentd-gcp"
+#  name       = "fluentd-gcp"
+#  namespace  = "kube-system"
+#  wait       = true
+#
+#  values = [data.template_file.fluentd-gcp-value.rendered]
+#}
 
 data "template_file" "aws-alb-ingress-controller-value" {
   template = file(

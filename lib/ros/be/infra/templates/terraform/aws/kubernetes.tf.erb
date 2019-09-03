@@ -101,14 +101,6 @@ module "iam" {
   source = "./aws/eks/modules/iam"
 }
 
-<% if tf.kubernetes.config.worker_groups.key_name.nil? || tf.kubernetes.config.worker_groups.key_name.empty? -%>
-# AWS key pair
-resource "aws_key_pair" "this" {
-  key_name   = local.cluster_name
-  public_key = file("~/.ssh/id_rsa.pub")
-}
-<% end -%>
-
 # EKS cluster
 module "eks-cluster" {
   source                    = "./aws/eks/modules/eks-cluster"
@@ -125,9 +117,6 @@ module "eks-cluster" {
 <% unless v.nil? || v.is_a?(String) && v.empty? -%>
     <%= k %> = <% if v.is_a?(String) %>"<%= v %>"<% else %><%= v %><% end %> 
 <% end -%>
-<% end -%>
-<% if tf.kubernetes.config.worker_groups.key_name.nil? || tf.kubernetes.config.worker_groups.key_name.empty? -%>
-    key_name = aws_key_pair.this.key_name
 <% end -%>
 <% end -%>
   }  

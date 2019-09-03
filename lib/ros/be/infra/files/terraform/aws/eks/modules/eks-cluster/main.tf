@@ -1,12 +1,7 @@
-
-#data "terraform_remote_state" "eks-vpc" {
-#  backend = "local"
-#}
-
 resource "aws_security_group" "eks-cluster" {
-  name        = join("-", [var.cluster_name, "eks-cluster"])  #join("-", ["stack", terraform.workspace, "eks-cluster"])
+  name        = join("-", [var.cluster_name, "eks-cluster"])
   description = "Cluster communication with worker nodes"
-  vpc_id      = var.vpc_id #data.terraform_remote_state.eks-vpc.outputs.vpc.vpc_id #var.vpc_id
+  vpc_id      = var.vpc_id
 
   egress {
     from_port   = 0
@@ -33,8 +28,8 @@ module "eks" {
   source          = "terraform-aws-modules/eks/aws"
   version         = "~> 5.1.0"
   cluster_name    = var.cluster_name
-  subnets         = concat(var.public_subnets, var.private_subnets) #concat(data.terraform_remote_state.eks-vpc.outputs.vpc.public_subnets, data.terraform_remote_state.eks-vpc.outputs.vpc.private_subnets)
-  vpc_id          = var.vpc_id #data.terraform_remote_state.eks-vpc.outputs.vpc.vpc_id #var.vpc_id
+  subnets         = concat(var.public_subnets, var.private_subnets)
+  vpc_id          = var.vpc_id
 
   cluster_create_security_group   = false
   cluster_endpoint_private_access = true
@@ -48,8 +43,8 @@ module "eks" {
   config_output_path = "./"
 
   workers_group_defaults = {
-    subnets                       = var.private_subnets #data.terraform_remote_state.eks-vpc.outputs.vpc.private_subnets
-    additional_security_group_ids = var.default_security_group_id #data.terraform_remote_state.eks-vpc.outputs.vpc.default_security_group_id #module.eks-vpc.default_security_group_id #
+    subnets                       = var.private_subnets
+    additional_security_group_ids = var.default_security_group_id
   }
 
   kubeconfig_aws_authenticator_env_variables = {
@@ -121,7 +116,6 @@ sleep 10; \
 done; \
 rm kube_config.yaml;
 EOS
-
   }
 
   triggers = {
