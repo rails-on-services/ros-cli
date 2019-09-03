@@ -8,3 +8,18 @@ resource "google_compute_subnetwork" "this" {
   ip_cidr_range = var.cidr
   network       = google_compute_network.this.self_link
 }
+
+resource "google_compute_firewall" "this" {
+  name          = "allow-ssh"
+  network       = google_compute_network.this.name
+  source_ranges = ["0.0.0.0/0"]
+  
+  allow {
+    protocol = "icmp"
+  }
+
+  allow {
+    protocol = "tcp"
+    ports    = ["22"]
+  }
+}
