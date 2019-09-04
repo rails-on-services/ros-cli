@@ -68,25 +68,25 @@ resource "kubernetes_secret" "fluentd-gcp-google-service-account" {
   }
 
   data = {
-    "application_default_credentials.json" = file(var.fluentd_gcp_logging_service_account_json_key_path)
+    "application_default_credentials.json" = file("${path.module}/files/gcp_fluentd_logging_credentials.json")
   }
 }
 
-resource "helm_release" "fluentd-gcp" {
-  depends_on = [kubernetes_secret.fluentd-gcp-google-service-account]
-  count      = var.enable_fluentd_gcp_logging && fileexists("${path.module}/files/gcp_fluentd_logging_credentials.json") ? 1 : 0
-  chart      = "./files/fluentd"
-  name       = "fluentd-gcp"
-  namespace  = "kube-system"
-  wait       = true
-
-  values = [templatefile("${path.module}/templates/helm-fluentd-gcp.tpl", {
-        cluster_name     = var.cluster_name,
-        cluster_location = var.region
-      }
-    )
-  ]
-}
+#resource "helm_release" "fluentd-gcp" {
+#  depends_on = [kubernetes_secret.fluentd-gcp-google-service-account]
+#  count      = var.enable_fluentd_gcp_logging && fileexists("${path.module}/files/gcp_fluentd_logging_credentials.json") ? 1 : 0
+#  chart      = "${path.module}/files/fluentd"
+#  name       = "fluentd-gcp"
+#  namespace  = "kube-system"
+#  wait       = true
+#
+#  values = [templatefile("${path.module}/templates/helm-fluentd-gcp.tpl", {
+#        cluster_name     = var.cluster_name,
+#        cluster_location = var.region
+#      }
+#    )
+#  ]
+#}
 
 resource "helm_release" "aws-alb-ingress-controller" {
   depends_on = [null_resource.helm-repository-incubator]
@@ -97,7 +97,9 @@ resource "helm_release" "aws-alb-ingress-controller" {
   wait       = true
 
   values = [templatefile("${path.module}/templates/helm-aws-alb-ingress-controller.tpl", {
-        cluster_name = var.cluster_name
+        cluster_name = var.cluster_name,
+        aws_region   = var.region,
+        vpc_id       = var.vpc_id
       }
     )
   ]
@@ -119,27 +121,6 @@ resource "helm_release" "external-dns" {
   ]
 
 }
-
-# create external services
-#resource "kubernetes_service" "external_services" {
-#  count = length(var.k8s_mapping_external_services)
-#
-#  depends_on = [kubernetes_namespace.extra_namespaces]
-#
-#  metadata {
-#    name = var.k8s_mapping_external_services[count.index]["name"]
-#    namespace = lookup(
-#      var.k8s_mapping_external_services[count.index],
-#      "namespace",
-#      "default",
-#    )
-#  }
-#
-#  spec {
-#    external_name = var.k8s_mapping_external_services[count.index]["externalName"]
-#    type          = "ExternalName"
-#  }
-#}
 
 resource "kubernetes_cluster_role_binding" "this" {
   count = length(var.clusterrolebindings)
@@ -210,10 +191,10 @@ resource "helm_release" "istio" {
 }
 
 resource "helm_release" "istio-alb-ingressgateway" {
-  count      = var.enable_istio && var.istio_ingressgateway_alb_cert_arn != "" ? 1 : 0
+  count      = var.enable_istio ? 1 : 0
   depends_on = [helm_release.istio]
   name       = "istio-alb-ingressgateway"
-  chart      = "./files/istio-alb-ingressgateway"
+  chart      = "${path.module}/files/istio-alb-ingressgateway"
   namespace  = "istio-system"
   wait       = true
 

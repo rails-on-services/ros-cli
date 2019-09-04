@@ -3,6 +3,11 @@ variable "region" {
   type    = string
 }
 
+variable "vpc_id" {
+  default = ""
+  type    = string
+}
+
 variable "kubeconfig" {
   default = ""
   type    = string
