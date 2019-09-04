@@ -36,22 +36,12 @@ resource "kubernetes_namespace" "extra_namespaces" {
   }
 }
 
-#data "template_file" "cluster-autoscaler-value" {
-#  template = file("${path.module}/templates/helm-cluster-autoscaler.tpl")
-#
-#  vars = {
-#    aws_region   = var.region
-#    cluster_name = var.cluster_name
-#  }
-#}
-
 resource "helm_release" "cluster-autoscaler" {
   name      = "cluster-autoscaler"
   chart     = "stable/cluster-autoscaler"
   namespace = "kube-system"
   wait      = true
 
-  #values = [data.template_file.cluster-autoscaler-value.rendered]
   values = [templatefile("${path.module}/templates/helm-cluster-autoscaler.tpl", {
         aws_region   = var.region,
         cluster_name = var.cluster_name
@@ -69,17 +59,6 @@ resource "helm_release" "metrics-server" {
   values = [file("${path.module}/files/helm-metrics-server.yaml")]
 }
 
-#resource "helm_release" "kube-eagle" {
-#  depends_on = [null_resource.helm-repository-kube-eagle]
-#  repository = "kube-eagle"
-#  chart      = "kube-eagle"
-#  name       = "kube-eagle"
-#  namespace  = "monitor"
-#  wait       = true
-#
-#  values = [file("${path.module}/files/helm-kube-eagle.yaml")]
-#}
-
 resource "kubernetes_secret" "fluentd-gcp-google-service-account" {
   count = var.enable_fluentd_gcp_logging && fileexists("${path.module}/files/gcp_fluentd_logging_credentials.json") ? 1 : 0
 
@@ -93,15 +72,6 @@ resource "kubernetes_secret" "fluentd-gcp-google-service-account" {
   }
 }
 
-#data "template_file" "fluentd-gcp-value" {
-#  template = file("${path.module}/templates/helm-fluentd-gcp.tpl")
-#
-#  vars = {
-#    cluster_name     = var.cluster_name
-#    cluster_location = var.region
-#  }
-#}
-
 resource "helm_release" "fluentd-gcp" {
   depends_on = [kubernetes_secret.fluentd-gcp-google-service-account]
   count      = var.enable_fluentd_gcp_logging && fileexists("${path.module}/files/gcp_fluentd_logging_credentials.json") ? 1 : 0
@@ -110,7 +80,6 @@ resource "helm_release" "fluentd-gcp" {
   namespace  = "kube-system"
   wait       = true
 
-  #values = [data.template_file.fluentd-gcp-value.rendered]
   values = [templatefile("${path.module}/templates/helm-fluentd-gcp.tpl", {
         cluster_name     = var.cluster_name,
         cluster_location = var.region
@@ -118,16 +87,6 @@ resource "helm_release" "fluentd-gcp" {
     )
   ]
 }
-
-#data "template_file" "aws-alb-ingress-controller-value" {
-#  template = file(
-#    "${path.module}/templates/helm-aws-alb-ingress-controller.tpl",
-#  )
-#
-#  vars = {
-#    cluster_name = var.cluster_name
-#  }
-#}
 
 resource "helm_release" "aws-alb-ingress-controller" {
   depends_on = [null_resource.helm-repository-incubator]
@@ -137,7 +96,6 @@ resource "helm_release" "aws-alb-ingress-controller" {
   namespace  = "kube-system"
   wait       = true
 
-  #values = [data.template_file.aws-alb-ingress-controller-value.rendered]
   values = [templatefile("${path.module}/templates/helm-aws-alb-ingress-controller.tpl", {
         cluster_name = var.cluster_name
       }
@@ -145,24 +103,12 @@ resource "helm_release" "aws-alb-ingress-controller" {
   ]
 }
 
-#data "template_file" "external-dns-value" {
-#  template = file("${path.module}/templates/helm-external-dns.tpl")
-#
-#  vars = {
-#    aws_region    = var.region
-#    zoneType      = var.external_dns_route53_zone_type
-#    domainFilters = jsonencode(var.external_dns_domainFilters)
-#    zoneIdFilters = jsonencode(var.external_dns_zoneIdFilters)
-#  }
-#}
-
 resource "helm_release" "external-dns" {
   count     = var.enable_external_dns ? 1 : 0
   name      = "external-dns"
   chart     = "stable/external-dns"
   namespace = "kube-system"
   wait      = true
-  #values    = [data.template_file.external-dns-value.rendered]
   values = [templatefile("${path.module}/templates/helm-external-dns.tpl", {
         aws_region    = var.region,
         zoneType      = var.external_dns_route53_zone_type,
