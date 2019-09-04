@@ -1,13 +1,13 @@
 # Providers
 provider "aws" {
-  region  = "ap-southeast-1"
+  region  = "<%= tf.kubernetes.config.region.nil? ? 'ap-southeast-1' : tf.kubernetes.config.region %>"
   profile = local.aws_profile
 }
 
 provider "kubernetes" {
   version                = "~> 1.9"
   host                   = module.eks-cluster.cluster_endpoint #data.aws_eks_cluster.cluster.endpoint
-  cluster_ca_certificate = base64decode(module.eks-cluster.cluster_certificate_authority_data) #base64decode(data.aws_eks_cluster.cluster.certificate_authority[0].data)
+  cluster_ca_certificate = base64decode(module.eks-cluster.cluster_certificate_authority_data)
   token                  = data.aws_eks_cluster_auth.cluster-auth.token
   load_config_file       = false
 }
@@ -21,7 +21,7 @@ provider "helm" {
 
   kubernetes {
     host                   = module.eks-cluster.cluster_endpoint #data.aws_eks_cluster.cluster.endpoint
-    cluster_ca_certificate = base64decode(module.eks-cluster.cluster_certificate_authority_data) #base64decode(data.aws_eks_cluster.cluster.certificate_authority[0].data)
+    cluster_ca_certificate = base64decode(module.eks-cluster.cluster_certificate_authority_data)
     token                  = data.aws_eks_cluster_auth.cluster-auth.token
   }
 }
@@ -52,7 +52,7 @@ locals {
   vpc_name                            = "<%= tf.kubernetes.config.name.nil? ? 'terraform.workspace' : tf.kubernetes.config.name %>"
   cluster_name                        = "<%= tf.kubernetes.config.name.nil? ? 'terraform.workspace' : tf.kubernetes.config.name %>"
   accelerator_name                    = "<%= tf.kubernetes.config.name.nil? ? 'terraform.workspace' : tf.kubernetes.config.name %>"
-  environment                         = "<%= tf.kubernetes.config.environment.nil? ? 'terraform.workspace' : tf.kubernetes.config.environment %>
+  environment                         = "<%= tf.kubernetes.config.environment %>"
 }
 
 # VPC
@@ -98,7 +98,7 @@ module "vpc" {
 
 # IAM
 module "iam" {
-  source = "./aws/modules/iam"
+  source = "./aws/iam"
 }
 
 # EKS cluster
@@ -132,7 +132,7 @@ module "eks-cluster" {
 <% unless tf.globalaccelerator.nil? || tf.globalaccelerator.config.nil? || ! tf.globalaccelerator.config.enabled -%>
 # Global accelerator
 module "globalaccelerator" {
-  source                      = "./aws/eks/modules/globalaccelerator"
+  source                      = "./aws/globalaccelerator"
   name                        = local.accelerator_name
   route53_zone_id             = module.route53.this.zone_id
   global_accelerator_hostname = "<%= tf.globalaccelerator.config.hostname.nil? || tf.globalaccelerator.config.hostname.empty? ? '' : tf.globalaccelerator.config.hostname %>"
@@ -176,8 +176,8 @@ module "eks-resources" {
   perx_helm_server_username  = "<%= tf.kubernetes.config.cluster_resources.perx_helm_server_username %>"
   perx_helm_server_password  = "<%= tf.kubernetes.config.cluster_resources.perx_helm_server_password %>"
   enable_external_dns        = <%= tf.kubernetes.config.cluster_resources.enable_external_dns.nil? ? false : tf.kubernetes.config.cluster_resources.enable_external_dns %>
-  external_dns_domainFilters = [module.acm.this.domain_name] #<%= tf.kubernetes.config.cluster_resources.external_dns_domainFilters %>
-  external_dns_zoneIdFilters = [module.route53.this.zone_id] #<%= tf.kubernetes.config.cluster_resources.external_dns_zoneIdFilters %>
+  external_dns_domainFilters = [module.acm.this.domain_name]
+  external_dns_zoneIdFilters = [module.route53.this.zone_id]
   istio_version              = "<%= tf.kubernetes.config.cluster_resources.istio_version %>"
 
   istio_ingressgateway_alb_cert_arn = module.acm.this.arn

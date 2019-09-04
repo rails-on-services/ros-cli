@@ -5,7 +5,7 @@ variable "tags" {
 
 variable "aws_profile" {
   type = string
-  default = ""
+  default = "default"
   description = "Valid AWS Profile in local config that has access to the cluster. This to avoid Unauthorized error when local-exec runs"
 }
 
