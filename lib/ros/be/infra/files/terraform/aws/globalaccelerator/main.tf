@@ -9,7 +9,6 @@ resource "aws_globalaccelerator_accelerator" "this" {
 }
 
 resource "aws_route53_record" "globalaccelerator" {
-  count   = var.route53_zone_id == "" ? 0 : 1
   zone_id = var.route53_zone_id
   name    = var.global_accelerator_hostname
   type    = "A"
