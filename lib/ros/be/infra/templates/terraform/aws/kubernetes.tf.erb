@@ -49,10 +49,10 @@ locals {
   vpc_create_database_subnet_group    = <%= tf.vpc.config.create_database_subnet_group.nil? ? false : true %>
   vpc_create_redshift_subnet_group    = <%= tf.vpc.config.create_redshift_subnet_group.nil? ? false : true %>
   vpc_create_elasticache_subnet_group = <%= tf.vpc.config.create_elasticache_subnet_group.nil? ? false : true %>
-  vpc_name                            = join("-", ["stack", "<%= tf.kubernetes.config.name.nil? ? 'terraform.workspace' : tf.kubernetes.config.name %>"])
-  cluster_name                        = join("-", ["stack", "<%= tf.kubernetes.config.name.nil? ? 'terraform.workspace' : tf.kubernetes.config.name %>"])
-  accelerator_name                    = join("-", ["stack", "<%= tf.kubernetes.config.name.nil? ? 'terraform.workspace' : tf.kubernetes.config.name %>"])
-  environment                         = "<%= tf.kubernetes.config.name.nil? ? 'terraform.workspace' : tf.kubernetes.config.name %>"
+  vpc_name                            = "<%= tf.kubernetes.config.name.nil? ? 'terraform.workspace' : tf.kubernetes.config.name %>"
+  cluster_name                        = "<%= tf.kubernetes.config.name.nil? ? 'terraform.workspace' : tf.kubernetes.config.name %>"
+  accelerator_name                    = "<%= tf.kubernetes.config.name.nil? ? 'terraform.workspace' : tf.kubernetes.config.name %>"
+  environment                         = "<%= tf.kubernetes.config.environment.nil? ? 'terraform.workspace' : tf.kubernetes.config.environment %>
 }
 
 # VPC
@@ -98,7 +98,7 @@ module "vpc" {
 
 # IAM
 module "iam" {
-  source = "./aws/eks/modules/iam"
+  source = "./aws/modules/iam"
 }
 
 # EKS cluster
@@ -134,7 +134,7 @@ module "eks-cluster" {
 module "globalaccelerator" {
   source                      = "./aws/eks/modules/globalaccelerator"
   name                        = local.accelerator_name
-  route53_zone_id             = module.route53.this.zone_id #"<%= tf.globalaccelerator.config.route53_zone_id.nil? || tf.globalaccelerator.config.route53_zone_id.empty? ? '' : tf.globalaccelerator.config.route53_zone_id %>"
+  route53_zone_id             = module.route53.this.zone_id
   global_accelerator_hostname = "<%= tf.globalaccelerator.config.hostname.nil? || tf.globalaccelerator.config.hostname.empty? ? '' : tf.globalaccelerator.config.hostname %>"
 }
 
@@ -147,7 +147,7 @@ module "route53" {
   source                         = "./aws/route53"
   root_domain                    = "<%= tf.dns.config.root_domain %>"
   sub_domain                     = "<%= tf.dns.config.sub_domain %>"
-  root_domain_managed_in_route53 = <%= tf.dns.root_domain_managed_in_route53.nil? || ! tf.dns.root_domain_managed_in_route53.enabled? ? false : true%>
+  root_domain_managed_in_route53 = <%= tf.dns.root_domain_managed_in_route53.nil? || ! tf.dns.root_domain_managed_in_route53 ? false : true%>
 }
 
 module "acm" {
@@ -156,6 +156,7 @@ module "acm" {
   route53_domain_name       = substr(module.route53.this.name, 0, length(module.route53.this.name)-1)
   route53_dns_record_count  = 1
   subject_alternative_names = ["<%= tf.cert.config.subject_alternative_names.join(", ") %>"]
+  validate_certificate      = <%= tf.dns.root_domain_managed_in_route53 ? true : false %>
 }
 
 # EKS resources
@@ -174,7 +175,7 @@ module "eks-resources" {
   clusterrolebindings        = module.iam.kubernetes_clusterrolebindings
   perx_helm_server_username  = "<%= tf.kubernetes.config.cluster_resources.perx_helm_server_username %>"
   perx_helm_server_password  = "<%= tf.kubernetes.config.cluster_resources.perx_helm_server_password %>"
-  enable_external_dns        = <%= tf.kubernetes.config.cluster_resources.enable_external_dns.nil? ? false : tf.kubernetes.config.cluster_resources.enable_external_dns%>
+  enable_external_dns        = <%= tf.kubernetes.config.cluster_resources.enable_external_dns.nil? ? false : tf.kubernetes.config.cluster_resources.enable_external_dns %>
   external_dns_domainFilters = [module.acm.this.domain_name] #<%= tf.kubernetes.config.cluster_resources.external_dns_domainFilters %>
   external_dns_zoneIdFilters = [module.route53.this.zone_id] #<%= tf.kubernetes.config.cluster_resources.external_dns_zoneIdFilters %>
   istio_version              = "<%= tf.kubernetes.config.cluster_resources.istio_version %>"
@@ -182,6 +183,7 @@ module "eks-resources" {
   istio_ingressgateway_alb_cert_arn = module.acm.this.arn
   enable_fluentd_gcp_logging        = true
   kubeconfig                        = module.eks-cluster.kubeconfig
+  vpc_id                            = module.vpc.vpc_id
 }
 
 output "cluster_endpoint" {
