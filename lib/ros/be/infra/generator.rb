@@ -45,7 +45,7 @@ module Ros
           end
           # Copy over gcp creds for cluster level fluentd logging collection
           if infra.cluster_type.eql?('kubernetes') and File.exists?("#{Ros.environments_dir}/gcp_fluentd_logging_credentials.json")
-            FileUtils.cp("#{Ros.environments_dir}/gcp_fluentd_logging_credentials.json", "#{infra.deploy_path}/aws/aws/eks/modules/eks-resources/files")
+            FileUtils.cp("#{Ros.environments_dir}/gcp_fluentd_logging_credentials.json", "#{infra.deploy_path}/aws/eks/modules/eks-resources/files")
           end
         end
 
@@ -65,7 +65,9 @@ module Ros
             dns: 'route53',
             instance: 'ec2',
             kubernetes: 'eks',
-            vpc: 'vpc'
+            vpc: 'vpc',
+            iam: 'iam',
+            globalaccelerator: 'globalaccelerator'
           }[type]
         end
 
