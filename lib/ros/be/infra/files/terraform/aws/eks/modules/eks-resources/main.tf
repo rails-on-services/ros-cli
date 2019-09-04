@@ -36,14 +36,14 @@ resource "kubernetes_namespace" "extra_namespaces" {
   }
 }
 
-data "template_file" "cluster-autoscaler-value" {
-  template = file("${path.module}/templates/helm-cluster-autoscaler.tpl")
-
-  vars = {
-    aws_region   = var.region
-    cluster_name = var.cluster_name
-  }
-}
+#data "template_file" "cluster-autoscaler-value" {
+#  template = file("${path.module}/templates/helm-cluster-autoscaler.tpl")
+#
+#  vars = {
+#    aws_region   = var.region
+#    cluster_name = var.cluster_name
+#  }
+#}
 
 resource "helm_release" "cluster-autoscaler" {
   name      = "cluster-autoscaler"
@@ -51,7 +51,13 @@ resource "helm_release" "cluster-autoscaler" {
   namespace = "kube-system"
   wait      = true
 
-  values = [data.template_file.cluster-autoscaler-value.rendered]
+  #values = [data.template_file.cluster-autoscaler-value.rendered]
+  values = [templatefile("${path.module}/templates/helm-cluster-autoscaler.tpl", {
+        aws_region   = var.region,
+        cluster_name = var.cluster_name
+      }
+    )
+  ]
 }
 
 resource "helm_release" "metrics-server" {
@@ -74,18 +80,18 @@ resource "helm_release" "metrics-server" {
 #  values = [file("${path.module}/files/helm-kube-eagle.yaml")]
 #}
 
-#resource "kubernetes_secret" "fluentd-gcp-google-service-account" {
-#  count = var.enable_fluentd_gcp_logging ? 1 : 0
-#
-#  metadata {
-#    name      = "fluentd-gcp-google-service-account"
-#    namespace = "kube-system"
-#  }
-#
-#  data = {
-#    "application_default_credentials.json" = file(var.fluentd_gcp_logging_service_account_json_key_path)
-#  }
-#}
+resource "kubernetes_secret" "fluentd-gcp-google-service-account" {
+  count = var.enable_fluentd_gcp_logging && fileexists("${path.module}/files/gcp_fluentd_logging_credentials.json") ? 1 : 0
+
+  metadata {
+    name      = "fluentd-gcp-google-service-account"
+    namespace = "kube-system"
+  }
+
+  data = {
+    "application_default_credentials.json" = file(var.fluentd_gcp_logging_service_account_json_key_path)
+  }
+}
 
 #data "template_file" "fluentd-gcp-value" {
 #  template = file("${path.module}/templates/helm-fluentd-gcp.tpl")
@@ -95,29 +101,33 @@ resource "helm_release" "metrics-server" {
 #    cluster_location = var.region
 #  }
 #}
-#
-#resource "helm_release" "fluentd-gcp" {
-#  depends_on = [
-#    kubernetes_secret.fluentd-gcp-google-service-account,
-#    ]
-#  count      = var.enable_fluentd_gcp_logging ? 1 : 0
-#  chart      = "./files/fluentd-gcp"
-#  name       = "fluentd-gcp"
-#  namespace  = "kube-system"
-#  wait       = true
-#
-#  values = [data.template_file.fluentd-gcp-value.rendered]
-#}
 
-data "template_file" "aws-alb-ingress-controller-value" {
-  template = file(
-    "${path.module}/templates/helm-aws-alb-ingress-controller.tpl",
-  )
+resource "helm_release" "fluentd-gcp" {
+  depends_on = [kubernetes_secret.fluentd-gcp-google-service-account]
+  count      = var.enable_fluentd_gcp_logging && fileexists("${path.module}/files/gcp_fluentd_logging_credentials.json") ? 1 : 0
+  chart      = "./files/fluentd"
+  name       = "fluentd-gcp"
+  namespace  = "kube-system"
+  wait       = true
 
-  vars = {
-    cluster_name = var.cluster_name
-  }
+  #values = [data.template_file.fluentd-gcp-value.rendered]
+  values = [templatefile("${path.module}/templates/helm-fluentd-gcp.tpl", {
+        cluster_name     = var.cluster_name,
+        cluster_location = var.region
+      }
+    )
+  ]
 }
+
+#data "template_file" "aws-alb-ingress-controller-value" {
+#  template = file(
+#    "${path.module}/templates/helm-aws-alb-ingress-controller.tpl",
+#  )
+#
+#  vars = {
+#    cluster_name = var.cluster_name
+#  }
+#}
 
 resource "helm_release" "aws-alb-ingress-controller" {
   depends_on = [null_resource.helm-repository-incubator]
@@ -127,28 +137,42 @@ resource "helm_release" "aws-alb-ingress-controller" {
   namespace  = "kube-system"
   wait       = true
 
-  values = [data.template_file.aws-alb-ingress-controller-value.rendered]
+  #values = [data.template_file.aws-alb-ingress-controller-value.rendered]
+  values = [templatefile("${path.module}/templates/helm-aws-alb-ingress-controller.tpl", {
+        cluster_name = var.cluster_name
+      }
+    )
+  ]
 }
 
-data "template_file" "external-dns-value" {
-  template = file("${path.module}/templates/helm-external-dns.tpl")
-
-  vars = {
-    aws_region    = var.region
-    zoneType      = var.external_dns_route53_zone_type
-    domainFilters = jsonencode(var.external_dns_domainFilters)
-    zoneIdFilters = jsonencode(var.external_dns_zoneIdFilters)
-  }
-}
-
-#resource "helm_release" "external-dns" {
-#  count     = var.enable_external_dns ? 1 : 0
-#  name      = "external-dns"
-#  chart     = "stable/external-dns"
-#  namespace = "kube-system"
-#  wait      = true
-#  values    = [data.template_file.external-dns-value.rendered]
+#data "template_file" "external-dns-value" {
+#  template = file("${path.module}/templates/helm-external-dns.tpl")
+#
+#  vars = {
+#    aws_region    = var.region
+#    zoneType      = var.external_dns_route53_zone_type
+#    domainFilters = jsonencode(var.external_dns_domainFilters)
+#    zoneIdFilters = jsonencode(var.external_dns_zoneIdFilters)
+#  }
 #}
+
+resource "helm_release" "external-dns" {
+  count     = var.enable_external_dns ? 1 : 0
+  name      = "external-dns"
+  chart     = "stable/external-dns"
+  namespace = "kube-system"
+  wait      = true
+  #values    = [data.template_file.external-dns-value.rendered]
+  values = [templatefile("${path.module}/templates/helm-external-dns.tpl", {
+        aws_region    = var.region,
+        zoneType      = var.external_dns_route53_zone_type,
+        domainFilters = jsonencode(var.external_dns_domainFilters),
+        zoneIdFilters = jsonencode(var.external_dns_zoneIdFilters)
+      }
+    )
+  ]
+
+}
 
 # create external services
 #resource "kubernetes_service" "external_services" {
@@ -239,23 +263,23 @@ resource "helm_release" "istio" {
   values     = [file("${path.module}/files/helm-istio.yaml")]
 }
 
-#resource "helm_release" "istio-alb-ingressgateway" {
-#  count      = var.enable_istio && var.istio_ingressgateway_alb_cert_arn != "" ? 1 : 0
-#  depends_on = [helm_release.istio]
-#  name       = "istio-alb-ingressgateway"
-#  chart      = "./files/istio-alb-ingressgateway"
-#  namespace  = "istio-system"
-#  wait       = true
-#
-#  set {
-#    name  = "ingress.annotations.alb\\.ingress\\.kubernetes\\.io/certificate-arn"
-#    value = var.istio_ingressgateway_alb_cert_arn
-#  }
-#
-#  lifecycle {
-#    create_before_destroy = false
-#  }
-#}
+resource "helm_release" "istio-alb-ingressgateway" {
+  count      = var.enable_istio && var.istio_ingressgateway_alb_cert_arn != "" ? 1 : 0
+  depends_on = [helm_release.istio]
+  name       = "istio-alb-ingressgateway"
+  chart      = "./files/istio-alb-ingressgateway"
+  namespace  = "istio-system"
+  wait       = true
+
+  set {
+    name  = "ingress.annotations.alb\\.ingress\\.kubernetes\\.io/certificate-arn"
+    value = var.istio_ingressgateway_alb_cert_arn
+  }
+
+  lifecycle {
+    create_before_destroy = false
+  }
+}
 
 # This is to create an extra kubernetes clusterrole for developers
 resource "kubernetes_cluster_role" "developer" {

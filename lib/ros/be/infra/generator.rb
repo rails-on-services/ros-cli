@@ -36,12 +36,16 @@ module Ros
             module_name = send(provider, component)
             module_path = "../files/terraform/#{provider}/#{module_name}"
             # NOTE: Uncomment next line to pause execution and inspect variable values, test code, etc
-            #binding.pry
+            # binding.pry
             directory(module_path, "#{infra.deploy_path}/#{provider}/#{module_name}")
           end
           # Render each provider's main.tf
           providers.each do |provider|
             template("terraform/#{provider}/#{infra.cluster_type}.tf.erb", "#{infra.deploy_path}/#{provider}-main.tf")
+          end
+          # Copy over gcp creds for cluster level fluentd logging collection
+          if infra.cluster_type.eql?('kubernetes') and File.exists?("#{Ros.environments_dir}/gcp_fluentd_logging_credentials.json")
+            FileUtils.cp("#{Ros.environments_dir}/gcp_fluentd_logging_credentials.json", "#{infra.deploy_path}/aws/aws/eks/modules/eks-resources/files")
           end
         end
 
