@@ -7,6 +7,9 @@ module Ros
         include CliBase
         attr_accessor :services
 
+        def clean_kubernetes_name(name)
+          name.gsub(/[^a-zA-Z-]/, '-')
+        end
         def initialize(options = {})
           @options = options
           @errors = Ros::Errors.new
@@ -156,7 +159,7 @@ module Ros
                 skaffold("#{run_cmd} -f #{File.basename(service_file)}#{profile_cmd}",
                          { 'REPLICA_COUNT' => replica_count })
                 errors.add("skaffold_#{run_cmd}", stderr) if exit_code.positive?
-                kubectl("scale deploy #{service} --replicas=#{replica_count}")
+                kubectl("scale deploy #{clean_kubernetes_name(service)} --replicas=#{replica_count}")
                 errors.add("scale_#{service}", stderr) if exit_code.positive?
                 build_count += 1
               end
@@ -201,7 +204,7 @@ module Ros
           generate_config if stale_config
           update_platform_env
           services.each do |service|
-            kubectl("rollout restart deploy #{service}")
+            kubectl("rollout restart deploy #{clean_kubernetes_name(service)}")
           end
           # down(services)
           # up(services)
@@ -211,7 +214,7 @@ module Ros
         def stop(services)
           generate_config if stale_config
           services.each do |service|
-            kubectl("scale deploy #{service} --replicas=0")
+            kubectl("scale deploy #{clean_kubernetes_name(service)} --replicas=0")
             pods(name: service).each do |pod|
               kubectl("delete pod #{pod}")
             end
