@@ -29,3 +29,8 @@ variable "route53_dns_record_count" {
   default     = 1
   description = "Number of cert_validation records to be created"
 }
+
+variable "validate_certificate" {
+  default     = true
+  description = "Whether try to validate cert or leave it in pending state. In case if root zone managed outside Route53 and has to be delegated prior to cert validation"
+}
