@@ -43,9 +43,9 @@ resource "helm_release" "cluster-autoscaler" {
   wait      = true
 
   values = [templatefile("${path.module}/templates/helm-cluster-autoscaler.tpl", {
-        aws_region   = var.region,
-        cluster_name = var.cluster_name
-      }
+    aws_region   = var.region,
+    cluster_name = var.cluster_name
+    }
     )
   ]
 }
@@ -72,21 +72,21 @@ resource "kubernetes_secret" "fluentd-gcp-google-service-account" {
   }
 }
 
-#resource "helm_release" "fluentd-gcp" {
-#  depends_on = [kubernetes_secret.fluentd-gcp-google-service-account]
-#  count      = var.enable_fluentd_gcp_logging && fileexists("${path.module}/files/gcp_fluentd_logging_credentials.json") ? 1 : 0
-#  chart      = "${path.module}/files/fluentd"
-#  name       = "fluentd-gcp"
-#  namespace  = "kube-system"
-#  wait       = true
-#
-#  values = [templatefile("${path.module}/templates/helm-fluentd-gcp.tpl", {
-#        cluster_name     = var.cluster_name,
-#        cluster_location = var.region
-#      }
-#    )
-#  ]
-#}
+resource "helm_release" "fluentd-gcp" {
+  depends_on = [kubernetes_secret.fluentd-gcp-google-service-account]
+  count      = var.enable_fluentd_gcp_logging && fileexists("${path.module}/files/gcp_fluentd_logging_credentials.json") ? 1 : 0
+  chart      = "${path.module}/files/fluentd"
+  name       = "fluentd-gcp"
+  namespace  = "kube-system"
+  wait       = true
+
+  values = [templatefile("${path.module}/templates/helm-fluentd-gcp.tpl", {
+    cluster_name     = var.cluster_name,
+    cluster_location = var.region
+    }
+    )
+  ]
+}
 
 resource "helm_release" "aws-alb-ingress-controller" {
   depends_on = [null_resource.helm-repository-incubator]
@@ -97,10 +97,10 @@ resource "helm_release" "aws-alb-ingress-controller" {
   wait       = true
 
   values = [templatefile("${path.module}/templates/helm-aws-alb-ingress-controller.tpl", {
-        cluster_name = var.cluster_name,
-        aws_region   = var.region,
-        vpc_id       = var.vpc_id
-      }
+    cluster_name = var.cluster_name,
+    aws_region   = var.region,
+    vpc_id       = var.vpc_id
+    }
     )
   ]
 }
@@ -112,11 +112,11 @@ resource "helm_release" "external-dns" {
   namespace = "kube-system"
   wait      = true
   values = [templatefile("${path.module}/templates/helm-external-dns.tpl", {
-        aws_region    = var.region,
-        zoneType      = var.external_dns_route53_zone_type,
-        domainFilters = jsonencode(var.external_dns_domainFilters),
-        zoneIdFilters = jsonencode(var.external_dns_zoneIdFilters)
-      }
+    aws_region    = var.region,
+    zoneType      = var.external_dns_route53_zone_type,
+    domainFilters = jsonencode(var.external_dns_domainFilters),
+    zoneIdFilters = jsonencode(var.external_dns_zoneIdFilters)
+    }
     )
   ]
 
@@ -168,7 +168,7 @@ echo "crds=$CRDS"; \
 done; 
 EOS
   }
-  
+
   depends_on = [
     helm_release.istio-init,
   ]

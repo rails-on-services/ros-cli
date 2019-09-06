@@ -1,8 +1,8 @@
 data "aws_caller_identity" "current" {}
 
 resource "aws_iam_role" "eks-roles" {
-  count = "${length(local.eks_roles)}"
-  name  = "${element(local.eks_roles, count.index)}"
+  count = length(local.eks_roles)
+  name  = element(local.eks_roles, count.index)
 
   description = "Managed by Terraform"
 
@@ -24,16 +24,16 @@ EOF
 }
 
 resource "aws_iam_group" "eks-groups" {
-  count = "${length(local.eks_groups)}"
-  name  = "${element(local.eks_groups, count.index)}"
+  count = length(local.eks_groups)
+  name  = element(local.eks_groups, count.index)
 }
 
 resource "aws_iam_group_policy" "eks-group-policy" {
-  count = "${length(local.eks_groups)}"
+  count = length(local.eks_groups)
 
   name = "allow_assume_role_${local.eks_roles[count.index]}"
 
-  group = "${element(aws_iam_group.eks-groups.*.id, count.index)}"
+  group = element(aws_iam_group.eks-groups.*.id, count.index)
 
   policy = <<EOF
 {

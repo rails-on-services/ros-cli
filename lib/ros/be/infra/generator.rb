@@ -33,11 +33,13 @@ module Ros
             next if %i(kubernetes instance).include?(component) and infra.cluster_type != component.to_s
             provider = config.config.provider
             providers.add(provider)
-            module_name = send(provider, component)
-            module_path = "../files/terraform/#{provider}/#{module_name}"
-            # NOTE: Uncomment next line to pause execution and inspect variable values, test code, etc
-            # binding.pry
-            directory(module_path, "#{infra.deploy_path}/#{provider}/#{module_name}")
+            module_names = send(provider, component)
+            module_names.each do |module_name|
+              module_path = "../files/terraform/#{provider}/#{module_name}"
+              # NOTE: Uncomment next line to pause execution and inspect variable values, test code, etc
+              # binding.pry
+              directory(module_path, "#{infra.deploy_path}/#{provider}/#{module_name}")
+            end
           end
           # Render each provider's main.tf
           providers.each do |provider|
@@ -45,8 +47,9 @@ module Ros
           end
           # Copy over gcp creds for cluster level fluentd logging collection
           if infra.cluster_type.eql?('kubernetes') and File.exists?("#{Ros.environments_dir}/gcp_fluentd_logging_credentials.json")
-            FileUtils.cp("#{Ros.environments_dir}/gcp_fluentd_logging_credentials.json", "#{infra.deploy_path}/aws/eks/modules/eks-resources/files")
+            FileUtils.cp("#{Ros.environments_dir}/gcp_fluentd_logging_credentials.json", "#{infra.deploy_path}/aws/eks-resources/files")
           end
+          create_file("#{infra.deploy_path}/terraform.tfvars.json", "#{JSON.pretty_generate(tf_vars)}")
         end
 
         def execute
@@ -61,13 +64,13 @@ module Ros
         private
         def aws(type)
           {
-            cert: 'acm',
-            dns: 'route53',
-            instance: 'ec2',
-            kubernetes: 'eks',
-            vpc: 'vpc',
-            iam: 'iam',
-            globalaccelerator: 'globalaccelerator'
+            cert: ['acm'],
+            dns: ['route53'],
+            instance: ['ec2'],
+            kubernetes: ['eks-cluster', 'eks-resources'],
+            vpc: ['vpc'],
+            iam: ['eks-iam'],
+            globalaccelerator: ['globalaccelerator']
           }[type]
         end
 
@@ -98,7 +101,18 @@ module Ros
           }
         end
 
+        def tf_vars
+            vars = {
+              tags: infra.config.cluster.tags, 
+            }
+            if infra.cluster_type.eql?('kubernetes')
+              vars["eks_worker_groups"] = infra.components.kubernetes.config.worker_groups
+            end
+            return vars
+        end
+
         def tf; infra.components end
+        def cluster_config;  infra.config.cluster end
         # def infra; Ros::Be::Infra::Model end
       end
     end

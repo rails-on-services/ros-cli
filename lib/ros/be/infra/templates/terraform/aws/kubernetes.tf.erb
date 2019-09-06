@@ -42,6 +42,14 @@ provider "template" {
   version = "~> 2.1"
 }
 
+variable "tags" {
+  default = {}
+}
+
+variable "eks_worker_groups" {
+  default = []
+}
+
 # Locals
 locals {
   aws_profile                         = "<%= tf.kubernetes.config.aws_profile.nil? ? "default" : tf.kubernetes.config.aws_profile %>"
@@ -49,15 +57,17 @@ locals {
   vpc_create_database_subnet_group    = <%= tf.vpc.config.create_database_subnet_group.nil? ? false : true %>
   vpc_create_redshift_subnet_group    = <%= tf.vpc.config.create_redshift_subnet_group.nil? ? false : true %>
   vpc_create_elasticache_subnet_group = <%= tf.vpc.config.create_elasticache_subnet_group.nil? ? false : true %>
-  vpc_name                            = "<%= tf.kubernetes.config.name.nil? ? 'terraform.workspace' : tf.kubernetes.config.name %>"
-  cluster_name                        = "<%= tf.kubernetes.config.name.nil? ? 'terraform.workspace' : tf.kubernetes.config.name %>"
-  accelerator_name                    = "<%= tf.kubernetes.config.name.nil? ? 'terraform.workspace' : tf.kubernetes.config.name %>"
-  environment                         = "<%= tf.kubernetes.config.environment %>"
+  cluster_name                        = "<%= tf.kubernetes.config.name.nil? ? cluster_config.name : tf.kubernetes.config.name %>"
+  vpc_name                            = "<%= tf.vpc.config.name.nil? ? cluster_config.name : tf.vpc.config.name %>"
+  accelerator_name                    = "<%= tf.globalaccelerator.config.name.nil? ? cluster_config.name : tf.globalaccelerator.config.name %>"
+  iam_name                            = "<%= tf.iam.config.name.nil? ? cluster_config.name : tf.iam.config.name %>"
+  tags                                = var.tags
 }
 
 # VPC
 data "aws_availability_zones" "available" {}
 
+# TODO refactor module aws/vpc so that it can be used by both of k8s tf and instance tf
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "~> 2.9.0"
@@ -77,9 +87,7 @@ module "vpc" {
   public_subnets      = [for i in range(1, 4) : cidrsubnet(local.vpc_cidr, 8, i)] 
   private_subnets     = [for i in range(11, 14) : cidrsubnet(local.vpc_cidr, 8, i)]
 
-  tags = {
-    "Environment" = local.environment
-  }
+  tags = var.tags
 
   vpc_tags = {
     "kubernetes.io/cluster/${local.cluster_name}" = "shared"
@@ -98,12 +106,13 @@ module "vpc" {
 
 # IAM
 module "iam" {
-  source = "./aws/iam"
+  source = "./aws/eks-iam"
+  name   = local.iam_name
 }
 
 # EKS cluster
 module "eks-cluster" {
-  source                    = "./aws/eks/modules/eks-cluster"
+  source                    = "./aws/eks-cluster"
   cluster_name              = local.cluster_name
   vpc_id                    = module.vpc.vpc_id
   public_subnets            = module.vpc.public_subnets
@@ -111,31 +120,21 @@ module "eks-cluster" {
   default_security_group_id = module.vpc.default_security_group_id
   aws_profile               = local.aws_profile
 
-  eks_worker_groups = {
-<% unless tf.kubernetes.config.worker_groups.nil? -%>
-<% tf.kubernetes.config.worker_groups.each do |k, v| -%>
-<% unless v.nil? || v.is_a?(String) && v.empty? -%>
-    <%= k %> = <% if v.is_a?(String) %>"<%= v %>"<% else %><%= v %><% end %> 
-<% end -%>
-<% end -%>
-<% end -%>
-  }  
+  eks_worker_groups = var.eks_worker_groups
 
   eks_map_users = []
   eks_map_roles = module.iam.eks_map_roles
   
-  tags = {
-    "Environment" = local.environment
-  }
+  tags = var.tags
 }
 
-<% unless tf.globalaccelerator.nil? || tf.globalaccelerator.config.nil? || ! tf.globalaccelerator.config.enabled -%>
+<% if tf.globalaccelerator&.config&.enabled -%>
 # Global accelerator
 module "globalaccelerator" {
   source                      = "./aws/globalaccelerator"
   name                        = local.accelerator_name
   route53_zone_id             = module.route53.this.zone_id
-  global_accelerator_hostname = "<%= tf.globalaccelerator.config.hostname.nil? || tf.globalaccelerator.config.hostname.empty? ? '' : tf.globalaccelerator.config.hostname %>"
+  global_accelerator_hostname = "<%= tf.globalaccelerator&.config&.hostname %>"
 }
 
 output "globalaccelerator_ips" {
@@ -145,36 +144,34 @@ output "globalaccelerator_ips" {
 
 module "route53" {
   source                         = "./aws/route53"
-  root_domain                    = "<%= tf.dns.config.root_domain %>"
-  sub_domain                     = "<%= tf.dns.config.sub_domain %>"
-  root_domain_managed_in_route53 = <%= tf.dns.root_domain_managed_in_route53.nil? || ! tf.dns.root_domain_managed_in_route53 ? false : true%>
+  root_domain                    = "<%= cluster_config.dns.domain %>"
+  sub_domain                     = "<%= cluster_config.dns.subdomain %>"
+  root_domain_managed_in_route53 = <%= tf.dns&.config&.root_domain_managed_in_route53 ? true : false %>
 }
 
 module "acm" {
   source                    = "./aws/acm"
-  domain_name               = "<%= tf.cert.config.domain_name %>"
+  domain_name               = "<%= cluster_config.dns.subdomain %>.<%= cluster_config.dns.domain %>"
   route53_domain_name       = substr(module.route53.this.name, 0, length(module.route53.this.name)-1)
   route53_dns_record_count  = 1
-  subject_alternative_names = ["<%= tf.cert.config.subject_alternative_names.join(", ") %>"]
-  validate_certificate      = <%= tf.dns.root_domain_managed_in_route53 ? true : false %>
+  subject_alternative_names = [
+    "*.<%= cluster_config.dns.subdomain %>.<%= cluster_config.dns.domain %>"
+    <%- tf.cert.config.subject_alternative_names&.each do |v| -%>
+    , "<%= v %>"
+    <% end -%>
+  ]
+  validate_certificate      = <%= tf.dns&.config&.root_domain_managed_in_route53 ? true : false %>
 }
-
-# EKS resources
-#data "aws_eks_cluster" "cluster" {
-#  name = local.cluster_name
-#}
 
 data "aws_eks_cluster_auth" "cluster-auth" {
   name = local.cluster_name
 }
 
 module "eks-resources" {
-  source                     = "./aws/eks/modules/eks-resources"
+  source                     = "./aws/eks-resources"
   cluster_name               = local.cluster_name
   extra_namespaces           = []
   clusterrolebindings        = module.iam.kubernetes_clusterrolebindings
-  perx_helm_server_username  = "<%= tf.kubernetes.config.cluster_resources.perx_helm_server_username %>"
-  perx_helm_server_password  = "<%= tf.kubernetes.config.cluster_resources.perx_helm_server_password %>"
   enable_external_dns        = <%= tf.kubernetes.config.cluster_resources.enable_external_dns.nil? ? false : tf.kubernetes.config.cluster_resources.enable_external_dns %>
   external_dns_domainFilters = [module.acm.this.domain_name]
   external_dns_zoneIdFilters = [module.route53.this.zone_id]

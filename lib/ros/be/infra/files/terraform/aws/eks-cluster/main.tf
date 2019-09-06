@@ -25,11 +25,11 @@ resource "aws_security_group_rule" "eks-cluster-ingress-internet-https" {
 }
 
 module "eks" {
-  source          = "terraform-aws-modules/eks/aws"
-  version         = "~> 5.1.0"
-  cluster_name    = var.cluster_name
-  subnets         = concat(var.public_subnets, var.private_subnets)
-  vpc_id          = var.vpc_id
+  source       = "terraform-aws-modules/eks/aws"
+  version      = "~> 5.1.0"
+  cluster_name = var.cluster_name
+  subnets      = concat(var.public_subnets, var.private_subnets)
+  vpc_id       = var.vpc_id
 
   cluster_create_security_group   = false
   cluster_endpoint_private_access = true
@@ -42,23 +42,32 @@ module "eks" {
   write_kubeconfig   = true
   config_output_path = "./"
 
-  workers_group_defaults = {
-    subnets                       = var.private_subnets
-    additional_security_group_ids = var.default_security_group_id
-  }
-
   kubeconfig_aws_authenticator_env_variables = {
     AWS_PROFILE = var.aws_profile
   }
 
   # using launch configuration
-  worker_groups = [merge(local.worker_groups, var.eks_worker_groups)]
-
+  worker_groups = var.eks_worker_groups
+  workers_group_defaults = {
+    instance_type                 = "m5.xlarge"
+    name                          = "eks_workers_a"
+    asg_max_size                  = 10
+    asg_min_size                  = 2
+    root_volume_size              = 30
+    root_volume_type              = "gp2"
+    autoscaling_enabled           = true
+    protect_from_scale_in         = true
+    asg_force_delete              = true # This is to address a case when terraform cannot delete autoscaler group if protect_from_scale_in = true
+    enable_monitoring             = false
+    kubelet_extra_args            = "--node-labels=beta.kubernetes.io/fluentd-ds-ready=true"
+    subnets                       = var.private_subnets
+    additional_security_group_ids = var.default_security_group_id
+  }
   # not using launch template
   worker_groups_launch_template = []
 
-  map_users       = var.eks_map_users
-  map_roles       = var.eks_map_roles
+  map_users = var.eks_map_users
+  map_roles = var.eks_map_roles
 
   tags = var.tags
 }

@@ -13,20 +13,6 @@ variable "kubeconfig" {
   type    = string
 }
 
-
-variable "perx_helm_server_url" {
-  type    = string
-  default = "https://chartmuseum.perxtech.io"
-}
-
-variable "perx_helm_server_username" {
-  type = string
-}
-
-variable "perx_helm_server_password" {
-  type = string
-}
-
 variable "cluster_name" {
   type        = string
   description = "EKS cluster name"
