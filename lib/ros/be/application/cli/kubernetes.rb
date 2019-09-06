@@ -191,7 +191,8 @@ module Ros
         def logs(service)
           generate_config if stale_config
           trap("SIGINT") { throw StandardError } if options.tail
-          kubectl("#{command('logs')} #{service_pod(service)} -c #{service}", true)
+          k8s_selector = {name: service, component: :server}.map{ |k, v| "app.kubernetes.io/#{k}=#{v}"}.join(',')
+          kubectl("#{command('logs')} -l #{k8s_selector} -c #{clean_kubernetes_name(service)}", true)
         rescue StandardError
         end
 
