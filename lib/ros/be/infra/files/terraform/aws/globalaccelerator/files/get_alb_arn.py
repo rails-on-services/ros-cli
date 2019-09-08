@@ -22,8 +22,7 @@ def external_data():
   
   # Check if kubeconfig file exists
   if not os.path.isfile(kubeconfigpath) : 
-    sys.stdout.write(json.dumps({"LoadBalancerArn": ""}))
-    sys.exit()
+    empty_output()
 
   # Get istio load balancer hostname attached to our cluster  
   try:
@@ -34,8 +33,7 @@ def external_data():
       'istio-alb-ingressgateway', \
       '-o', 'jsonpath={.status.loadBalancer.ingress[*].hostname}']).decode('utf-8')
   except Exception: 
-    sys.stdout.write(json.dumps({"LoadBalancerArn": ""}))
-    sys.exit()
+    empty_output()
 
   # Get all load load balancers for our account
   try: 
@@ -46,8 +44,7 @@ def external_data():
       '--output', 'json'])
     json_lb = json.loads(loadbalancers)    
   except Exception: 
-    sys.stdout.write(json.dumps({"LoadBalancerArn": ""}))
-    sys.exit()  
+    empty_output()
 
   # Look for LB that matches istio LB hostname, output first match
   for i in json_lb:
@@ -56,8 +53,9 @@ def external_data():
         sys.stdout.write(json.dumps({"LoadBalancerArn": i["LoadBalancerArn"]}))
         sys.exit()
 
+def empty_output():
   sys.stdout.write(json.dumps({"LoadBalancerArn": ""}))
   sys.exit()
-  
+
 if __name__ == "__main__":
   external_data()
