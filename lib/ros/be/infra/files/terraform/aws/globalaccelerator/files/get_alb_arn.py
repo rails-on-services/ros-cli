@@ -52,9 +52,9 @@ def external_data():
   # Look for LB that matches istio LB hostname, output first match
   for i in json_lb:
     if i["DNSName"] == hostname:
-      sys.stdout.write(json.dumps({"LoadBalancerArn": i["LoadBalancerArn"]}))
-      sys.exit()
-      #break
+      if i["State"]['Code'] == 'active':
+        sys.stdout.write(json.dumps({"LoadBalancerArn": i["LoadBalancerArn"]}))
+        sys.exit()
 
   sys.stdout.write(json.dumps({"LoadBalancerArn": ""}))
   sys.exit()

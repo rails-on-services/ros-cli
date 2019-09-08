@@ -143,6 +143,10 @@ module "globalaccelerator" {
 output "globalaccelerator_ips" {
   value = module.globalaccelerator.globalaccelerator_ips
 }
+
+output "alb_arn" {
+  value = module.globalaccelerator.alb_arn
+}
 <% end -%>
 
 module "route53" {
@@ -186,6 +190,7 @@ module "eks-resources" {
   vpc_id                            = module.vpc.vpc_id
 }
 
+/*
 output "cluster_endpoint" {
   value = module.eks-cluster.cluster_endpoint
 }
@@ -216,3 +221,4 @@ output "route53" {
 output "acm" {
   value = module.acm.*
 }
+*/

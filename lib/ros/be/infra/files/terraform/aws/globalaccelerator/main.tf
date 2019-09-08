@@ -16,7 +16,7 @@ resource "aws_route53_record" "globalaccelerator" {
   records = aws_globalaccelerator_accelerator.this.ip_sets[0].ip_addresses
 }
 
-data "external" "elb_arn" {
+data "external" "alb_arn" {
   program = ["python", "${path.module}/files/get_alb_arn.py"]
 
   query = {
@@ -41,13 +41,13 @@ resource "aws_globalaccelerator_listener" "this" {
   }
 }
 resource "aws_globalaccelerator_endpoint_group" "this" {
-  count             = data.external.elb_arn.result.LoadBalancerArn != "" ? 1 : 0
+  count             = data.external.alb_arn.result.LoadBalancerArn != "" ? 1 : 0
   listener_arn      = aws_globalaccelerator_listener.this.id
-  health_check_path = "/"
+  #health_check_path = "/"
   health_check_port = 80
 
   endpoint_configuration {
-    endpoint_id = data.external.elb_arn.result.LoadBalancerArn
+    endpoint_id = data.external.alb_arn.result.LoadBalancerArn
     weight      = 100
   }
 }
