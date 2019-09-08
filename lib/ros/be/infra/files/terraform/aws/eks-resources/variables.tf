@@ -3,6 +3,11 @@ variable "region" {
   type    = string
 }
 
+variable "aws_profile" {
+  default = "deafult"
+  type    = string
+}
+
 variable "vpc_id" {
   default = ""
   type    = string

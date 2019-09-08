@@ -14,3 +14,14 @@ variable "global_accelerator_hostname" {
   default     = ""
   description = "[Optional] DNS name of the global accelerator to be added to route53 zone"
 }
+
+variable "aws_profile" {
+  default     = "deafult"
+  type        = string
+  description = "AWS profile value"
+}
+
+variable "cluster_name" {
+  type        = string
+  description = "EKS cluster name"
+}
