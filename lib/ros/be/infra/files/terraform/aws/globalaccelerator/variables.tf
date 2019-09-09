@@ -3,13 +3,18 @@ variable "name" {
   default = ""
 }
 
+variable "add_route53_record" {
+  type    = bool
+  default = true
+}
+
 variable "route53_zone_id" {
   type        = string
   default     = ""
   description = "[Optional] route53 zone id"
 }
 
-variable "global_accelerator_hostname" {
+variable "route53_record_name" {
   type        = string
   default     = ""
   description = "[Optional] DNS name of the global accelerator to be added to route53 zone"

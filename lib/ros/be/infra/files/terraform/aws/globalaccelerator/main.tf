@@ -9,9 +9,9 @@ resource "aws_globalaccelerator_accelerator" "this" {
 }
 
 resource "aws_route53_record" "globalaccelerator" {
-  count   = var.route53_zone_id != "" ? 1 : 0
+  count   = var.add_route53_record ? 1 : 0
   zone_id = var.route53_zone_id
-  name    = var.global_accelerator_hostname
+  name    = var.route53_record_name
   type    = "A"
   ttl     = "300"
   records = aws_globalaccelerator_accelerator.this.ip_sets[0].ip_addresses

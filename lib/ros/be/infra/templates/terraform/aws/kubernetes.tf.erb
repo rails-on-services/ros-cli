@@ -177,7 +177,8 @@ module "globalaccelerator" {
   source                      = "./aws/globalaccelerator"
   name                        = local.accelerator_name
   route53_zone_id             = module.route53.this.zone_id
-  global_accelerator_hostname = "<%= tf.globalaccelerator&.config&.hostname %>"
+  add_route53_record          = <%= tf.globalaccelerator&.config&.hostname.nil? ? false : true %>    
+  route53_record_name         = "<%= tf.globalaccelerator&.config&.hostname %>"
   add_elb_listener            = true
   elb_endpoint                = module.eks-resources.alb_arn
 }
