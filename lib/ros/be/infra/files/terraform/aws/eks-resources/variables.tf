@@ -3,6 +3,11 @@ variable "region" {
   type    = string
 }
 
+variable "aws_profile" {
+  default = "deafult"
+  type    = string
+}
+
 variable "vpc_id" {
   default = ""
   type    = string
@@ -63,11 +68,6 @@ variable "external_dns_domainFilters" {
 variable "external_dns_zoneIdFilters" {
   type    = list(string)
   default = []
-}
-
-variable "enable_istio" {
-  default     = true
-  description = "Enable istio with ingress gateway as NodePort service"
 }
 
 variable "istio_version" {

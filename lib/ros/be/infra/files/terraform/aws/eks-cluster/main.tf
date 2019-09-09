@@ -37,6 +37,7 @@ module "eks" {
   cluster_security_group_id       = aws_security_group.eks-cluster.id
   worker_ami_name_filter          = var.eks_worker_ami_name_filter
   cluster_enabled_log_types       = var.eks_cluster_enabled_log_types
+  cluster_version                 = var.eks_cluster_version
 
   manage_aws_auth    = true
   write_kubeconfig   = true
@@ -53,7 +54,7 @@ module "eks" {
     name                          = "eks_workers_a"
     asg_max_size                  = 10
     asg_min_size                  = 2
-    root_volume_size              = 30
+    root_volume_size              = 100
     root_volume_type              = "gp2"
     autoscaling_enabled           = true
     protect_from_scale_in         = true

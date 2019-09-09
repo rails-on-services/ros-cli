@@ -76,8 +76,8 @@ module Ros
 
         def gcp(type)
           {
-            vpc: 'vpc',
-            instance: 'gci'
+            vpc: ['vpc'],
+            instance: ['gci']
           }[type]
         end
 

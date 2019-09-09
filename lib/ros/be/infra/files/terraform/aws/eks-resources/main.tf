@@ -146,7 +146,6 @@ resource "kubernetes_cluster_role_binding" "this" {
 }
 
 resource "helm_release" "istio-init" {
-  count      = var.enable_istio ? 1 : 0
   depends_on = [null_resource.helm-repository-istio]
   name       = "istio-init"
   repository = "istio"
@@ -175,7 +174,6 @@ EOS
 }
 
 resource "helm_release" "istio" {
-  count = var.enable_istio ? 1 : 0
   depends_on = [
     null_resource.helm-repository-istio,
     helm_release.istio-init,
@@ -191,7 +189,6 @@ resource "helm_release" "istio" {
 }
 
 resource "helm_release" "istio-alb-ingressgateway" {
-  count      = var.enable_istio ? 1 : 0
   depends_on = [helm_release.istio]
   name       = "istio-alb-ingressgateway"
   chart      = "${path.module}/files/istio-alb-ingressgateway"
@@ -232,5 +229,15 @@ resource "kubernetes_cluster_role" "developer" {
     api_groups = [""]
     resources  = ["pods/exec"]
     verbs      = ["create"]
+  }
+}
+
+data "external" "alb_arn" {
+  depends_on = ["helm_release.istio-alb-ingressgateway"]
+  program    = ["python", "${path.module}/files/get_alb_arn.py"]
+
+  query = {
+    config_name = "${var.cluster_name}_config.yaml",
+    aws_profile = var.aws_profile
   }
 }

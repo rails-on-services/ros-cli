@@ -4,8 +4,8 @@ variable "tags" {
 }
 
 variable "aws_profile" {
-  type = string
-  default = "default"
+  type        = string
+  default     = "default"
   description = "Valid AWS Profile in local config that has access to the cluster. This to avoid Unauthorized error when local-exec runs"
 }
 
@@ -14,18 +14,23 @@ variable "cluster_name" {
   default = ""
 }
 
+variable "eks_cluster_version" {
+  type    = string
+  default = "1.14"
+}
+
 variable "vpc_id" {
   type    = string
   default = ""
 }
 
 variable "public_subnets" {
-  type = list(string)
+  type    = list(string)
   default = []
 }
 
 variable "private_subnets" {
-  type = list(string)
+  type    = list(string)
   default = []
 }
 variable "default_security_group_id" {
