@@ -9,21 +9,12 @@ resource "aws_globalaccelerator_accelerator" "this" {
 }
 
 resource "aws_route53_record" "globalaccelerator" {
+  count   = var.route53_zone_id != "" ? 1 : 0
   zone_id = var.route53_zone_id
   name    = var.global_accelerator_hostname
   type    = "A"
   ttl     = "300"
   records = aws_globalaccelerator_accelerator.this.ip_sets[0].ip_addresses
-}
-
-data "external" "alb_arn" {
-  program = ["python", "${path.module}/files/get_alb_arn.py"]
-
-  query = {
-    config_name = "${var.cluster_name}_config.yaml",
-    aws_profile  = var.aws_profile
-
-  }
 }
 
 resource "aws_globalaccelerator_listener" "this" {
@@ -40,14 +31,15 @@ resource "aws_globalaccelerator_listener" "this" {
     to_port   = 433
   }
 }
+
 resource "aws_globalaccelerator_endpoint_group" "this" {
-  count             = data.external.alb_arn.result.LoadBalancerArn != "" ? 1 : 0
-  listener_arn      = aws_globalaccelerator_listener.this.id
-  #health_check_path = "/"
-  health_check_port = 80
+  count                 = var.add_elb_listener ? 1 : 0
+  listener_arn          = aws_globalaccelerator_listener.this.id
+  health_check_protocol = "TCP"
+  health_check_port     = 80
 
   endpoint_configuration {
-    endpoint_id = data.external.alb_arn.result.LoadBalancerArn
+    endpoint_id = var.elb_endpoint
     weight      = 100
   }
 }

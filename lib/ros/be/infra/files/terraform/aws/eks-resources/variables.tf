@@ -70,11 +70,6 @@ variable "external_dns_zoneIdFilters" {
   default = []
 }
 
-variable "enable_istio" {
-  default     = true
-  description = "Enable istio with ingress gateway as NodePort service"
-}
-
 variable "istio_version" {
   default     = "1.2.4"
   description = "Istio version to install"

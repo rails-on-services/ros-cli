@@ -15,13 +15,13 @@ variable "global_accelerator_hostname" {
   description = "[Optional] DNS name of the global accelerator to be added to route53 zone"
 }
 
-variable "aws_profile" {
-  default     = "deafult"
-  type        = string
-  description = "AWS profile value"
+variable "add_elb_listener" {
+  type        = bool
+  default     = true
+  description = "Whether to add var.elb_endpoint to global accelerator endpoints"
 }
 
-variable "cluster_name" {
+variable "elb_endpoint" {
   type        = string
-  description = "EKS cluster name"
+  description = "[OPTIONAL] ELB ARN to be add to global accelerator endpoints"
 }

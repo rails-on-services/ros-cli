@@ -52,7 +52,7 @@ variable "eks_worker_groups" {
 
 # Locals
 locals {
-  aws_profile                         = "<%= tf.kubernetes.config.aws_profile.nil? ? "default" : tf.kubernetes.config.aws_profile %>"
+  aws_profile                         = "<%= cluster_config.aws_profile.nil? ? "default" : cluster_config.aws_profile %>"
   vpc_cidr                            = "<%= tf.vpc.config.cidr.nil? ? "10.0.0.0/16" : tf.vpc.config.cidr %>"
   vpc_create_database_subnet_group    = <%= tf.vpc.config.create_database_subnet_group.nil? ? false : true %>
   vpc_create_redshift_subnet_group    = <%= tf.vpc.config.create_redshift_subnet_group.nil? ? false : true %>
@@ -129,26 +129,6 @@ module "eks-cluster" {
   tags = var.tags
 }
 
-<% if tf.globalaccelerator&.config&.enabled -%>
-# Global accelerator
-module "globalaccelerator" {
-  source                      = "./aws/globalaccelerator"
-  name                        = local.accelerator_name
-  route53_zone_id             = module.route53.this.zone_id
-  global_accelerator_hostname = "<%= tf.globalaccelerator&.config&.hostname %>"
-  aws_profile                 = local.aws_profile
-  cluster_name                = local.cluster_name
-}
-
-output "globalaccelerator_ips" {
-  value = module.globalaccelerator.globalaccelerator_ips
-}
-
-output "alb_arn" {
-  value = module.globalaccelerator.alb_arn
-}
-<% end -%>
-
 module "route53" {
   source                         = "./aws/route53"
   root_domain                    = "<%= cluster_config.dns.domain %>"
@@ -176,6 +156,7 @@ data "aws_eks_cluster_auth" "cluster-auth" {
 
 module "eks-resources" {
   source                     = "./aws/eks-resources"
+  aws_profile                = local.aws_profile
   cluster_name               = local.cluster_name
   extra_namespaces           = []
   clusterrolebindings        = module.iam.kubernetes_clusterrolebindings
@@ -189,6 +170,23 @@ module "eks-resources" {
   kubeconfig                        = module.eks-cluster.kubeconfig
   vpc_id                            = module.vpc.vpc_id
 }
+
+<% if tf.globalaccelerator&.config&.enabled -%>
+# Global accelerator
+module "globalaccelerator" {
+  source                      = "./aws/globalaccelerator"
+  name                        = local.accelerator_name
+  route53_zone_id             = module.route53.this.zone_id
+  global_accelerator_hostname = "<%= tf.globalaccelerator&.config&.hostname %>"
+  add_elb_listener            = true
+  elb_endpoint                = module.eks-resources.alb_arn
+}
+
+output "globalaccelerator_ips" {
+  value = module.globalaccelerator.globalaccelerator_ips
+}
+
+<% end -%>
 
 /*
 output "cluster_endpoint" {
@@ -222,3 +220,7 @@ output "acm" {
   value = module.acm.*
 }
 */
+
+output "alb_arn" {
+  value = module.eks-resources.alb_arn
+}
