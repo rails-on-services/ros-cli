@@ -62,7 +62,7 @@ locals {
   accelerator_name                    = "<%= infra.components.globalaccelerator&.config&.name.nil? ? infra.config.cluster.name : infra.components.globalaccelerator.config.name %>"
   iam_name                            = "<%= infra.components.iam&.config&.name.nil? ? infra.config.cluster.name : infra.components.iam.config.name %>"
   tags                                = var.tags
-  domain_name                         = "<%= infra.dns.sub_domain %><%= infra.dns.sub_domain.nil? ? "" : "."%><%= infra.dns.root_domain %>"
+  domain_name                         = "<%= infra.config.cluster.dns.subdomain %><%= infra.config.cluster.dns.subdomain.nil? ? "" : "."%><%= infra.config.cluster.dns.domain %>"
 }
 
 # VPC
@@ -131,8 +131,8 @@ module "eks-cluster" {
 
 module "route53" {
   source                         = "./aws/route53"
-  root_domain                    = "<%= infra.dns.root_domain %>"
-  sub_domain                     = "<%= infra.dns.sub_domain %>"
+  root_domain                    = "<%= infra.config.cluster.dns.domain %>"
+  sub_domain                     = "<%= infra.config.cluster.dns.subdomain.nil? ? "" : infra.config.cluster.dns.subdomain %>"
   root_domain_managed_in_route53 = <%= infra.dns.root_domain_managed_in_route53 ? true : false %>
 }
 
