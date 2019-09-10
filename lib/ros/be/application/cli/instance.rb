@@ -80,12 +80,13 @@ module Ros
           #
           # TODO: the tmp file on iam should probably be ROS_ENV (as passed to image vi ENV var) / feature_set
           # TODO: when IAM service is brought down the credentials file should be removed
-          capture_cmd("docker-compose ps -q iam")
           errors.add(:get_credentials, "file not found: #{file}") if exit_code.positive?
-          copy_service_file(stdout.chomp, file, creds_file) if exit_code.zero?
+          copy_service_file("iam", file, creds_file) if exit_code.zero?
         end
 
-        def copy_service_file(container_id, src, dest)
+        def copy_service_file(service_name, src, dest)
+          capture_cmd("docker-compose ps -q #{service_name}")
+          container_id = stdout.chomp
           system_cmd("docker cp #{container_id}:#{src} #{dest}")
         end
 
