@@ -188,7 +188,7 @@ module Ros
             prefix = application.components.platform.components.dig(service, :config, :ros) ? 'app:' : ''
             if exec(service, "rails db:setup #{prefix}ros:apidoc:generate")
               # copy_service_file is implemented in both instance and kubernetes
-              copy_service_file(service, 'tmp/docs/openapi/ros-api.json', "#{openapi_dir}/#{service}.json")
+              copy_service_file(service, '/home/rails/services/app/tmp/docs/openapi/ros-api.json', "#{openapi_dir}/#{service}.json")
             end
           end
           Dir["#{openapi_dir}/*.json"].each do |file|
