@@ -24,6 +24,12 @@ module Ros
           errors.add(:build, 'see terminal output') unless exit_code.zero?
         end
 
+        def pull(services)
+          generate_config if stale_config
+          compose("pull #{services.join(' ')}")
+          errors.add(:pull, 'see terminal output') unless exit_code.zero?
+        end
+
         def push(services)
           services = enabled_services if services.empty?
           generate_config if stale_config

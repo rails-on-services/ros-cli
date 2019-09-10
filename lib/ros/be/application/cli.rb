@@ -65,6 +65,13 @@ module Ros
           command.exit
         end
 
+        desc 'pull IMAGE', 'push one or all images'
+        def pull(*services)
+          command = context(options)
+          command.pull(services)
+          command.exit
+        end
+
         desc 'up SERVICE', 'bring up service(s)'
         option :build, type: :boolean, aliases: '-b', desc: 'Build image before run'
         option :console, type: :boolean, aliases: '-c', desc: 'Connect to service console after starting'
