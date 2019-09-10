@@ -11,6 +11,8 @@ components:
               rails_master_key: <%= SecureRandom.hex %>
               aws_access_key_id: localstack_does_not_authenticate
               aws_secret_access_key: so_valid_credentials_are_not_necessary
+              aws_account_id: <%= Settings.config.infra.aws.account_id %>
+              aws_region: <%= Settings.config.infra.aws.region %>
 
               # Uncomment to set to a remote host
               # rails_database_host: localhost
