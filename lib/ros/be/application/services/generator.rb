@@ -62,7 +62,8 @@ module Ros
               kafka_brokers: cluster.infra.cluster_type.eql?('kubernetes') ? 'kafka:9092' : 'kafkastack:9092',
               # storage_name: "storage#{base_hostname.gsub('.', '-')}",
               current_feature_set: application.current_feature_set
-            })
+            }).merge!(application.components.services.components[:'fluentd'])
+            binding.pry
           end
 
           def cluster; Ros::Be::Infra::Cluster::Model end
