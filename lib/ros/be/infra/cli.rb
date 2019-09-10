@@ -16,6 +16,7 @@ module Ros
 
         desc 'init', 'Initialize the cluster'
         option :long, type: :boolean, aliases: '-l', desc: 'Run the long form of the command'
+        option :role_name, type: :string, aliases: '--role-name', desc: 'Override the aws iam role to be used'
         def init
           cluster.init(self)
         end
