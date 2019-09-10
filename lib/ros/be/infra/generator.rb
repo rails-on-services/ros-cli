@@ -95,7 +95,7 @@ module Ros
           {
             terraform: {
               backend: {
-                "#{Settings.config.terraform.state.type}": Settings.config.terraform.state.to_h.select { |k, v| k.to_s != 'type' } || {}
+                "#{Settings.config.terraform.state.type}": Settings.config.terraform.state.to_h.select { |k, v| k.to_s != 'type' && ! v.nil? } || {}
               }
             }
           }
