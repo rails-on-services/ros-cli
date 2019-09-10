@@ -42,6 +42,7 @@ module "eks" {
   manage_aws_auth    = true
   write_kubeconfig   = true
   config_output_path = "./"
+  kubeconfig_name    = var.cluster_name
 
   kubeconfig_aws_authenticator_env_variables = {
     AWS_PROFILE = var.aws_profile
@@ -113,7 +114,7 @@ resource "aws_iam_role_policy_attachment" "eks-worker-external-dns" {
 }
 
 resource "null_resource" "k8s-tiller-rbac" {
-  depends_on = [module.eks]
+  #depends_on = [module.eks]
 
   provisioner "local-exec" {
     working_dir = path.module
