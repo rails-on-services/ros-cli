@@ -111,9 +111,7 @@ module Ros
             return vars
         end
 
-        def tf; infra.components end
-        def cluster_config;  infra.config.cluster end
-        # def infra; Ros::Be::Infra::Model end
+        def infra; Ros::Be::Infra::Model end
       end
     end
   end
