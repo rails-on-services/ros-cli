@@ -1,10 +1,11 @@
 <%= @service.fluentd.header %>
-    <%- if @service.fluentd.include_tcp_source %>
+    <%- if @service.fluentd.include_tcp_source -%>
     <source>
       @type forward
       port 24224
     </source>
-    <%- end %>
+    
+    <%- end -%>
     <filter **.rack-traffic-log>
       @type record_modifier
       # write a temporary field _unix_time
@@ -36,6 +37,11 @@
       brokers <%= @service.fluentd.kafka_brokers %>      
       topic_key type
       message_key_key id  
+      <%- if @service.fluentd.api_key && @service.fluentd.api_secret -%>
+      username <%= @service.fluentd.api_key %>
+      password <%= @service.fluentd.api_secret%>
+      ssl_ca_certs_from_system true
+      <%- end -%>
       headers_from_record { "ce_specversion":"$.specversion", 
                             "ce_type":"$.type", 
                             "ce_source":"$.source", 

@@ -51,15 +51,11 @@ module Ros
 
           # Configuration values for fluentd request logging config file
           def fluentd
-            binding.pry
-            # If type is kubernetes, then value of header is:
             @fluentd ||= Config::Options.new({
               header: cluster.infra.cluster_type.eql?('kubernetes') ? "configMaps:\n  ros.conf: |" : '',
               include_tcp_source: cluster.infra.cluster_type.eql?('kubernetes') ? false : true,
-              #kafka_brokers: cluster.infra.cluster_type.eql?('kubernetes') ? 'kafka:9092' : 'kafkastack:9092',
               current_feature_set: application.current_feature_set
-            }) #.merge!(application.components.services.components[:'fluentd'])
-            binding.pry
+            }).merge!((application.components.services.components[:'fluentd'].config).to_hash)
           end
 
           def cluster; Ros::Be::Infra::Cluster::Model end
@@ -102,7 +98,6 @@ module Ros
                   # skip if it exists as an instance method on this class as it will be invoked by thor automatically
                   next if respond_to?(File.basename(template_file).gsub('.', '_').chomp('_erb').to_sym)
                   destination_file = "#{destination_root}/#{deploy_path}/#{template_file.gsub("#{base_service_template_dir}/", '')}".chomp('.erb')
-                  binding.pry
                   template(template_file, destination_file)
                 end
               end
