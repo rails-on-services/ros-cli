@@ -292,6 +292,10 @@ module Ros
 
         def svpr(cmd)
           kubectl_capture(cmd)
+          if exit_code.positive?
+            STDOUT.puts(stderr)
+            Kernel.exit(1)
+          end
           # TODO: Does this effectively handle > 1 pod running
           YAML.safe_load(stdout)['items'].map { |i| i['metadata']['name'] }
         end

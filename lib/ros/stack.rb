@@ -15,7 +15,7 @@ module Ros
       def deploy_path; "tmp/deployments/#{Ros.env}" end
 
       def image_tag
-        "#{image_prefix}#{version}-#{sha}"
+        "#{version}-#{image_prefix}#{sha}"
       end
 
       # image_prefix is specific to the image_type
