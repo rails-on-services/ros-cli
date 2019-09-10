@@ -11,7 +11,7 @@ module Ros
         include CliBase
 
         check_unknown_options!
-        class_option :v, type: :boolean, default: false, desc: 'verbose output'
+        class_option :v, type: :boolean, default: true, desc: 'verbose output'
         class_option :n, type: :boolean, default: false, desc: "run but don't execute action"
 
         desc 'init', 'Initialize the cluster'
