@@ -30,7 +30,7 @@ module Ros
                 STDOUT.puts "missing #{credentials_file}"
                 return
               end
-              infra.config.cluster.aws_profile.nil? || ENV['AWS_PROFILE'] ? profile = "" : profile = "--profile #{infra.config.cluster.aws_profile}"
+              infra.config.cluster.aws_profile.nil? || ENV['AWS_PROFILE'] || ENV['AWS_DEFAULT_PROFILE'] ? profile = "" : profile = "--profile #{infra.config.cluster.aws_profile}"
               cmd_string = "aws eks update-kubeconfig --name #{name} #{profile}"
               cmd_string = "#{cmd_string} --role-arn arn:aws:iam::#{provider.account_id}:role/#{provider.cluster.role_name}" if cli.options.long
               cli.system_cmd(cmd_string)
