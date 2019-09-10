@@ -34,6 +34,10 @@ module Ros
           end
         end
 
+        def push(services)
+          STDOUT.puts("build command already pushed the image, skipping.")
+        end
+
         # TODO: Add ability for fail fast
         def up(services)
           #@services = services.empty? ? enabled_services : services

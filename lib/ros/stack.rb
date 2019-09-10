@@ -14,13 +14,16 @@ module Ros
 
       def deploy_path; "tmp/deployments/#{Ros.env}" end
 
-      def image_tag; "#{version}-#{sha}" end
+      def image_tag
+        binding.pry
+        "#{image_prefix}#{version}-#{sha}"
+      end
 
       # image_suffix is specific to the image_type
       # TODO: Update to handle more than just rails
-      def image_suffix
-        @image_suffix ||= (
-          image.build_args.rails_env.eql?('production') ? '' : "-#{image.build_args.rails_env}"
+      def image_prefix
+        @image_prefix ||= (
+          images.rails.build_args.rails_env.eql?('production') ? '' : "#{images.rails.build_args.rails_env}-"
         )
       end
 
@@ -38,7 +41,7 @@ module Ros
       end
 
       def version; Dir.chdir(Ros.root) { Bump::Bump.current } end
-      def image; Settings.config.platform.config.image end
+      def images; Settings.config.platform.config.images end
     end
   end
 end
