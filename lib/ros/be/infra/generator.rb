@@ -111,6 +111,7 @@ module Ros
             return vars
         end
 
+        def tf; infra.components end
         def infra; Ros::Be::Infra::Model end
       end
     end
