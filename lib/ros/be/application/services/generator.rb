@@ -38,7 +38,11 @@ module Ros
           end
 
           def kafka_connect
-            @kafka_connect ||= application.components.services.components[:'kafka-connect']
+            @kafka_connect ||= application.components.services.components[:'kafka-connect'].config
+          end
+
+          def kafka_schema_registry
+            @kafka_schema_registry ||= application.components.services.components[:'kafka-schema-registry'].config
           end
 
           # def self.aws_environment

@@ -29,9 +29,6 @@ deploy:
             #Below is temporary. Until I find out why env var isn't properly set from cp-schema-registry.url
             CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: "http://kafka-schema-registry:8081"
 
-          kafka:
-            bootstrapServers: "PLAINTEXT://kafka:9092"
-
           configurationOverrides:
             plugin.path: /usr/share/java,/usr/share/confluent-hub-components
             key.converter: org.apache.kafka.connect.storage.StringConverter
@@ -42,6 +39,38 @@ deploy:
             config.storage.replication.factor: 1
             status.storage.replication.factor: 1
             offset.storage.replication.factor: 1
+
+          <%- if @service.kafka_connect.api_key && @service.kafka_connect.api_secret -%>
+            ssl.endpoint.identification.algorithm: https
+            sasl.mechanism: PLAIN
+            request.timeout.ms: 20000
+            retry.backoff.ms: 500
+            sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule \
+            required username="<%= @service.kafka_connect.api_key %>" password="<%= @service.kafka_connect.api_secret %>";
+            security.protocol: SASL_SSL
+
+            consumer.ssl.endpoint.identification.algorithm: https
+            consumer.sasl.mechanism: PLAIN
+            consumer.request.timeout.ms: 20000
+            consumer.retry.backoff.ms: 500
+            consumer.sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule \
+            required username="<%= @service.kafka_connect.api_key %>" password="<%= @service.kafka_connect.api_secret %>";
+            consumer.security.protocol: SASL_SSL
+
+            producer.ssl.endpoint.identification.algorithm: https
+            producer.sasl.mechanism: PLAIN
+            producer.request.timeout.ms: 20000
+            producer.retry.backoff.ms: 500
+            producer.sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule \
+            required username="<%= @service.kafka_connect.api_key %>" password="<%= @service.kafka_connect.api_secret %>";
+            producer.security.protocol: SASL_SSL
+
+          kafka:
+            bootstrapServers: "SASL_SSL://<%= @service.kafka_connect.kafka_brokers %>"
+          <%- else -%>
+          kafka:
+            bootstrapServers: "PLAINTEXT://<%= @service.kafka_connect.kafka_brokers %>"
+          <%- end -%>
 
           prometheus:
             jmx:

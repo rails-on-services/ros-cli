@@ -41,6 +41,7 @@
       username <%= @service.fluentd.api_key %>
       password <%= @service.fluentd.api_secret%>
       ssl_ca_certs_from_system true
+      sasl_over_ssl true
       <%- end -%>
       headers_from_record { "ce_specversion":"$.specversion", 
                             "ce_type":"$.type", 

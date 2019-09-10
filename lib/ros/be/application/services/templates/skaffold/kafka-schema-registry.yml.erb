@@ -14,7 +14,16 @@ deploy:
           podLabels:
             app.kubernetes.io/name: kafka-schema-registry
           kafka:
-            bootstrapServers: "PLAINTEXT://kafka-headless:9092"
+            <%- if @service.kafka_schema_registry.api_key && @service.kafka_schema_registry.api_secret -%>
+            bootstrapServers: "SASL_SSL://<%= @service.kafka_schema_registry.kafka_brokers %>"
+          configurationOverrides:
+            kafkastore.security.protocol: SASL_SSL
+            kafkastore.sasl.mechanism: PLAIN
+            kafkastore.sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule \
+            required username="<%= @service.kafka_schema_registry.api_key %>" password="<%= @service.kafka_schema_registry.api_secret %>";
+            <%- else -%>
+            bootstrapServers: "PLAINTEXT://<%= @service.kafka_schema_registry.kafka_brokers %>"
+            <%- end -%>
           heapOptions: "-Xms1024M -Xmx1024M"
           prometheus:
             jmx:

@@ -11,7 +11,7 @@ spec:
     spec:
       restartPolicy: OnFailure
       initContainers:
-        <% @service.kafka_connect.config.connectors.each do |connector| -%>
+        <% @service.kafka_connect.connectors.each do |connector| -%>
         - image: gcr.io/cloud-builders/curl
           name: <%= connector[0] %>
           command:
