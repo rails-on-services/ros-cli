@@ -15,11 +15,10 @@ module Ros
       def deploy_path; "tmp/deployments/#{Ros.env}" end
 
       def image_tag
-        binding.pry
         "#{image_prefix}#{version}-#{sha}"
       end
 
-      # image_suffix is specific to the image_type
+      # image_prefix is specific to the image_type
       # TODO: Update to handle more than just rails
       def image_prefix
         @image_prefix ||= (
