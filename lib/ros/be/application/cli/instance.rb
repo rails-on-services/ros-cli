@@ -20,7 +20,7 @@ module Ros
 
         def build(services)
           generate_config if stale_config
-          compose("build #{services.join(' ')}")
+          compose("build --parallel #{services.join(' ')}")
           errors.add(:build, 'see terminal output') unless exit_code.zero?
         end
 
