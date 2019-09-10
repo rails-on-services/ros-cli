@@ -56,11 +56,7 @@ module Ros
             @fluentd ||= Config::Options.new({
               header: cluster.infra.cluster_type.eql?('kubernetes') ? "configMaps:\n  ros.conf: |" : '',
               include_tcp_source: cluster.infra.cluster_type.eql?('kubernetes') ? false : true,
-              # log_tag: "#{api_hostname}.rack-traffic-log",
-              request_log_tag: "**.rack-traffic-log",
-              event_log_tag: "events-log.**",
               kafka_brokers: cluster.infra.cluster_type.eql?('kubernetes') ? 'kafka:9092' : 'kafkastack:9092',
-              # storage_name: "storage#{base_hostname.gsub('.', '-')}",
               current_feature_set: application.current_feature_set
             }).merge!(application.components.services.components[:'fluentd'])
             binding.pry

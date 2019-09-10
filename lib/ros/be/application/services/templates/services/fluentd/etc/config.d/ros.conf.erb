@@ -1,11 +1,11 @@
 <%= @service.fluentd.header %>
-    <% if @service.fluentd.include_tcp_source %>
+    <%- if @service.fluentd.include_tcp_source %>
     <source>
       @type forward
       port 24224
     </source>
-    <% end %>
-    <filter <%= @service.fluentd.request_log_tag %>>
+    <%- end %>
+    <filter **.rack-traffic-log>
       @type record_modifier
       # write a temporary field _unix_time
       <record>
@@ -13,25 +13,25 @@
       </record>
     </filter>
 
-    <filter <%= @service.fluentd.request_log_tag %>>
+    <filter **.rack-traffic-log>
       @type record_transformer
       enable_ruby true
       renew_time_key _unix_time
       remove_keys _unix_time
     </filter>
 
-    <match <%= @service.fluentd.request_log_tag %>>
+    <match **.rack-traffic-log>
       @type kafka_buffered
       brokers <%= @service.fluentd.kafka_brokers %>
       default_topic http_request_log
     </match>
 
-    <filter <%= @service.fluentd.event_log_tag %>>
+    <filter events-log.**>
       @type base64_decode
       fields data
     </filter>
 
-    <match <%= @service.fluentd.event_log_tag %>>
+    <match events-log.**>
       @type kafka2  
       brokers <%= @service.fluentd.kafka_brokers %>      
       topic_key type
