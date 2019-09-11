@@ -38,7 +38,11 @@ module Ros
           end
 
           def kafka_connect
-            @kafka_connect ||= application.components.services.components[:'kafka-connect']
+            @kafka_connect ||= application.components.services.components[:'kafka-connect'].config
+          end
+
+          def kafka_schema_registry
+            @kafka_schema_registry ||= application.components.services.components[:'kafka-schema-registry'].config
           end
 
           # def self.aws_environment
@@ -49,20 +53,35 @@ module Ros
           #   }
           # end
 
+          def kafka
+            @kafka ||= 
+            if application.components.services.components.kafka&.config&.enabled
+              Config::Options.new({
+                bootstrap_servers: "kafka:9092"
+              })
+            elsif application.components.services.components.kafkastack&.config&.enabled
+              Config::Options.new({
+                bootstrap_servers: "kafkastack:9092"
+              })
+            else
+              application&.config&.external_kafka || Config::Options.new
+            end
+          end
+
+          # kafka topics involved
+          def kafka_topics
+            # TODO, need to all all avro event log topics and
+            [fluentd.http_log_kafka_topic]
+          end
+
           # Configuration values for fluentd request logging config file
           def fluentd
-            # If type is kubernetes, then value of header is:
-            # "configMaps:\n  rails-audit-log.conf: |"
             @fluentd ||= Config::Options.new({
               header: cluster.infra.cluster_type.eql?('kubernetes') ? "configMaps:\n  ros.conf: |" : '',
               include_tcp_source: cluster.infra.cluster_type.eql?('kubernetes') ? false : true,
-              # log_tag: "#{api_hostname}.rack-traffic-log",
-              request_log_tag: "**.rack-traffic-log",
-              event_log_tag: "events-log.**",
-              kafka_brokers: cluster.infra.cluster_type.eql?('kubernetes') ? 'kafka:9092' : 'kafkastack:9092',
-              # storage_name: "storage#{base_hostname.gsub('.', '-')}",
-              current_feature_set: application.current_feature_set
-            })
+              current_feature_set: application.current_feature_set,
+              http_log_kafka_topic: "http_request_log"
+            }).merge!((application.components.services.components[:'fluentd'].config)&.to_hash)
           end
 
           def cluster; Ros::Be::Infra::Cluster::Model end
@@ -139,12 +158,12 @@ module Ros
           def copy_kubernetes_helm_charts
             return unless infra.cluster_type.eql?('kubernetes')
             directory('../files/helm-charts', "#{deploy_path}/helm-charts")
-            FileUtils.mkdir_p("#{destination_root}/#{deploy_path}") unless File.directory?("#{destination_root}/#{deploy_path}") 
+            FileUtils.mkdir_p("#{destination_root}/#{deploy_path}") unless File.directory?("#{destination_root}/#{deploy_path}")
             FileUtils.cp("#{Ros.environments_dir}/big_query_credentials.json", "#{destination_root}/#{deploy_path}") if File.exists?("#{Ros.environments_dir}/big_query_credentials.json")
           end
 
           private
-           
+
           def nginx_services; @nginx_services ||= (args[0] || platform_service_names) end
 
           def deploy_path

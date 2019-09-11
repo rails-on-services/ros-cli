@@ -1,0 +1,41 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kafka-topic-creation
+spec:
+  template:
+    metadata:
+      name: kafka-topic-creation
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        <%- @service.kafka_topics.each_with_index do |topic, index| -%>
+        - name: create-topic-<%= index %>
+          image: confluentinc/cp-kafka:5.3.0
+          command:
+            - bash
+            - -c
+            - |
+              cat <<EOT > ./config
+              request.timeout.ms=20000
+              retry.backoff.ms=500
+              <%- if @service.kafka.security_protocol == "SASL_SSL" -%>
+              security.protocol=SASL_SSL
+              ssl.endpoint.identification.algorithm=https
+              <%- if @service.kafka.sasl_mechanism == "PLAIN" -%>
+              sasl.mechanism=PLAIN
+              sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username\="<%= @service.kafka.username %>" password\="<%= @service.kafka.password %>";
+              <%- end -%>
+              <%- end -%>
+              EOT
+              if kafka-topics --bootstrap-server <%= @service.kafka.bootstrap_servers %> --command-config ./config --list | grep "<%= topic %>" ; then
+                echo "Topic already exist, nothing to do"
+              else
+                kafka-topics --bootstrap-server <%= @service.kafka.bootstrap_servers %> \
+                --command-config ./config --create --topic <%= topic %> \
+                --config cleanup.policy=compact --config segment.ms=600000 \
+                --config delete.retention.ms=600000 --partitions 3 --replication-factor 3
+              fi
+        <%- end -%>

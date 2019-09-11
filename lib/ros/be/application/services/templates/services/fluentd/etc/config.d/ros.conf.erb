@@ -1,11 +1,11 @@
 <%= @service.fluentd.header %>
-    <% if @service.fluentd.include_tcp_source %>
+    <%- if @service.fluentd.include_tcp_source -%>
     <source>
       @type forward
       port 24224
     </source>
-    <% end %>
-    <filter <%= @service.fluentd.request_log_tag %>>
+    <%- end -%>
+    <filter **.rack-traffic-log>
       @type record_modifier
       # write a temporary field _unix_time
       <record>
@@ -13,37 +13,53 @@
       </record>
     </filter>
 
-    <filter <%= @service.fluentd.request_log_tag %>>
+    <filter **.rack-traffic-log>
       @type record_transformer
       enable_ruby true
       renew_time_key _unix_time
       remove_keys _unix_time
     </filter>
 
-    <match <%= @service.fluentd.request_log_tag %>>
+    <match **.rack-traffic-log>
       @type kafka_buffered
-      brokers <%= @service.fluentd.kafka_brokers %>
-      default_topic http_request_log
+      brokers <%= @service.kafka.bootstrap_servers %>
+      ssl_ca_certs_from_system true
+      <%- if @service.kafka.security_protocol == "SASL_SSL" -%>
+      sasl_over_ssl true
+      <%- end -%>
+      <%- if @service.kafka.sasl_mechanism == "PLAIN" -%>
+      username <%= @service.kafka.username %>
+      password <%= @service.kafka.password %>
+      <%- end -%>
+      default_topic <%= @service.fluentd.http_log_kafka_topic %>
     </match>
 
-    <filter <%= @service.fluentd.event_log_tag %>>
+    <filter events-log.**>
       @type base64_decode
       fields data
     </filter>
 
-    <match <%= @service.fluentd.event_log_tag %>>
-      @type kafka2  
-      brokers <%= @service.fluentd.kafka_brokers %>      
+    <match events-log.**>
+      @type kafka2
       topic_key type
-      message_key_key id  
-      headers_from_record { "ce_specversion":"$.specversion", 
-                            "ce_type":"$.type", 
-                            "ce_source":"$.source", 
-                            "ce_id":"$.id", 
-                            "ce_time":"$.time", 
-                            "ce_datacontenttype":"$.datacontenttype", 
-                            "ce_schemaurl":"$.schemaurl", 
-                            "ce_subject":"$.subject" 
+      message_key_key id
+      brokers <%= @service.kafka.bootstrap_servers %>
+      ssl_ca_certs_from_system true
+      <%- if @service.kafka.security_protocol == "SASL_SSL" -%>
+      sasl_over_ssl true
+      <%- end -%>
+      <%- if @service.kafka.sasl_mechanism == "PLAIN" -%>
+      username <%= @service.kafka.username %>
+      password <%= @service.kafka.password %>
+      <%- end -%>
+      headers_from_record { "ce_specversion":"$.specversion",
+                            "ce_type":"$.type",
+                            "ce_source":"$.source",
+                            "ce_id":"$.id",
+                            "ce_time":"$.time",
+                            "ce_datacontenttype":"$.datacontenttype",
+                            "ce_schemaurl":"$.schemaurl",
+                            "ce_subject":"$.subject"
                           }
 
       <format>

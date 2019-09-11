@@ -67,7 +67,6 @@ module Ros
           elsif @platform_services.empty? and not @infra_services.empty?
             @force_infra_deploy = true
           end
-
           generate_config if stale_config
           if options.force or not system_cmd("kubectl get ns #{namespace}", kube_env)
             STDOUT.puts 'Forcing namespace create' if options.force

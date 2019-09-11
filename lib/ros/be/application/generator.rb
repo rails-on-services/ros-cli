@@ -25,13 +25,27 @@ module Ros
           def compose_project_name; "#{Stack.name}_#{current_feature_set}" end
 
           def current_feature_set
-            # @feature_set ||= (override_feature_set ? Stack.branch_name : settings.config.feature_set)
-            @feature_set ||= (override_feature_set ? Stack.tag_name.gsub(settings.config.deploy_tag, '') : settings.config.feature_set)
+            @feature_set ||=  override_feature_set ? override_feature_set : config.feature_set
           end
 
           def override_feature_set
-            # @override_feature_set ||= (settings.config.feature_from_branch and not Stack.branch_name.eql?(settings.config.feature_set))
-            @override_feature_set ||= (settings.config.deploy_tag and Stack.tag_name.start_with?(settings.config.deploy_tag))
+            if config.feature_from_branch
+              if config.branch_regex
+                regex = Regexp.new(config.branch_regex)
+                Stack.branch_name.match(regex).captures[0]
+              else
+                Stack.branch_name
+              end
+            elsif config.feature_from_tag && !Stack.tag_name.nil? && !Stack.tag_name.empty?
+              if config.tag_regex
+                regex = Regexp.new(config.tag_regex)
+                Stack.tag_name.match(regex).captures[0]
+              else
+                Stack.tag_name
+              end
+            else
+              nil
+            end
           end
 
           def environment

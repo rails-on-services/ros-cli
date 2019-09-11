@@ -6,19 +6,31 @@ deploy:
     releases:
       - name: kafka-schema-registry
         chartPath: <%= @service.chart_path %>/cp-helm-charts/cp-schema-registry
-        skipBuildDependencies: true        
+        skipBuildDependencies: true
         overrides:
-          imageTag: 5.3.0  
-          replicaCount: 1          
+          imageTag: 5.3.0
+          replicaCount: 1
           fullnameOverride: kafka-schema-registry
           podLabels:
             app.kubernetes.io/name: kafka-schema-registry
           kafka:
-            bootstrapServers: "PLAINTEXT://kafka-headless:9092"
+            <%- if @service.kafka.security_protocol == "SASL_SSL" -%>
+            bootstrapServers: "SASL_SSL://<%= @service.kafka.bootstrap_servers %>"
+            <%- else -%>
+            bootstrapServers: "PLAINTEXT://<%= @service.kafka.bootstrap_servers %>"
+            <%- end -%>
+
+          configurationOverrides:
+            <%- if @service.kafka.security_protocol == "SASL_SSL" -%>
+            kafkastore.security.protocol: SASL_SSL
+            <%- if @service.kafka.sasl_mechanism == "PLAIN" -%>
+            kafkastore.sasl.mechanism: PLAIN
+            kafkastore.sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="<%= @service.kafka.username %>" password="<%= @service.kafka.password %>";
+            <%- end -%>
+            <%- end -%>
+            kafkastore.topic: _schemas_<%= @service.current_feature_set %>
+
           heapOptions: "-Xms1024M -Xmx1024M"
-          prometheus:
-            jmx:
-              enabled: false
           resources:
             limits:
               cpu: 1

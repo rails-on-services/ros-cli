@@ -6,12 +6,13 @@ deploy:
     releases:
       - name: kafka-connect
         chartPath: <%= @service.chart_path %>/cp-helm-charts/cp-kafka-connect
-        skipBuildDependencies: true        
+        skipBuildDependencies: true
         overrides:
           replicaCount: 1
           image: railsonservices/kafka-connect
           imageTag: latest
           nameOverride: kafka-connect
+          fullnameOverride: kafka-connect-<%= @service.current_feature_set %>
           podLabels:
             app.kubernetes.io/name: kafka-connect
           ## Kafka Connect JVM Heap Option
@@ -26,26 +27,47 @@ deploy:
           ## Additional env variables
           customEnv:
             CONNECT_LOG4J_LOGGERS: "com.wepay.kafka.connect.bigquery=DEBUG"
+            CONNECT_LOG4J_APPENDER_STDOUT_LAYOUT_CONVERSIONPATTERN: "[%d] %p %X{connector.context}%m (%c:%L)%n"
             #Below is temporary. Until I find out why env var isn't properly set from cp-schema-registry.url
             CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: "http://kafka-schema-registry:8081"
-
-          kafka:
-            bootstrapServers: "PLAINTEXT://kafka:9092"
 
           configurationOverrides:
             plugin.path: /usr/share/java,/usr/share/confluent-hub-components
             key.converter: org.apache.kafka.connect.storage.StringConverter
             value.converter: io.confluent.connect.avro.AvroConverter
             value.converter.schemas.enable: true
+            request.timeout.ms: 20000
+            retry.backoff.ms: 500
+            consumer.request.timeout.ms: 20000
+            consumer.retry.backoff.ms: 500
+            producer.request.timeout.ms: 20000
+            producer.retry.backoff.ms: 500
+            <%- if @service.kafka.security_protocol == "SASL_SSL" -%>
+            security.protocol: SASL_SSL
+            consumer.security.protocol: SASL_SSL
+            producer.security.protocol: SASL_SSL
+            ssl.endpoint.identification.algorithm: https
+            consumer.ssl.endpoint.identification.algorithm: https
+            producer.ssl.endpoint.identification.algorithm: https
+            sasl.mechanism: <%= @service.kafka.sasl_mechanism %>
+            producer.sasl.mechanism: <%= @service.kafka.sasl_mechanism %>
+            consumer.sasl.mechanism: <%= @service.kafka.sasl_mechanism %>
+            <%- if @service.kafka.sasl_mechanism == "PLAIN" -%>
+            sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="<%= @service.kafka.username %>" password="<%= @service.kafka.password %>";
+            consumer.sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="<%= @service.kafka.username %>" password="<%= @service.kafka.password %>";
+            producer.sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="<%= @service.kafka.username %>" password="<%= @service.kafka.password %>";
+            <%- end -%>
+            <%- end -%>
+            <%- @service.kafka_connect.configurationOverrides&.reject{ |k, v| v.nil? }&.each do |k, v| -%>
+            <%= k %>: <%= v %>
+            <%- end -%>
 
-            #test environment settings to save some resources
-            config.storage.replication.factor: 1
-            status.storage.replication.factor: 1
-            offset.storage.replication.factor: 1
-
-          prometheus:
-            jmx:
-              enabled: false
+          kafka:
+            <%- if @service.kafka.security_protocol == "SASL_SSL" -%>
+            bootstrapServers: "SASL_SSL://<%= @service.kafka.bootstrap_servers %>"
+            <%- else -%>
+            bootstrapServers: "PLAINTEXT://<%= @service.kafka.bootstrap_servers %>"
+            <%- end -%>
 
           cp-schema-registry:
             url: "http://kafka-schema-registry:8081"

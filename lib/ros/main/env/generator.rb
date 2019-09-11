@@ -25,7 +25,12 @@ module Ros
           end
           if File.exist?("#{Ros.deployments_dir}/#{name}.yml.enc")
             if ENV['ROS_MASTER_KEY']
-              system("ansible-vault decrypt #{Ros.deployments_dir}/#{name}.yml.enc --output #{Ros.environments_dir}/#{name}.yml")
+              # then for all encrypted files with associated wit the env, decrypt them all
+              Dir["#{Ros.deployments_dir}/#{name}*.enc"].map{ |f| File.basename(f) }.each do |f|
+                output_f = "#{Ros.environments_dir}/#{f.chomp('.enc')}"
+                STDOUT.puts "Decrypting #{f} to #{output_f}"
+                system("ansible-vault decrypt #{Ros.deployments_dir}/#{f} --output #{output_f}")
+              end
               return
             else
               STDOUT.puts "WARNING: encrypted secrets exist but 'ROS_MASTER_KEY' is not set. Generating new environment for '#{name}'"
