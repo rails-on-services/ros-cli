@@ -53,13 +53,35 @@ module Ros
           #   }
           # end
 
+          def kafka
+            @kafka ||= 
+            if application.components.services.components.kafka&.config&.enabled
+              Config::Options.new({
+                bootstrap_servers: "kafka:9092"
+              })
+            elsif application.components.services.components.kafkastack&.config&.enabled
+              Config::Options.new({
+                bootstrap_servers: "kafkastack:9092"
+              })
+            else
+              application&.config&.external_kafka || Config::Options.new
+            end
+          end
+
+          # kafka topics involved
+          def kafka_topics
+            # TODO, need to all all avro event log topics and
+            [fluentd.http_log_kafka_topic]
+          end
+
           # Configuration values for fluentd request logging config file
           def fluentd
             @fluentd ||= Config::Options.new({
               header: cluster.infra.cluster_type.eql?('kubernetes') ? "configMaps:\n  ros.conf: |" : '',
               include_tcp_source: cluster.infra.cluster_type.eql?('kubernetes') ? false : true,
-              current_feature_set: application.current_feature_set
-            }).merge!((application.components.services.components[:'fluentd'].config).to_hash)
+              current_feature_set: application.current_feature_set,
+              http_log_kafka_topic: "http_request_log"
+            }).merge!((application.components.services.components[:'fluentd'].config)&.to_hash)
           end
 
           def cluster; Ros::Be::Infra::Cluster::Model end
@@ -136,12 +158,12 @@ module Ros
           def copy_kubernetes_helm_charts
             return unless infra.cluster_type.eql?('kubernetes')
             directory('../files/helm-charts', "#{deploy_path}/helm-charts")
-            FileUtils.mkdir_p("#{destination_root}/#{deploy_path}") unless File.directory?("#{destination_root}/#{deploy_path}") 
+            FileUtils.mkdir_p("#{destination_root}/#{deploy_path}") unless File.directory?("#{destination_root}/#{deploy_path}")
             FileUtils.cp("#{Ros.environments_dir}/big_query_credentials.json", "#{destination_root}/#{deploy_path}") if File.exists?("#{Ros.environments_dir}/big_query_credentials.json")
           end
 
           private
-           
+
           def nginx_services; @nginx_services ||= (args[0] || platform_service_names) end
 
           def deploy_path

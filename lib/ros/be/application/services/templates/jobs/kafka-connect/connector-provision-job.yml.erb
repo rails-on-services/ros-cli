@@ -11,41 +11,39 @@ spec:
     spec:
       restartPolicy: OnFailure
       initContainers:
-        <% @service.kafka_connect.connectors.each do |connector| -%>
+        <%- @service.kafka_connect.connectors.each do |name, config| -%>
         - image: gcr.io/cloud-builders/curl
-          name: <%= connector[0] %>
+          name: <%= name %>
           command:
             - curl
             - -X
             - PUT
-            - http://kafka-connect:8083/connectors/<%= connector[0] %>/config
+            - http://kafka-connect:8083/connectors/<%= name %>/config
             - -H
             - "Content-Type: application/json"
             - -H
             - "Accept: application/json"
             - -d
             - >
+              <%- if config.type == 'bigquery' -%>
               {
-                "connector.class": <% if connector[1].type == 'bigquery' -%>"com.wepay.kafka.connect.bigquery.BigQuerySinkConnector",
-                <%# elsif connector[1].type == 'foo' -%>
-                <%# elsif connector[1].type == 'blah' -%><% end -%>
+                "connector.class": "com.wepay.kafka.connect.bigquery.BigQuerySinkConnector",
                 "autoUpdateSchemas": "false",
                 "bigQueryMessageTimePartitioning": "false",
                 "autoCreateTables": "true",
                 "sanitizeTopics": "true",
-                "tasks.max": "<%= connector[1].tasks ? connector[1].tasks : 2 %>",
-                "topics": "<%= connector[1].topics %>",
+                "tasks.max": "<%= config.tasks ? config.tasks : 2 %>",
+                "topics": "<%= config.topics %>",
                 "schemaRegistryLocation": "http://kafka-schema-registry:8081",
                 "topicsToTables": "(\\w+)\\.(\\w+)=$1_$2",
-                "project": "<%= connector[1].project %>",
-                "datasets": ".*=<%= connector[1].dataset %>",
+                "project": "<%= config.project %>",
+                "datasets": ".*=<%= config.dataset %>",
                 "keyfile": "/etc/google/auth/application_default_credentials.json",
-                "schemaRetriever": <% if connector[1].type == 'bigquery' -%>"com.wepay.kafka.connect.bigquery.schemaregistry.schemaretriever.SchemaRegistrySchemaRetriever",
-                <%# elsif connector[1].type == 'foo' -%>
-                <%# elsif connector[1].type == 'blah' -%><% end -%>
+                "schemaRetriever": "com.wepay.kafka.connect.bigquery.schemaregistry.schemaretriever.SchemaRegistrySchemaRetriever",
                 "key.converter": "org.apache.kafka.connect.storage.StringConverter"
               }
-        <% end -%>
+              <%- end -%>
+          <%- end -%>
       containers:
         - image: busybox:latest
           name: echo

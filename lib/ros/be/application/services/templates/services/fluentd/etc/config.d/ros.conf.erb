@@ -4,7 +4,6 @@
       @type forward
       port 24224
     </source>
-    
     <%- end -%>
     <filter **.rack-traffic-log>
       @type record_modifier
@@ -23,8 +22,16 @@
 
     <match **.rack-traffic-log>
       @type kafka_buffered
-      brokers <%= @service.fluentd.kafka_brokers %>
-      default_topic http_request_log
+      brokers <%= @service.kafka.bootstrap_servers %>
+      ssl_ca_certs_from_system true
+      <%- if @service.kafka.security_protocol == "SASL_SSL" -%>
+      sasl_over_ssl true
+      <%- end -%>
+      <%- if @service.kafka.sasl_mechanism == "PLAIN" -%>
+      username <%= @service.kafka.username %>
+      password <%= @service.kafka.password %>
+      <%- end -%>
+      default_topic <%= @service.fluentd.http_log_kafka_topic %>
     </match>
 
     <filter events-log.**>
@@ -33,24 +40,26 @@
     </filter>
 
     <match events-log.**>
-      @type kafka2  
-      brokers <%= @service.fluentd.kafka_brokers %>      
+      @type kafka2
       topic_key type
-      message_key_key id  
-      <%- if @service.fluentd.api_key && @service.fluentd.api_secret -%>
-      username <%= @service.fluentd.api_key %>
-      password <%= @service.fluentd.api_secret%>
+      message_key_key id
+      brokers <%= @service.kafka.bootstrap_servers %>
       ssl_ca_certs_from_system true
+      <%- if @service.kafka.security_protocol == "SASL_SSL" -%>
       sasl_over_ssl true
       <%- end -%>
-      headers_from_record { "ce_specversion":"$.specversion", 
-                            "ce_type":"$.type", 
-                            "ce_source":"$.source", 
-                            "ce_id":"$.id", 
-                            "ce_time":"$.time", 
-                            "ce_datacontenttype":"$.datacontenttype", 
-                            "ce_schemaurl":"$.schemaurl", 
-                            "ce_subject":"$.subject" 
+      <%- if @service.kafka.sasl_mechanism == "PLAIN" -%>
+      username <%= @service.kafka.username %>
+      password <%= @service.kafka.password %>
+      <%- end -%>
+      headers_from_record { "ce_specversion":"$.specversion",
+                            "ce_type":"$.type",
+                            "ce_source":"$.source",
+                            "ce_id":"$.id",
+                            "ce_time":"$.time",
+                            "ce_datacontenttype":"$.datacontenttype",
+                            "ce_schemaurl":"$.schemaurl",
+                            "ce_subject":"$.subject"
                           }
 
       <format>
