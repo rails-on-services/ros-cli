@@ -30,8 +30,12 @@ module Ros
                 STDOUT.puts "missing #{credentials_file}"
                 return
               end
-              infra.config.cluster.aws_profile.nil? || ENV['AWS_PROFILE'] || ENV['AWS_DEFAULT_PROFILE'] ? profile = "" : profile = "--profile #{infra.config.cluster.aws_profile}"
-              cmd_string = "aws eks update-kubeconfig --name #{name} #{profile}"
+
+              cmd_string = "aws eks update-kubeconfig --name #{name}"
+              # environment variable should be in higher priority than config
+              if infra.config.cluster.aws_profile && ! ENV['AWS_PROFILE'] && ! ENV['AWS_ACCESS_KEY_ID']
+                cmd_string = "#{cmd_string} --profile #{infra.config.cluster.aws_profile}"
+              end
 
               role_name = cli.options.role_name.nil? ? provider.cluster.role_name : cli.options.role_name
               cmd_string = "#{cmd_string} --role-arn arn:aws:iam::#{provider.account_id}:role/#{role_name}" if cli.options.long || cli.options.role_name
