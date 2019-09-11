@@ -19,8 +19,7 @@ deploy:
           configurationOverrides:
             kafkastore.security.protocol: SASL_SSL
             kafkastore.sasl.mechanism: PLAIN
-            kafkastore.sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule \
-            required username="<%= @service.kafka_schema_registry.api_key %>" password="<%= @service.kafka_schema_registry.api_secret %>";
+            kafkastore.sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="<%= @service.kafka_schema_registry.api_key %>" password="<%= @service.kafka_schema_registry.api_secret %>";
             <%- else -%>
             bootstrapServers: "PLAINTEXT://<%= @service.kafka_schema_registry.kafka_brokers %>"
             <%- end -%>

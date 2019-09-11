@@ -45,24 +45,21 @@ deploy:
             sasl.mechanism: PLAIN
             request.timeout.ms: 20000
             retry.backoff.ms: 500
-            sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule \
-            required username="<%= @service.kafka_connect.api_key %>" password="<%= @service.kafka_connect.api_secret %>";
+            sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="<%= @service.kafka_connect.api_key %>" password="<%= @service.kafka_connect.api_secret %>";
             security.protocol: SASL_SSL
 
             consumer.ssl.endpoint.identification.algorithm: https
             consumer.sasl.mechanism: PLAIN
             consumer.request.timeout.ms: 20000
             consumer.retry.backoff.ms: 500
-            consumer.sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule \
-            required username="<%= @service.kafka_connect.api_key %>" password="<%= @service.kafka_connect.api_secret %>";
+            consumer.sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="<%= @service.kafka_connect.api_key %>" password="<%= @service.kafka_connect.api_secret %>";
             consumer.security.protocol: SASL_SSL
 
             producer.ssl.endpoint.identification.algorithm: https
             producer.sasl.mechanism: PLAIN
             producer.request.timeout.ms: 20000
             producer.retry.backoff.ms: 500
-            producer.sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule \
-            required username="<%= @service.kafka_connect.api_key %>" password="<%= @service.kafka_connect.api_secret %>";
+            producer.sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="<%= @service.kafka_connect.api_key %>" password="<%= @service.kafka_connect.api_secret %>";
             producer.security.protocol: SASL_SSL
 
           kafka:
