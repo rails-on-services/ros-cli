@@ -54,9 +54,6 @@ variable "eks_worker_groups" {
 locals {
   aws_profile                         = "<%= infra.config.cluster.aws_profile.nil? ? "default" : infra.config.cluster.aws_profile %>"
   vpc_cidr                            = "<%= infra.components.vpc&.config&.cidr.nil? ? "10.0.0.0/16" : infra.components.vpc.config.cidr %>"
-  vpc_create_database_subnet_group    = <%= infra.components.vpc&.config&.create_database_subnet_group.nil? ? false : true %>
-  vpc_create_redshift_subnet_group    = <%= infra.components.vpc&.config&.create_redshift_subnet_group.nil? ? false : true %>
-  vpc_create_elasticache_subnet_group = <%= infra.components.vpc&.config&.create_elasticache_subnet_group.nil? ? false : true %>
   cluster_name                        = "<%= infra.components.kubernetes&.config&.name.nil? ? infra.config.cluster.name : infra.components.kubernetes.config.name %>"
   vpc_name                            = "<%= infra.components.vpc&.config&.name.nil? ? infra.config.cluster.name : infra.components.vpc.config.name %>"
   accelerator_name                    = "<%= infra.components.globalaccelerator&.config&.name.nil? ? infra.config.cluster.name : infra.components.globalaccelerator.config.name %>"
@@ -80,13 +77,19 @@ module "vpc" {
   enable_dns_hostnames            = true
   enable_dns_support              = true
   enable_s3_endpoint              = true
-  create_database_subnet_group    = local.vpc_create_database_subnet_group
-  create_redshift_subnet_group    = local.vpc_create_redshift_subnet_group
-  create_elasticache_subnet_group = local.vpc_create_elasticache_subnet_group
+  create_redshift_subnet_group    = false
 
   azs                 = slice(data.aws_availability_zones.available.names, 0, 3)
   public_subnets      = [for i in range(1, 4) : cidrsubnet(local.vpc_cidr, 8, i)] 
   private_subnets     = [for i in range(11, 14) : cidrsubnet(local.vpc_cidr, 8, i)]
+  <%- if infra.components.vpc&.config&.create_database_subnets %>
+  database_subnets    = [for i in range(4, 7) : cidrsubnet(local.vpc_cidr, 8, i)]
+  create_database_subnet_group    = true
+  <%- end -%>
+  <%- if infra.components.vpc&.config&.vpc_create_elasticache_subnets %>
+  elasticache_subnets = [for i in range(7, 10) : cidrsubnet(local.vpc_cidr, 8, i)]
+  create_elasticache_subnet_group = true
+  <%- end -%>
 
   tags = var.tags
 
@@ -171,7 +174,7 @@ module "eks-resources" {
   vpc_id                            = module.vpc.vpc_id
 }
 
-<% if infra.components.globalaccelerator&.config&.enabled -%>
+<%- if infra.components.globalaccelerator&.config&.enabled -%>
 # Global accelerator
 module "globalaccelerator" {
   source                      = "./aws/globalaccelerator"
@@ -186,7 +189,23 @@ module "globalaccelerator" {
 output "globalaccelerator_ips" {
   value = module.globalaccelerator.globalaccelerator_ips
 }
+<% end -%>
 
+<%- if infra.components&.databases&.config&.enabled -%>
+<%- infra.components.databases.config.clusters&.each do |key, config| -%>
+module "rds-<%= key %>" {
+  source        = "./aws/rds"
+  name          = "<%= config.name %>"
+  instance_type = "<%= config.instance_type %>"
+  replica_count = "<%= config.replica_count %>"
+  username      = "<%= config.username %>"
+  password      = "<%= config.password %>"
+  vpc_id        = module.vpc.vpc_id
+  tags          = var.tags
+
+  db_subnet_group_name = module.vpc.database_subnet_group
+}
+<% end -%>
 <% end -%>
 
 /*
