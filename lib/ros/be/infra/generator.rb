@@ -70,7 +70,8 @@ module Ros
             kubernetes: ['eks-cluster', 'eks-resources'],
             vpc: ['vpc'],
             iam: ['eks-iam'],
-            globalaccelerator: ['globalaccelerator']
+            globalaccelerator: ['globalaccelerator'],
+            databases: ['rds']
           }[type]
         end
 
