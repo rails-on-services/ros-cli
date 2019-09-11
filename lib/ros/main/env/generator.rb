@@ -16,12 +16,20 @@ module Ros
           # If an encrypted version of the environment exists and a key is present
           # then decrypt and write the contents to config/environments
           if ENV['ROS_MASTER_KEY']
+            # TODO. This is ugly and temporary. We need generic way to decrypt and copy secrets to their destinations
+            if File.exists?("#{Ros.deployments_dir}/production-test.yml.enc")
+              system("ansible-vault decrypt #{Ros.deployments_dir}/production-test.yml.enc --output #{Ros.environments_dir}/production-test.yml")
+            end
+            if File.exists?("#{Ros.deployments_dir}/production-uat.yml.enc")
+              system("ansible-vault decrypt #{Ros.deployments_dir}/production-uat.yml.enc --output #{Ros.environments_dir}/production-uat.yml")
+            end
             if File.exists?("#{Ros.deployments_dir}/big_query_credentials.json.enc")
               system("ansible-vault decrypt #{Ros.deployments_dir}/big_query_credentials.json.enc --output #{Ros.environments_dir}/big_query_credentials.json")
             end
             if File.exists?("#{Ros.deployments_dir}/gcp_fluentd_logging_credentials.json.enc")
               system("ansible-vault decrypt #{Ros.deployments_dir}/gcp_fluentd_logging_credentials.json.enc --output #{Ros.environments_dir}/gcp_fluentd_logging_credentials.json")
             end
+
           end
           if File.exist?("#{Ros.deployments_dir}/#{name}.yml.enc")
             if ENV['ROS_MASTER_KEY']
