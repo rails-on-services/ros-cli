@@ -16,24 +16,21 @@ module Ros
           # If an encrypted version of the environment exists and a key is present
           # then decrypt and write the contents to config/environments
           if ENV['ROS_MASTER_KEY']
-            # TODO. This is ugly and temporary. We need generic way to decrypt and copy secrets to their destinations
-            if File.exists?("#{Ros.deployments_dir}/production-test.yml.enc")
-              system("ansible-vault decrypt #{Ros.deployments_dir}/production-test.yml.enc --output #{Ros.environments_dir}/production-test.yml")
-            end
-            if File.exists?("#{Ros.deployments_dir}/production-uat.yml.enc")
-              system("ansible-vault decrypt #{Ros.deployments_dir}/production-uat.yml.enc --output #{Ros.environments_dir}/production-uat.yml")
-            end
             if File.exists?("#{Ros.deployments_dir}/big_query_credentials.json.enc")
               system("ansible-vault decrypt #{Ros.deployments_dir}/big_query_credentials.json.enc --output #{Ros.environments_dir}/big_query_credentials.json")
             end
             if File.exists?("#{Ros.deployments_dir}/gcp_fluentd_logging_credentials.json.enc")
               system("ansible-vault decrypt #{Ros.deployments_dir}/gcp_fluentd_logging_credentials.json.enc --output #{Ros.environments_dir}/gcp_fluentd_logging_credentials.json")
             end
-
           end
           if File.exist?("#{Ros.deployments_dir}/#{name}.yml.enc")
             if ENV['ROS_MASTER_KEY']
-              system("ansible-vault decrypt #{Ros.deployments_dir}/#{name}.yml.enc --output #{Ros.environments_dir}/#{name}.yml")
+              # then for all encrypted files with associated wit the env, decrypt them all
+              Dir["#{Ros.deployments_dir}/#{name}*.enc"].map{ |f| File.basename(f) }.each do |f|
+                output_f = "#{Ros.environments_dir}/#{f.chomp('.enc')}"
+                STDOUT.puts "Decrypting #{f} to #{output_f}"
+                system("ansible-vault decrypt #{Ros.deployments_dir}/#{f} --output #{output_f}")
+              end
               return
             else
               STDOUT.puts "WARNING: encrypted secrets exist but 'ROS_MASTER_KEY' is not set. Generating new environment for '#{name}'"
