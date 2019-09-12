@@ -32,14 +32,14 @@ module Ros
             if config.feature_from_branch
               if config.branch_regex
                 regex = Regexp.new(config.branch_regex)
-                Stack.branch_name.match(regex).captures[0]
+                Stack.branch_name.match(regex)&.captures&[0]
               else
                 Stack.branch_name
               end
             elsif config.feature_from_tag && !Stack.tag_name.nil? && !Stack.tag_name.empty?
               if config.tag_regex
                 regex = Regexp.new(config.tag_regex)
-                Stack.tag_name.match(regex).captures[0]
+                Stack.tag_name.match(regex)&.captures&[0]
               else
                 Stack.tag_name
               end
