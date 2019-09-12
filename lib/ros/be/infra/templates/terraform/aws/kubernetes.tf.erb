@@ -2,28 +2,7 @@
 provider "aws" {
   region  = "<%= infra.components.kubernetes.config.region.nil? ? 'ap-southeast-1' : infra.components.kubernetes.config.region %>"
   profile = local.aws_profile
-}
-
-provider "kubernetes" {
-  version                = "~> 1.9"
-  host                   = module.eks-cluster.cluster_endpoint #data.aws_eks_cluster.cluster.endpoint
-  cluster_ca_certificate = base64decode(module.eks-cluster.cluster_certificate_authority_data)
-  token                  = data.aws_eks_cluster_auth.cluster-auth.token
-  load_config_file       = false
-}
-
-provider "helm" {
-  version         = "~> 0.10"
-  namespace       = "kube-system"
-  install_tiller  = true
-  tiller_image    = "gcr.io/kubernetes-helm/tiller:v2.14.3"
-  service_account = "tiller"
-
-  kubernetes {
-    host                   = module.eks-cluster.cluster_endpoint #data.aws_eks_cluster.cluster.endpoint
-    cluster_ca_certificate = base64decode(module.eks-cluster.cluster_certificate_authority_data)
-    token                  = data.aws_eks_cluster_auth.cluster-auth.token
-  }
+  version = "~> 2.27"
 }
 
 provider "local" {
@@ -63,54 +42,37 @@ locals {
 }
 
 # VPC
-data "aws_availability_zones" "available" {}
-
-# TODO refactor module aws/vpc so that it can be used by both of k8s tf and instance tf
 module "vpc" {
-  source  = "terraform-aws-modules/vpc/aws"
-  version = "~> 2.9.0"
+  source = "./aws/vpc"
 
-  name = local.vpc_name 
+  name  = local.vpc_name
   cidr = local.vpc_cidr
-
-  enable_nat_gateway              = true
-  enable_dns_hostnames            = true
-  enable_dns_support              = true
-  enable_s3_endpoint              = true
-  create_redshift_subnet_group    = false
-
-  azs                 = slice(data.aws_availability_zones.available.names, 0, 3)
-  public_subnets      = [for i in range(1, 4) : cidrsubnet(local.vpc_cidr, 8, i)] 
-  private_subnets     = [for i in range(11, 14) : cidrsubnet(local.vpc_cidr, 8, i)]
-  <%- if infra.components.vpc&.config&.create_database_subnets %>
-  database_subnets    = [for i in range(4, 7) : cidrsubnet(local.vpc_cidr, 8, i)]
-  create_database_subnet_group    = true
-  <%- end -%>
-  <%- if infra.components.vpc&.config&.create_elasticache_subnets %>
-  elasticache_subnets = [for i in range(7, 10) : cidrsubnet(local.vpc_cidr, 8, i)]
-  create_elasticache_subnet_group = true
-  <%- end -%>
-
   tags = var.tags
 
-  vpc_tags = {
+  <%- if infra.components.vpc&.config&.create_database_subnets -%>
+  create_database_subnets = true
+  <%- end -%>
+  <%- if infra.components.vpc&.config&.create_elasticache_subnets -%>
+  create_elasticache_subnets = true
+  <%- end -%>
+
+  vpc_tags =  {
     "kubernetes.io/cluster/${local.cluster_name}" = "shared"
   }
 
   public_subnet_tags = {
     "kubernetes.io/cluster/${local.cluster_name}" = "shared"
-    "kubernetes.io/role/elb"                          = "1"
+    "kubernetes.io/role/elb"                      = "1"
   }
 
   private_subnet_tags = {
     "kubernetes.io/cluster/${local.cluster_name}" = "shared"
-    "kubernetes.io/role/internal-elb"                 = "1"
+    "kubernetes.io/role/internal-elb"             = "1"
   }
 }
 
 output "vpc" {
-  value     = module.vpc.*
-  sensitive = true
+  value = module.vpc.this
 }
 
 # IAM
@@ -120,18 +82,17 @@ module "iam" {
 }
 
 output "iam" {
-  value     = module.iam.*
-  sensitive = true
+  value = module.iam.*
 }
 
 # EKS cluster
 module "eks-cluster" {
   source                    = "./aws/eks-cluster"
   cluster_name              = local.cluster_name
-  vpc_id                    = module.vpc.vpc_id
-  public_subnets            = module.vpc.public_subnets
-  private_subnets           = module.vpc.private_subnets
-  default_security_group_id = module.vpc.default_security_group_id
+  vpc_id                    = module.vpc.this.vpc_id
+  public_subnets            = module.vpc.this.public_subnets
+  private_subnets           = module.vpc.this.private_subnets
+  default_security_group_id = module.vpc.this.default_security_group_id
   aws_profile               = local.aws_profile
 
   eks_worker_groups = var.eks_worker_groups
@@ -142,16 +103,36 @@ module "eks-cluster" {
   tags = var.tags
 }
 
-output "eks_cluster_endpoint" {
-  value = module.eks-cluster.cluster_endpoint
-}
-
-output "eks_cluster_certificate_authority_data" {
-  value = module.eks-cluster.cluster_certificate_authority_data
-}
-
 output "eks" {
   value = module.eks-cluster.this
+}
+
+data "aws_eks_cluster_auth" "cluster-auth" {
+  depends_on = [module.eks-cluster]
+  name       = local.cluster_name
+}
+
+provider "kubernetes" {
+  version                = "~> 1.9"
+  host                   = module.eks-cluster.this.cluster_endpoint
+  cluster_ca_certificate = base64decode(module.eks-cluster.this.cluster_certificate_authority_data)
+  token                  = data.aws_eks_cluster_auth.cluster-auth.token
+  load_config_file       = false
+}
+
+provider "helm" {
+  version         = "~> 0.10"
+  namespace       = "kube-system"
+  install_tiller  = true
+  tiller_image    = "gcr.io/kubernetes-helm/tiller:v2.14.3"
+  service_account = "tiller"
+
+  kubernetes {
+    host                   = module.eks-cluster.this.cluster_endpoint
+    cluster_ca_certificate = base64decode(module.eks-cluster.this.cluster_certificate_authority_data)
+    token                  = data.aws_eks_cluster_auth.cluster-auth.token
+    load_config_file       = false
+  }
 }
 
 module "route53" {
@@ -183,10 +164,6 @@ output "acm" {
   value = module.acm.*
 }
 
-data "aws_eks_cluster_auth" "cluster-auth" {
-  name = local.cluster_name
-}
-
 module "eks-resources" {
   source                     = "./aws/eks-resources"
   aws_profile                = local.aws_profile
@@ -200,8 +177,8 @@ module "eks-resources" {
 
   istio_ingressgateway_alb_cert_arn = module.acm.this.arn
   enable_fluentd_gcp_logging        = true
-  kubeconfig                        = module.eks-cluster.kubeconfig
-  vpc_id                            = module.vpc.vpc_id
+  kubeconfig                        = module.eks-cluster.this.kubeconfig
+  vpc_id                            = module.vpc.this.vpc_id
 }
 
 output "istio_ingressgateway_alb_arn" {
@@ -234,11 +211,11 @@ module "rds-<%= key %>" {
   replica_count = "<%= config.replica_count %>"
   username      = "<%= config.username %>"
   password      = "<%= config.password %>"
-  vpc_id        = module.vpc.vpc_id
+  vpc_id        = module.vpc.this.vpc_id
   tags          = var.tags
+  subnets       = module.vpc.this.database_subnets
 
-  db_subnet_group_name          = module.vpc.database_subnet_group
-  allowed_security_groups       = [module.vpc.default_security_group_id]
+  allowed_security_groups       = [module.vpc.this.default_security_group_id]
   allowed_security_groups_count = 1
 }
 <% end -%>
@@ -249,7 +226,7 @@ module "rds-<%= key %>" {
 module "elasticache-redis-<%= key %>" {
   source        = "./aws/elasticache-redis"
   name          = "<%= config.name %>"
-  vpc_id        = module.vpc.vpc_id
+  vpc_id        = module.vpc.this.vpc_id
   tags          = var.tags
   <%- if config.node_type  -%>
   node_type     = "<%= config.node_type %>"
@@ -258,8 +235,8 @@ module "elasticache-redis-<%= key %>" {
   <%- if config.number_cache_clusters %>
   number_cache_clusters         = "<%= config.number_cache_clusters %>"
   <%- end -%>
-  elasticache_subnet_group_name = module.vpc.elasticache_subnet_group_name
-  allowed_security_groups       = [module.vpc.default_security_group_id]
+  elasticache_subnet_group_name = module.vpc.this.elasticache_subnet_group_name
+  allowed_security_groups       = [module.vpc.this.default_security_group_id]
   allowed_security_groups_count = 1
 }
 <% end -%>
