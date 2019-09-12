@@ -86,7 +86,7 @@ module "vpc" {
   database_subnets    = [for i in range(4, 7) : cidrsubnet(local.vpc_cidr, 8, i)]
   create_database_subnet_group    = true
   <%- end -%>
-  <%- if infra.components.vpc&.config&.vpc_create_elasticache_subnets %>
+  <%- if infra.components.vpc&.config&.create_elasticache_subnets %>
   elasticache_subnets = [for i in range(7, 10) : cidrsubnet(local.vpc_cidr, 8, i)]
   create_elasticache_subnet_group = true
   <%- end -%>
@@ -108,10 +108,20 @@ module "vpc" {
   }
 }
 
+output "vpc" {
+  value     = module.vpc.*
+  sensitive = true
+}
+
 # IAM
 module "iam" {
   source = "./aws/eks-iam"
   name   = local.iam_name
+}
+
+output "iam" {
+  value     = module.iam.*
+  sensitive = true
 }
 
 # EKS cluster
@@ -132,11 +142,27 @@ module "eks-cluster" {
   tags = var.tags
 }
 
+output "eks_cluster_endpoint" {
+  value = module.eks-cluster.cluster_endpoint
+}
+
+output "eks_cluster_certificate_authority_data" {
+  value = module.eks-cluster.cluster_certificate_authority_data
+}
+
+output "eks" {
+  value = module.eks-cluster.this
+}
+
 module "route53" {
   source                         = "./aws/route53"
   root_domain                    = "<%= infra.dns.root_domain %>"
   sub_domain                     = "<%= infra.dns.sub_domain %>"
   root_domain_managed_in_route53 = <%= infra.dns.root_domain_managed_in_route53 ? true : false %>
+}
+
+output "route53" {
+  value = module.route53.*
 }
 
 module "acm" {
@@ -151,6 +177,10 @@ module "acm" {
     <% end -%>
   ]
   validate_certificate      = <%= infra.dns.root_domain_managed_in_route53 ? true : false %>
+}
+
+output "acm" {
+  value = module.acm.*
 }
 
 data "aws_eks_cluster_auth" "cluster-auth" {
@@ -174,6 +204,10 @@ module "eks-resources" {
   vpc_id                            = module.vpc.vpc_id
 }
 
+output "istio_ingressgateway_alb_arn" {
+  value = module.eks-resources.istio_ingressgateway_alb_arn
+}
+
 <%- if infra.components.globalaccelerator&.config&.enabled -%>
 # Global accelerator
 module "globalaccelerator" {
@@ -183,7 +217,7 @@ module "globalaccelerator" {
   add_route53_record          = <%= infra.components.globalaccelerator&.config&.hostname.nil? ? false : true %>    
   route53_record_name         = "<%= infra.components.globalaccelerator&.config&.hostname %>"
   add_elb_listener            = true
-  elb_endpoint                = module.eks-resources.alb_arn
+  elb_endpoint                = module.eks-resources.istio_ingressgateway_alb_arn
 }
 
 output "globalaccelerator_ips" {
@@ -203,44 +237,30 @@ module "rds-<%= key %>" {
   vpc_id        = module.vpc.vpc_id
   tags          = var.tags
 
-  db_subnet_group_name = module.vpc.database_subnet_group
+  db_subnet_group_name          = module.vpc.database_subnet_group
+  allowed_security_groups       = [module.vpc.default_security_group_id]
+  allowed_security_groups_count = 1
 }
 <% end -%>
 <% end -%>
 
-/*
-output "cluster_endpoint" {
-  value = module.eks-cluster.cluster_endpoint
-}
+<%- if infra.components&.redis&.config&.enabled -%>
+<%- infra.components.redis.config.clusters&.each do |key, config| -%>
+module "elasticache-redis-<%= key %>" {
+  source        = "./aws/elasticache-redis"
+  name          = "<%= config.name %>"
+  vpc_id        = module.vpc.vpc_id
+  tags          = var.tags
+  <%- if config.node_type  -%>
+  node_type     = "<%= config.node_type %>"
+  <%- end -%>
 
-output "cluster_certificate_authority_data" {
-  value = module.eks-cluster.cluster_certificate_authority_data
+  <%- if config.number_cache_clusters %>
+  number_cache_clusters         = "<%= config.number_cache_clusters %>"
+  <%- end -%>
+  elasticache_subnet_group_name = module.vpc.elasticache_subnet_group_name
+  allowed_security_groups       = [module.vpc.default_security_group_id]
+  allowed_security_groups_count = 1
 }
-
-output "eks" {
-  value     = module.eks-cluster.this
-  sensitive = true
-}
-
-output "vpc" {
-  value     = module.vpc.*
-  sensitive = true
-}
-
-output "iam" {
-  value     = module.iam.*
-  sensitive = true
-}
-
-output "route53" {
-  value = module.route53.*
-}
-
-output "acm" {
-  value = module.acm.*
-}
-*/
-
-output "alb_arn" {
-  value = module.eks-resources.alb_arn
-}
+<% end -%>
+<% end -%>
