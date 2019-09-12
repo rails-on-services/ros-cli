@@ -35,3 +35,11 @@ variable "enable_nat_gateway" {
   default     = true
   description = "Whether to enable nat gateway for private subnets"
 }
+
+variable "create_database_subnets" {
+  default = false
+}
+
+variable "create_elasticache_subnets" {
+  default = false
+}
