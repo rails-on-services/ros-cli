@@ -42,4 +42,10 @@ resource "aws_globalaccelerator_endpoint_group" "this" {
     endpoint_id = var.elb_endpoint
     weight      = 100
   }
+
+  lifecycle {
+    ignore_changes = [
+      health_check_path,
+    ]
+  }
 }

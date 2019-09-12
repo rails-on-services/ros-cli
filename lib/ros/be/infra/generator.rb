@@ -71,7 +71,8 @@ module Ros
             vpc: ['vpc'],
             iam: ['eks-iam'],
             globalaccelerator: ['globalaccelerator'],
-            databases: ['rds']
+            databases: ['rds'],
+            redis: ['elasticache-redis']
           }[type]
         end
 
