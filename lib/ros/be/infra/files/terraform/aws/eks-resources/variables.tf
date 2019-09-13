@@ -41,9 +41,9 @@ variable "enable_fluentd_gcp_logging" {
   description = "Whether to deploy fluentd-gcp to collect node and container logs"
 }
 
-variable "fluentd_gcp_logging_service_account_json_key_path" {
+variable "fluentd_gcp_logging_service_account_json_key" {
   default     = ""
-  description = "The path to the google service account json key used for fluentd-gcp logging"
+  description = "[OPTIONAL] The content of the google service account json key used for fluentd-gcp logging"
 }
 
 variable "clusterrolebindings" {
