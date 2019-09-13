@@ -24,6 +24,8 @@ services:
       - <%= env_file %><% end %>
     depends_on:
       - wait
+    tty: true
+    stdin_open: true
     ports:
       # - "1234:1234"
       # - "9876" # druby for pry-remote

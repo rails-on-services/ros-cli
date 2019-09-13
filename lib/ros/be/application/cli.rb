@@ -72,9 +72,32 @@ module Ros
           command.exit
         end
 
+        desc 'attach SERVICE', 'attach to a running service; ctrl-f to detach; ctrl-c to stop/kill the container'
+        def attach(service)
+          command = context(options)
+          command.attach(service)
+          command.exit
+        end
+
+        desc 'deploy API', 'deploy to UAT at an endpoint'
+        def deploy(tag_name)
+          # prefix = Settings.components.be.components.application.config.deploy_tag
+          prefix = 'eanble-api.'
+          api_tag_name = "#{prefix}#{tag_name}"
+          # delete local tag
+          %x(git tag -d #{api_tag_name})
+          # delete remote tag
+          %x(git push --delete origin #{api_tag_name})
+          # retag local
+          %x(git tag -a -m #{api_tag_name} #{api_tag_name})
+          # push tag
+          %x(git push origin #{api_tag_name})
+        end
+
         desc 'up SERVICE', 'bring up service(s)'
+        option :attach, type: :boolean, aliases: '-a', desc: 'Attach to service after starting'
         option :build, type: :boolean, aliases: '-b', desc: 'Build image before run'
-        option :console, type: :boolean, aliases: '-c', desc: 'Connect to service console after starting'
+        option :console, type: :boolean, aliases: '-c', desc: "Connect to service's rails console after starting"
         option :daemon, type: :boolean, aliases: '-d', desc: 'Run in the background'
         option :force, type: :boolean, default: false, aliases: '-f', desc: 'Force cluster creation'
         option :profile, type: :string, aliases: '-p', desc: 'Service profile to bring up'
@@ -167,6 +190,7 @@ module Ros
         end
 
         desc 'restart SERVICE', 'Start and stop one or more services'
+        option :attach, type: :boolean, aliases: '-a', desc: 'Attach to service after starting'
         option :console, type: :boolean, aliases: '-c', desc: 'Connect to service console after starting'
         option :seed, type: :boolean, aliases: '--seed', desc: 'Seed the database before starting the service'
         option :shell, type: :boolean, aliases: '--sh', desc: 'Connect to service shell after starting'

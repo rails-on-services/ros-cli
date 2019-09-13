@@ -42,7 +42,7 @@ module Ros
           generate_config if stale_config
           STDOUT.puts 'NOT regenerating config' if options.v and not stale_config
           compose_options = ''
-          if options.daemon or options.console or options.shell
+          if options.daemon or options.console or options.shell or options.attach
             compose_options = '-d'
           end
           services.each do |service|
@@ -62,10 +62,12 @@ module Ros
             compose("up #{compose_options} #{service}")
             errors.add(:up, 'see terminal output') if exit_code.positive?
           end
-          reload_nginx(services)
+          # reload_nginx(services)
           status
+          # TODO: only one of console, shell or attach can be passed
           console(services.last) if options.console
           exec(services.last, 'bash') if options.shell
+          attach(services.last) if options.attach
         end
 
         def ps
@@ -119,22 +121,28 @@ module Ros
               next unless database_check(service, config)
             end
           end
-          reload_nginx(services)
+          # reload_nginx(services)
           status
           return unless services.size.eql? 1
           console(services[0]) if options.console
           exec(services[0], 'bash') if options.shell
+          attach(services.last) if options.attach
         end
 
         def stop(services)
           generate_config if stale_config
           compose("stop #{services.join(' ')}")
-          reload_nginx(services)
+          # reload_nginx(services)
         end
 
         def down(services)
           compose(:down)
           remove_cache
+        end
+
+        def attach(service)
+          project_name = Ros::Be::Application::Model.compose_project_name
+          system_cmd("docker attach #{project_name}_#{service}_1 --detach-keys='ctrl-f'", {}, true)
         end
 
         # Supporting methods
