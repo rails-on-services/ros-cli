@@ -80,3 +80,13 @@ variable "istio_ingressgateway_alb_cert_arn" {
   description = "[Optional] The AWS TLS certificates ARN (in IAM or ACM) for istio ALB ingress gateway"
 }
 
+
+variable "grafana_user" {
+  type        = string
+  description = "Grafana admin username"
+}
+
+variable "grafana_password" {
+  type        = string
+  description = "Grafana password"
+}

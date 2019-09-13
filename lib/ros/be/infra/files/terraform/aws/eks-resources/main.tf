@@ -120,7 +120,6 @@ resource "helm_release" "external-dns" {
     }
     )
   ]
-
 }
 
 resource "kubernetes_cluster_role_binding" "this" {
@@ -165,7 +164,7 @@ echo "${var.kubeconfig}" > ~/.kube/"${var.cluster_name}"_config.yaml & \
 CRDS=`kubectl get crds --kubeconfig ~/.kube/"${var.cluster_name}"_config.yaml | grep 'istio.io\|certmanager.k8s.io' | wc -l`; \
 echo "crds=$CRDS"; \
 [ $CRDS -ge 23 ] && break || sleep 10; \
-done; 
+done;
 EOS
   }
 
@@ -204,6 +203,73 @@ resource "helm_release" "istio-alb-ingressgateway" {
   lifecycle {
     create_before_destroy = false
   }
+}
+
+resource "kubernetes_secret" "grafana-credentials" {
+  depends_on = [kubernetes_namespace.extra_namespaces]
+
+  metadata {
+    name      = "grafana-credentials"
+    namespace = "monitoring"
+  }
+
+  data = {
+    username = var.grafana_user
+    password = var.grafana_password
+  }
+}
+
+resource "kubernetes_secret" "grafana-datasources" {
+  count      = length(fileset(path.module, "templates/grafana/datasources/*.yaml"))
+  depends_on = [kubernetes_namespace.extra_namespaces]
+
+  metadata {
+    name                      = "grafana-datasource-${replace(basename(sort(fileset(path.module, "templates/grafana/datasources/*.yaml"))[count.index]), ".json", "")}"
+    namespace                 = "monitoring"
+    labels = {
+      grafana_datasource = 1
+    }
+  }
+
+  data = {
+    "datasource.yaml" = file("${path.module}/${sort(fileset(path.module, "templates/grafana/datasources/*.json"))[count.index]}")
+  }
+}
+
+resource "kubernetes_config_map" "grafana-dashboards" {
+  count = length(fileset(path.module, "templates/grafana/dashboards/*.json"))
+
+  metadata {
+    name                     = "grafana-dashboard-${replace(basename(sort(fileset(path.module, "templates/grafana/dashboards/*.json"))[count.index]), ".json", "")}"
+    namespace                = "monitoring"
+    labels = {
+      grafana_dashboard = 1
+    }
+  }
+
+  data = {
+    "k8s-dashboard.json" = file("${path.module}/${sort(fileset(path.module, "templates/grafana/dashboards/*.json"))[count.index]}")
+  }
+}
+
+resource "helm_release" "grafana" {
+  depends_on = [
+    kubernetes_namespace.extra_namespaces,
+    kubernetes_secret.grafana-credentials,
+    kubernetes_config_map.grafana-dashboards,
+    kubernetes_secret.grafana-datasources
+  ]
+
+  name       = "grafana"
+  chart      = "grafana"
+  repository = "stable"
+  namespace  = "monitoring"
+  wait       = true
+
+  values = [templatefile("${path.module}/templates/grafana/helm-grafana.tpl", {
+    }
+    )
+  ]
 }
 
 # This is to create an extra kubernetes clusterrole for developers

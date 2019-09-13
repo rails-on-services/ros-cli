@@ -77,3 +77,12 @@ hook:
       requests:
         cpu: 300m
         memory: 500Mi
+prometheus_exporter:
+  command: ["bundle", "exec", "prometheus_exporter"]
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 100Mi
