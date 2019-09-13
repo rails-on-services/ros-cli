@@ -39,6 +39,7 @@ module Ros
         def apply
           generate_config if stale_config
           Dir.chdir(infra.deploy_path) do
+            system_cmd('rm -f .terraform/terraform.tfstate')
             system_cmd('terraform init', cmd_environment)
             system_cmd('terraform apply', cmd_environment)
             system_cmd('terraform output -json > output.json', cmd_environment)

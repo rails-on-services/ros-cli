@@ -19,6 +19,7 @@ module "db" {
   db_cluster_parameter_group_name = var.db_cluster_parameter_group_name
   db_parameter_group_name         = var.db_parameter_group_name
   allowed_security_groups         = var.allowed_security_groups
+  allowed_security_groups_count   = var.allowed_security_groups_count
 
   tags = var.tags
 }
