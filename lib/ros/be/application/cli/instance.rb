@@ -57,7 +57,6 @@ module Ros
             end
             if ref = svc_config(service)
               config = ref.dig(:config) || Config::Options.new
-              # binding.pry
               next unless database_check(service, config) unless config.type&.eql?('basic')
             end
             compose("up #{compose_options} #{service}")
@@ -80,8 +79,8 @@ module Ros
           #
           # TODO: the tmp file on iam should probably be ROS_ENV (as passed to image vi ENV var) / feature_set
           # TODO: when IAM service is brought down the credentials file should be removed
+          copy_service_file('iam', file, creds_file)
           errors.add(:get_credentials, "file not found: #{file}") if exit_code.positive?
-          copy_service_file("iam", file, creds_file) if exit_code.zero?
         end
 
         def copy_service_file(service_name, src, dest)
@@ -100,11 +99,11 @@ module Ros
           compose("#{run_string} #{service} #{command}", true)
         end
 
-        def logs(service)
+        def logs(*services)
           generate_config if stale_config
           compose_options = options.tail ? '-f' : ''
           trap("SIGINT") { throw StandardError } if options.tail
-          compose("logs #{compose_options} #{service}", true)
+          compose("logs #{compose_options} #{services.join(' ')}", true)
         rescue StandardError
         end
 

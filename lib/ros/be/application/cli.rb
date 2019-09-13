@@ -160,9 +160,9 @@ module Ros
 
         desc 'logs', 'Tail logs of a running service'
         option :tail, type: :boolean, aliases: '-f'
-        def logs(service)
+        def logs(*services)
           command = context(options)
-          command.logs(service)
+          command.logs(services)
           command.exit
         end
 

@@ -125,12 +125,15 @@ module Ros
           postman = JSON.parse(json.each_with_object([]) { |j, a| a.append(Credential.new(j).to_postman) }.to_json)
           envs = json.each_with_object([]) { |j, a| a.append(Credential.new(j).to_env) }
           cli = json.each_with_object([]) { |j, a| a.append(Credential.new(j).to_cli) }.join("\n\n")
+          sdk = json.each_with_object([]) { |j, a| a.append(Credential.new(j).to_sdk) }
           STDOUT.puts "Postman:"
           STDOUT.puts (postman)
           STDOUT.puts "\nEnvs:"
           STDOUT.puts (envs)
           STDOUT.puts "\nCli:"
           STDOUT.puts (cli)
+          STDOUT.puts "\nSDK:"
+          STDOUT.puts (sdk)
           STDOUT.puts "\nCredentials source: #{creds_file}"
         end
 
@@ -305,6 +308,10 @@ module Ros
           "[#{identifier}]\n" \
           "#{part_name}_access_key_id=#{credential['access_key_id']}\n" \
           "#{part_name}_secret_access_key=#{secret}"
+        end
+
+        def to_sdk
+          "Ros::Sdk::Credential.authorization='Basic #{credential['access_key_id']}:#{secret}'"
         end
 
         def to_postman
