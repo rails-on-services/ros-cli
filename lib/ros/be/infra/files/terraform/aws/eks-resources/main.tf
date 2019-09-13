@@ -60,7 +60,7 @@ resource "helm_release" "metrics-server" {
 }
 
 resource "kubernetes_secret" "fluentd-gcp-google-service-account" {
-  count = var.enable_fluentd_gcp_logging && fileexists("${path.module}/files/gcp_fluentd_logging_credentials.json") ? 1 : 0
+  count = var.enable_fluentd_gcp_logging && var.fluentd_gcp_logging_service_account_json_key != "" ? 1 : 0
 
   metadata {
     name      = "fluentd-gcp-google-service-account"
@@ -68,21 +68,22 @@ resource "kubernetes_secret" "fluentd-gcp-google-service-account" {
   }
 
   data = {
-    "application_default_credentials.json" = file("${path.module}/files/gcp_fluentd_logging_credentials.json")
+    "application_default_credentials.json" = var.fluentd_gcp_logging_service_account_json_key
   }
 }
 
 resource "helm_release" "fluentd-gcp" {
   depends_on = [kubernetes_secret.fluentd-gcp-google-service-account]
-  count      = var.enable_fluentd_gcp_logging && fileexists("${path.module}/files/gcp_fluentd_logging_credentials.json") ? 1 : 0
+  count      = var.enable_fluentd_gcp_logging ? 1 : 0
   chart      = "${path.module}/files/fluentd"
   name       = "fluentd-gcp"
   namespace  = "kube-system"
   wait       = true
 
   values = [templatefile("${path.module}/templates/helm-fluentd-gcp.tpl", {
-    cluster_name     = var.cluster_name,
-    cluster_location = var.region
+    cluster_name               = var.cluster_name,
+    cluster_location           = var.region
+    gcp_service_account_secret = var.fluentd_gcp_logging_service_account_json_key != "" ? "fluentd-gcp-google-service-account" : ""
     }
     )
   ]

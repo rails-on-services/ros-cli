@@ -19,9 +19,6 @@ module Ros
             if File.exists?("#{Ros.deployments_dir}/big_query_credentials.json.enc")
               system("ansible-vault decrypt #{Ros.deployments_dir}/big_query_credentials.json.enc --output #{Ros.environments_dir}/big_query_credentials.json")
             end
-            if File.exists?("#{Ros.deployments_dir}/gcp_fluentd_logging_credentials.json.enc")
-              system("ansible-vault decrypt #{Ros.deployments_dir}/gcp_fluentd_logging_credentials.json.enc --output #{Ros.environments_dir}/gcp_fluentd_logging_credentials.json")
-            end
           end
           if File.exist?("#{Ros.deployments_dir}/#{name}.yml.enc")
             if ENV['ROS_MASTER_KEY']

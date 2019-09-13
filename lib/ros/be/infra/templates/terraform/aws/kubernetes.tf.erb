@@ -29,6 +29,10 @@ variable "eks_worker_groups" {
   default = []
 }
 
+variable "fluentd_gcp_logging_service_account_json_key" {
+  default = ""
+}
+
 # Locals
 locals {
   aws_profile                         = "<%= infra.config.cluster.aws_profile.nil? ? "default" : infra.config.cluster.aws_profile %>"
@@ -107,6 +111,10 @@ output "eks" {
   value = module.eks-cluster.this
 }
 
+data "aws_eks_cluster" "cluster" {
+  name = local.cluster_name
+}
+
 data "aws_eks_cluster_auth" "cluster-auth" {
   depends_on = [module.eks-cluster]
   name       = local.cluster_name
@@ -114,10 +122,10 @@ data "aws_eks_cluster_auth" "cluster-auth" {
 
 provider "kubernetes" {
   version                = "~> 1.9"
-  host                   = module.eks-cluster.this.cluster_endpoint
-  cluster_ca_certificate = base64decode(module.eks-cluster.this.cluster_certificate_authority_data)
+  host                   = data.aws_eks_cluster.cluster.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority[0].data)
   token                  = data.aws_eks_cluster_auth.cluster-auth.token
-  load_config_file       = false
+  # load_config_file       = false
 }
 
 provider "helm" {
@@ -128,10 +136,10 @@ provider "helm" {
   service_account = "tiller"
 
   kubernetes {
-    host                   = module.eks-cluster.this.cluster_endpoint
-    cluster_ca_certificate = base64decode(module.eks-cluster.this.cluster_certificate_authority_data)
+    host                   = data.aws_eks_cluster.cluster.endpoint
+    cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority[0].data)
     token                  = data.aws_eks_cluster_auth.cluster-auth.token
-    load_config_file       = false
+    # load_config_file       = false
   }
 }
 
@@ -176,9 +184,11 @@ module "eks-resources" {
   istio_version              = "<%= infra.components.kubernetes.config.cluster_resources.istio_version %>"
 
   istio_ingressgateway_alb_cert_arn = module.acm.this.arn
-  enable_fluentd_gcp_logging        = true
   kubeconfig                        = module.eks-cluster.this.kubeconfig
   vpc_id                            = module.vpc.this.vpc_id
+
+  enable_fluentd_gcp_logging = <%= infra.components.kubernetes.config.cluster_resources&.cluster_logging&.provider == 'gcp' ? true : false %>
+  fluentd_gcp_logging_service_account_json_key = var.fluentd_gcp_logging_service_account_json_key
 }
 
 output "istio_ingressgateway_alb_arn" {

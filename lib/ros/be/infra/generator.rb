@@ -45,10 +45,6 @@ module Ros
           providers.each do |provider|
             template("terraform/#{provider}/#{infra.cluster_type}.tf.erb", "#{infra.deploy_path}/#{provider}-main.tf")
           end
-          # Copy over gcp creds for cluster level fluentd logging collection
-          if infra.cluster_type.eql?('kubernetes') and File.exists?("#{Ros.environments_dir}/gcp_fluentd_logging_credentials.json")
-            FileUtils.cp("#{Ros.environments_dir}/gcp_fluentd_logging_credentials.json", "#{infra.deploy_path}/aws/eks-resources/files")
-          end
           create_file("#{infra.deploy_path}/terraform.tfvars.json", "#{JSON.pretty_generate(tf_vars)}")
         end
 
@@ -109,6 +105,8 @@ module Ros
             }
             if infra.cluster_type.eql?('kubernetes')
               vars["eks_worker_groups"] = infra.components.kubernetes.config.worker_groups
+              vars["fluentd_gcp_logging_service_account_json_key"] = \
+                infra.components.kubernetes.config&.cluster_resources&.cluster_logging&.gcp_service_account_key || ""
             end
             return vars
         end
