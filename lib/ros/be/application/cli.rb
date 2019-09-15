@@ -72,7 +72,8 @@ module Ros
           command.exit
         end
 
-        desc 'attach SERVICE', 'attach to a running service; ctrl-f to detach; ctrl-c to stop/kill the container'
+        desc 'attach SERVICE', 'attach to a running service; ctrl-f to detach; ctrl-c to stop/kill the service (short-cut alias: "at")'
+        map %w(at) => :attach
         def attach(service)
           command = context(options)
           command.attach(service)
@@ -95,7 +96,7 @@ module Ros
         end
 
         desc 'up SERVICE', 'bring up service(s)'
-        option :attach, type: :boolean, aliases: '-a', desc: 'Attach to service after starting'
+        option :attach, type: :boolean, aliases: '--at', desc: 'Attach to service after starting'
         option :build, type: :boolean, aliases: '-b', desc: 'Build image before run'
         option :console, type: :boolean, aliases: '-c', desc: "Connect to service's rails console after starting"
         option :daemon, type: :boolean, aliases: '-d', desc: 'Run in the background'
@@ -183,14 +184,14 @@ module Ros
 
         desc 'logs', 'Tail logs of a running service'
         option :tail, type: :boolean, aliases: '-f'
-        def logs(*services)
+        def logs(service)
           command = context(options)
-          command.logs(services)
+          command.logs(service)
           command.exit
         end
 
         desc 'restart SERVICE', 'Start and stop one or more services'
-        option :attach, type: :boolean, aliases: '-a', desc: 'Attach to service after starting'
+        option :attach, type: :boolean, aliases: '--at', desc: 'Attach to service after starting'
         option :console, type: :boolean, aliases: '-c', desc: 'Connect to service console after starting'
         option :seed, type: :boolean, aliases: '--seed', desc: 'Seed the database before starting the service'
         option :shell, type: :boolean, aliases: '--sh', desc: 'Connect to service shell after starting'

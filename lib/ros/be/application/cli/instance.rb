@@ -101,11 +101,13 @@ module Ros
           compose("#{run_string} #{service} #{command}", true)
         end
 
-        def logs(*services)
+        def logs(service)
           generate_config if stale_config
           compose_options = options.tail ? '-f' : ''
           trap("SIGINT") { throw StandardError } if options.tail
-          compose("logs #{compose_options} #{services.join(' ')}", true)
+          project_name = Ros::Be::Application::Model.compose_project_name
+          system_cmd("docker logs #{compose_options} #{project_name}_#{service}_1", {}, true)
+          # compose("logs #{compose_options} #{services.join(' ')}", true)
         rescue StandardError
         end
 
@@ -220,6 +222,16 @@ module Ros
         def switch!
           FileUtils.rm_f('.env')
           FileUtils.ln_s(application.compose_file, '.env')
+          Dir.chdir("#{Ros.root}/services") do
+            FileUtils.rm_f('.env')
+            FileUtils.ln_s("../#{application.deploy_path}/platform", '.env')
+          end
+          if not Ros.is_ros?
+            Dir.chdir("#{Ros.root}/ros/services") do
+              FileUtils.rm_f('.env')
+              FileUtils.ln_s("../../#{application.deploy_path}/platform", '.env')
+            end
+          end
         end
 
         def namespace

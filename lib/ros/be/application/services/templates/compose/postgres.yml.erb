@@ -10,7 +10,7 @@ services:
       platform.feature_set: <%= @service.current_feature_set %>
     image: mdillon/postgis:9.6
     ports:
-      - "5432" # - "5432:5432"
+      - "5432:5432"
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
