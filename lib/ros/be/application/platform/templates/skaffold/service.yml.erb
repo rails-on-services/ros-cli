@@ -45,6 +45,11 @@ profiles:<% @service.profiles.each do |profile| %>
               # application.component: platform
               # platform.feature_set: <%= @service.current_feature_set %>
               # service.type: <%= profile %>
+            podAnnotations:
+              prometheus.io/path: /metrics
+              prometheus.io/port: "9394"
+              prometheus.io/scheme: http
+              prometheus.io/scrape: "true"
             nameOverride: <%= @service.name.to_s.gsub('_', '-') %><%= xname.gsub('_', '-') %>
             image:
               pullPolicy: <%= @service.pull_policy %>
