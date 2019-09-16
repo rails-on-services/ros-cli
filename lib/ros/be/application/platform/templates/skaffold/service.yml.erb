@@ -50,14 +50,18 @@ profiles:<% @service.profiles.each do |profile| %>
               pullPolicy: <%= @service.pull_policy %>
             imagePullSecrets:
               - name: <%= @service.pull_secret %>
-            app:<% if profile.eql?('server') %>
+            app:
+              <%- if profile.eql?('server') -%>
               command: ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "-P", "/tmp/server.pid"]
-              <% elsif profile.eql?('worker') %>
+              <%- elsif profile.eql?('worker') -%>
               command: ["bundle", "exec", "sidekiq", "-r", "spec/dummy", "-C", "config/sidekiq.yml"]
-              <% elsif profile.eql?('sqs_worker') %>
-              command: ["bundle", "exec", "shoryuken", "-r", "./app/workers", "-C", "config/shoryuken.yml"]<% end %>
-              envFromSecrets:<% @service.secrets_files.each do |name| %>
-                - <%= name %><% end %><% if profile.eql?('server') %>
+              <%- elsif profile.eql?('sqs_worker') -%>
+              command: ["bundle", "exec", "shoryuken", "-r", "./app/workers", "-C", "config/shoryuken.yml"]
+              <%- end -%>
+              envFromSecrets:
+                <%- @service.secrets_files.each do |name| -%>
+                - <%= name %>
+                <%- end -%>
             <%- if profile.eql?('server') -%>
             bootstrap:
               enabled: true
@@ -65,12 +69,17 @@ profiles:<% @service.profiles.each do |profile| %>
             hook:
               upgradeMigration:
                 enabled: true
-                command: ["bundle", "exec", "rails", "<% if @service.is_ros_service %>app:<% end %>db:migrate"]<% end %>
-            <%- if profile.eql?('worker') -%>
+                command: ["bundle", "exec", "rails", "<% if @service.is_ros_service %>app:<% end %>db:migrate"]
+            <%- elsif profile.eql?('worker') -%>
             service:
               enabled: false
-            containerPort: 
-            httpProbePath: 
+            containerPort:
+            httpProbePath:
+            bootstrap:
+              enabled: false
+            hook:
+              upgradeMigration:
+                enabled: false
             <%- end -%>
             resources:
               limits:
