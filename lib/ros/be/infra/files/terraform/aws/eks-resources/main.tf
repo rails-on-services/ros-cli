@@ -234,7 +234,7 @@ resource "kubernetes_secret" "grafana-datasources" {
   }
 
   data = {
-    basename(sort(fileset(path.module, "files/grafana/datasources/*.yaml"))[count.index]) = file("${path.module}/${sort(fileset(path.module, "files/grafana/datasources/*.json"))[count.index]}")
+    basename(sort(fileset(path.module, "files/grafana/datasources/*.yaml"))[count.index]) = file("${path.module}/${sort(fileset(path.module, "files/grafana/datasources/*.yaml"))[count.index]}")
   }
 }
 
