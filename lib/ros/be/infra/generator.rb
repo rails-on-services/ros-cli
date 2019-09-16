@@ -43,6 +43,7 @@ module Ros
           end
           # Render each provider's main.tf
           providers.each do |provider|
+            @provider_config = Stack.config.infra[provider]
             template("terraform/#{provider}/#{infra.cluster_type}.tf.erb", "#{infra.deploy_path}/#{provider}-main.tf")
           end
           create_file("#{infra.deploy_path}/terraform.tfvars.json", "#{JSON.pretty_generate(tf_vars)}")
@@ -101,7 +102,7 @@ module Ros
 
         def tf_vars
             vars = {
-              tags: infra.config.cluster.tags, 
+              tags: infra.config.cluster.tags,
             }
             if infra.cluster_type.eql?('kubernetes')
               vars["eks_worker_groups"] = infra.components.kubernetes.config.worker_groups
