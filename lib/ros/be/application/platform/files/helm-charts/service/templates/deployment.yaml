@@ -102,15 +102,15 @@ spec:
           command:
             {{- toYaml . | trim | nindent 12 }}
           {{- end }}
-          #livenessProbe:
-          #  exec:
-          #    command:
-          #      - sh
-          #      - -c
-          #      - >
-          #        export live=$(curl -s -m 5 http://localhost:9394/metrics | grep "^ruby_collector_working" | cut -d " " -f 2) && if [ "$live" != "1" ]; then exit 1; else exit 0; fi
-          #  initialDelaySeconds: 10
-          #  periodSeconds: 5
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - >
+                  export live=$(curl -s -m 5 http://localhost:9394/metrics | grep "^ruby_collector_working" | cut -d " " -f 2) && if [ "$live" != "1" ]; then exit 1; else exit 0; fi
+            initialDelaySeconds: 10
+            periodSeconds: 5
           resources:
             {{- toYaml .Values.prometheus_exporter.resources | trim | nindent 12 }}
       {{- with .Values.nodeSelector }}

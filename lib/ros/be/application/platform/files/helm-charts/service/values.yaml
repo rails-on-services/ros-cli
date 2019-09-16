@@ -50,7 +50,7 @@ app:
   # environment variables, not a list of objects with keys name and value
   # but directly an object of key and value
   env: {}
-  
+
   # existing k8s secrets for environment varialbes
   envFromSecrets: []
   # existing k8s configMaps for environment variables
@@ -78,7 +78,7 @@ hook:
         cpu: 300m
         memory: 500Mi
 prometheus_exporter:
-  command: ["bundle", "exec", "prometheus_exporter"]
+  command: ["bundle", "exec", "prometheus_exporter", "-a", "/home/rails/lib/core/lib/ros/prometheus_exporter/web_collector.rb"]
   resources:
     limits:
       cpu: 100m
