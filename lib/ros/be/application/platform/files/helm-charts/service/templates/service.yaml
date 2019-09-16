@@ -18,6 +18,9 @@ spec:
       targetPort: http
       protocol: TCP
       name: http
+    - port: 9394
+      protocol: TCP
+      name: prometheus-exporter
   selector:
     app.kubernetes.io/name: {{ include "service.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
