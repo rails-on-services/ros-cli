@@ -36,10 +36,12 @@ spec:
         - name: {{ include "service.name" . }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.containerPort }}
           ports:
             - name: http
               containerPort: {{ .Values.containerPort }}
               protocol: TCP
+          {{- end }}}
           readinessProbe:
             httpGet:
               path: {{ .Values.httpProbePath | quote }}

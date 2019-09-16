@@ -58,6 +58,11 @@ profiles:<% @service.profiles.each do |profile| %>
               command: ["bundle", "exec", "shoryuken", "-r", "./app/workers", "-C", "config/shoryuken.yml"]<% end %>
               envFromSecrets:<% @service.secrets_files.each do |name| %>
                 - <%= name %><% end %><% if profile.eql?('server') %>
+            <%- if profile.eql?('worker') -%>
+            service:
+              enabled: false
+            containerPort: 
+            <%- end -%>
             bootstrap:
               enabled: true
               command: ["bundle", "exec", "rails", "<% if @service.is_ros_service %>app:<% end %>ros:db:reset", "<% if @service.is_ros_service %>app:ros:<%= @service.name %>:<% end %>db:seed"]
