@@ -48,7 +48,7 @@ spec:
               - name: Host
                 value: localhost
           {{- with .Values.app.command }}
-          command: 
+          command:
             {{- toYaml . | trim | nindent 12 }}
           {{- end }}
           {{- with .Values.app.env }}

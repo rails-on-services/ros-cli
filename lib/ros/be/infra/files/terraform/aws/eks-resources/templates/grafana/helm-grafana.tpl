@@ -1,13 +1,13 @@
 image:
   tag: 6.3.5
-#persistence:
-#  enabled: true
-#  size: 20Gi
-#  storageClassName: pd-ssd
-#  accessModes:
-#  - ReadWriteOnce
+persistence:
+  enabled: true
+  size: 20Gi
+  storageClassName: gp2
+  accessModes:
+  - ReadWriteOnce
 service:
-  type: LoadBalancer
+  type: ClusterIP
 resources:
   limits:
     memory: 2.5Gi

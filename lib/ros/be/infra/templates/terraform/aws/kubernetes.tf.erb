@@ -49,31 +49,12 @@ locals {
 module "vpc" {
   source = "./aws/vpc"
 
-<<<<<<< HEAD
   name  = local.vpc_name
-=======
-  name = local.vpc_name
->>>>>>> Initial commit
   cidr = local.vpc_cidr
   tags = var.tags
 
-<<<<<<< HEAD
   <%- if infra.components.vpc&.config&.create_database_subnets -%>
   create_database_subnets = true
-=======
-  enable_nat_gateway              = true
-  enable_dns_hostnames            = true
-  enable_dns_support              = true
-  enable_s3_endpoint              = true
-  create_redshift_subnet_group    = false
-
-  azs                 = slice(data.aws_availability_zones.available.names, 0, 3)
-  public_subnets      = [for i in range(1, 4) : cidrsubnet(local.vpc_cidr, 8, i)]
-  private_subnets     = [for i in range(11, 14) : cidrsubnet(local.vpc_cidr, 8, i)]
-  <%- if infra.components.vpc&.config&.create_database_subnets %>
-  database_subnets    = [for i in range(4, 7) : cidrsubnet(local.vpc_cidr, 8, i)]
-  create_database_subnet_group    = true
->>>>>>> Initial commit
   <%- end -%>
   <%- if infra.components.vpc&.config&.create_elasticache_subnets -%>
   create_elasticache_subnets = true
@@ -120,7 +101,16 @@ module "eks-cluster" {
 
   eks_worker_groups = var.eks_worker_groups
 
-  eks_map_users = []
+  eks_map_users = [
+    <%- infra.components.kubernetes.config.admins&.each do |user| -%>
+    {
+      user_arn = "arn:aws:iam::<%= @provider_config.account_id %>:user/<%= user %>"
+      username = "<%= user %>"
+      group    = "system:masters"
+    },
+    <%- end -%>
+  ]
+
   eks_map_roles = module.iam.eks_map_roles
 
   tags = var.tags
@@ -144,7 +134,7 @@ provider "kubernetes" {
   host                   = data.aws_eks_cluster.cluster.endpoint
   cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority[0].data)
   token                  = data.aws_eks_cluster_auth.cluster-auth.token
-  # load_config_file       = false
+  load_config_file       = true
 }
 
 provider "helm" {
@@ -158,7 +148,7 @@ provider "helm" {
     host                   = data.aws_eks_cluster.cluster.endpoint
     cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority[0].data)
     token                  = data.aws_eks_cluster_auth.cluster-auth.token
-    # load_config_file       = false
+    load_config_file       = true
   }
 }
 
@@ -203,23 +193,19 @@ module "eks-resources" {
   istio_version              = "<%= infra.components.kubernetes.config.cluster_resources.istio_version %>"
 
   istio_ingressgateway_alb_cert_arn = module.acm.this.arn
-<<<<<<< HEAD
   kubeconfig                        = module.eks-cluster.this.kubeconfig
   vpc_id                            = module.vpc.this.vpc_id
 
-  enable_fluentd_gcp_logging = <%= infra.components.kubernetes.config.cluster_resources&.cluster_logging&.provider == 'gcp' ? true : false %>
+  enable_fluentd_gcp_logging                   = <%= infra.components.kubernetes.config.cluster_resources&.cluster_logging&.provider == 'gcp' ? true : false %>
   fluentd_gcp_logging_service_account_json_key = var.fluentd_gcp_logging_service_account_json_key
+  grafana_host                                 = "<%= infra.components.dns.config.endpoints.grafana.nil? ? "grafana" : infra.components.dns.config.endpoints.grafana %>"
+  grafana_endpoint                             = "<%= infra.components.dns.config.endpoints.grafana.nil? ? "grafana" : infra.components.dns.config.endpoints.grafana %>.${local.domain_name}"
+  grafana_user                                 = "<%= infra.components.kubernetes.config.cluster_resources.grafana.username.nil? ? "" : infra.components.kubernetes.config.cluster_resources.grafana.username %>"
+  grafana_password                             = "<%= infra.components.kubernetes.config.cluster_resources.grafana.password.nil? ? "" : infra.components.kubernetes.config.cluster_resources.grafana.password %>"
 }
 
 output "istio_ingressgateway_alb_arn" {
   value = module.eks-resources.istio_ingressgateway_alb_arn
-=======
-  enable_fluentd_gcp_logging        = true
-  kubeconfig                        = module.eks-cluster.kubeconfig
-  vpc_id                            = module.vpc.vpc_id
-  grafana_user                      = "admin" #"<%= infra.components.kubernetes.config.cluster_resources.grafana_user %>"
-  grafana_password                  = "password" #"<%= infra.components.kubernetes.config.cluster_resources.grafana_password %>"
->>>>>>> Initial commit
 }
 
 <%- if infra.components.globalaccelerator&.config&.enabled -%>

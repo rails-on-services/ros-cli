@@ -12,17 +12,17 @@ def external_data():
       input_dict = json.loads(input_json)
   except ValueError as value_error:
       sys.exit(value_error)
-  
+
   # AWS profile
-  aws_profile=input_dict["aws_profile"]  
-  
+  aws_profile=input_dict["aws_profile"]
+
   # Kube config
   config_name=input_dict["config_name"]
-  homedir=os.path.expanduser('~')
-  kubeconfigpath = "{}/.kube/{}".format(homedir, config_name)
-  
+  dirname = os.path.dirname(__file__)
+  kubeconfigpath = os.path.join(dirname, "../../../kubeconfig_{}".format(config_name))
+
   # Check if kubeconfig file exists
-  if not os.path.isfile(kubeconfigpath) : 
+  if not os.path.isfile(kubeconfigpath) :
     error_output("Kubeconfig not valid: {}".format(kubeconfigpath))
 
   hostname = None
@@ -37,11 +37,11 @@ def external_data():
           'istio-alb-ingressgateway', \
           '-o', 'jsonpath={.status.loadBalancer.ingress[*].hostname}']).decode('utf-8')
       loadbalancers=subprocess.check_output(['aws', 'elbv2', \
-        'describe-load-balancers',  
+        'describe-load-balancers',
         '--profile', '{}'.format(aws_profile), \
         '--query', 'LoadBalancers[*]', \
         '--output', 'json'])
-      json_lb = json.loads(loadbalancers) 
+      json_lb = json.loads(loadbalancers)
       # Look for LB that matches istio LB hostname, output first match
       match_lb = list(filter(lambda x: x['DNSName'] == hostname and x['State']['Code'] == 'active', json_lb))
       if not match_lb:
