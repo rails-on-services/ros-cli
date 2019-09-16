@@ -20,7 +20,7 @@ fullnameOverride: ""
 podAnnotations: {}
 
 containerPort: 3000
-readinessProbePath: /healthz
+httpProbePath: /healthz
 
 service:
   enabled: true

@@ -36,17 +36,30 @@ spec:
         - name: {{ include "service.name" . }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.containerPort }}
           ports:
             - name: http
               containerPort: {{ .Values.containerPort }}
               protocol: TCP
+          {{- end }}
+          {{- if .Values.httpProbePath }}
           readinessProbe:
             httpGet:
-              path: {{ .Values.readinessProbePath | quote }}
+              path: {{ .Values.httpProbePath | quote }}
               port: http
               httpHeaders:
               - name: Host
                 value: localhost
+          livenessProbe:
+            failureThreshold: 5
+            initialDelaySeconds: 10
+            httpGet:
+              path: {{ .Values.httpProbePath | quote }}
+              port: http
+              httpHeaders:
+              - name: Host
+                value: localhost
+          {{- end }}
           {{- with .Values.app.command }}
           command: 
             {{- toYaml . | trim | nindent 12 }}
