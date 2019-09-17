@@ -77,12 +77,16 @@ hook:
       requests:
         cpu: 300m
         memory: 500Mi
-prometheus_exporter:
-  command: ["bundle", "exec", "prometheus_exporter", "-a", "/home/rails/lib/core/lib/ros/prometheus_exporter/web_collector.rb"]
+
+metrics:
+  enabled: true
+  path: /metrics
+  port: "9394"
+  command: ["bundle", "exec", "prometheus_exporter"]
   resources:
     limits:
       cpu: 100m
-      memory: 128Mi
-    requests:
-      cpu: 100m
       memory: 100Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
