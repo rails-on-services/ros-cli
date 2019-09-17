@@ -211,7 +211,7 @@ resource "kubernetes_secret" "grafana-credentials" {
 
   metadata {
     name      = "grafana-credentials"
-    namespace = "monitoring"
+    namespace = var.grafana_namespace
   }
 
   data = {
@@ -226,7 +226,7 @@ resource "kubernetes_secret" "grafana-datasources" {
 
   metadata {
     name      = "grafana-datasource-${replace(replace(basename(sort(fileset(path.module, "files/grafana/datasources/*.yaml"))[count.index]), ".json", ""), "_", "-")}"
-    namespace = "monitoring"
+    namespace = var.grafana_namespace
 
     labels = {
       grafana_datasource = 1
@@ -240,10 +240,11 @@ resource "kubernetes_secret" "grafana-datasources" {
 
 resource "kubernetes_config_map" "grafana-dashboards" {
   count = length(fileset(path.module, "files/grafana/dashboards/*.json"))
+  depends_on = [kubernetes_namespace.extra_namespaces]
 
   metadata {
     name      = "grafana-dashboard-${replace(replace(basename(sort(fileset(path.module, "files/grafana/dashboards/*.json"))[count.index]), ".json", ""), "_", "-")}"
-    namespace = "monitoring"
+    namespace = var.grafana_namespace
 
     labels = {
       grafana_dashboard = 1
@@ -263,7 +264,7 @@ resource "helm_release" "grafana-ingress" {
 
   name      = "grafana-ingress"
   chart     = "${path.module}/files/grafana-ingress"
-  namespace = "monitoring"
+  namespace = var.grafana_namespace
   wait      = true
 
   values = [templatefile("${path.module}/templates/grafana/helm-grafana-ingress.tpl", {
@@ -285,7 +286,7 @@ resource "helm_release" "grafana" {
  name       = "grafana"
  chart      = "grafana"
  repository = "stable"
- namespace  = "monitoring"
+ namespace  = var.grafana_namespace
  wait       = true
 
  values = [templatefile("${path.module}/templates/grafana/helm-grafana.tpl", {

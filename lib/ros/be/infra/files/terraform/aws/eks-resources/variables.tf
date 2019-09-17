@@ -99,3 +99,8 @@ variable "grafana_endpoint" {
   type        = string
   description = "External Grafana DNS hostname"
 }
+
+variable "grafana_namespace" {
+  type        = string
+  description = "Namespace to install Grafana and related resources"
+}

@@ -3,7 +3,6 @@ image:
 persistence:
   enabled: true
   size: 20Gi
-  storageClassName: gp2
   accessModes:
   - ReadWriteOnce
 service:

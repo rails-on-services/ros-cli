@@ -185,23 +185,28 @@ module "eks-resources" {
   source                     = "./aws/eks-resources"
   aws_profile                = local.aws_profile
   cluster_name               = local.cluster_name
-  extra_namespaces           = [ "monitoring" ]
   clusterrolebindings        = module.iam.kubernetes_clusterrolebindings
-  enable_external_dns        = <%= infra.components.kubernetes.config.cluster_resources.enable_external_dns.nil? ? false : infra.components.kubernetes.config.cluster_resources.enable_external_dns %>
+  enable_external_dns        = <%= infra.components.kubernetes.components.infra.config.enable_external_dns.nil? ? false : infra.components.kubernetes.components.infra.config.enable_external_dns %>
   external_dns_domainFilters = [module.acm.this.domain_name]
   external_dns_zoneIdFilters = [module.route53.this.zone_id]
-  istio_version              = "<%= infra.components.kubernetes.config.cluster_resources.istio_version %>"
-
+  istio_version              = "<%= infra.components.kubernetes.components.infra.config.istio.version.nil? ? '1.2.5' : infra.components.kubernetes.components.infra.config.istio.version %>"
+  extra_namespaces           = [
+    <%- infra.components.kubernetes.components.infra.config.extra_namespaces&.each do |v| -%>
+    "<%= v %>" ,
+    <%- end -%>
+    "<%= infra.components.kubernetes.components.services.components.grafana.environment.namespace %>"
+   ]
   istio_ingressgateway_alb_cert_arn = module.acm.this.arn
   kubeconfig                        = module.eks-cluster.this.kubeconfig
   vpc_id                            = module.vpc.this.vpc_id
 
-  enable_fluentd_gcp_logging                   = <%= infra.components.kubernetes.config.cluster_resources&.cluster_logging&.provider == 'gcp' ? true : false %>
+  enable_fluentd_gcp_logging                   = <%= infra.components.kubernetes.components.services.components.fluentd.environment.provider == 'gcp' ? true : false %>
   fluentd_gcp_logging_service_account_json_key = var.fluentd_gcp_logging_service_account_json_key
+  grafana_namespace                            = "<%= infra.components.kubernetes.components.services.components.grafana.environment.namespace %>"
   grafana_host                                 = "<%= infra.components.dns.config.endpoints.grafana.nil? ? "grafana" : infra.components.dns.config.endpoints.grafana %>"
   grafana_endpoint                             = "<%= infra.components.dns.config.endpoints.grafana.nil? ? "grafana" : infra.components.dns.config.endpoints.grafana %>.${local.domain_name}"
-  grafana_user                                 = "<%= infra.components.kubernetes.config.cluster_resources.grafana.username.nil? ? "" : infra.components.kubernetes.config.cluster_resources.grafana.username %>"
-  grafana_password                             = "<%= infra.components.kubernetes.config.cluster_resources.grafana.password.nil? ? "" : infra.components.kubernetes.config.cluster_resources.grafana.password %>"
+  grafana_user                                 = "<%= infra.components.kubernetes.components.services.components.grafana.environment.username.nil? ? "" : infra.components.kubernetes.components.services.components.grafana.environment.username %>"
+  grafana_password                             = "<%= infra.components.kubernetes.components.services.components.grafana.environment.password.nil? ? "" : infra.components.kubernetes.components.services.components.grafana.environment.password %>"
 }
 
 output "istio_ingressgateway_alb_arn" {
