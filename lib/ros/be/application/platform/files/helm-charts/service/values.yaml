@@ -50,7 +50,7 @@ app:
   # environment variables, not a list of objects with keys name and value
   # but directly an object of key and value
   env: {}
-  
+
   # existing k8s secrets for environment varialbes
   envFromSecrets: []
   # existing k8s configMaps for environment variables
@@ -77,3 +77,16 @@ hook:
       requests:
         cpu: 300m
         memory: 500Mi
+
+metrics:
+  enabled: true
+  path: /metrics
+  port: "9394"
+  command: ["bundle", "exec", "prometheus_exporter"]
+  resources:
+    limits:
+      cpu: 100m
+      memory: 100Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
