@@ -132,7 +132,7 @@ module Ros
         def deploy_gcp_bigquery_secret
           return if kubectl("get secret gcp-jsonkey") unless options.force
           secret = application.components.services.components[:'kafka-connect']&.config&.gcp_service_account_key
-          kube_cmd = "create secret generic gcp-jsonkey --from-literal=application_default_credentials.json=#{secret}"
+          kube_cmd = "create secret generic gcp-jsonkey --from-literal=application_default_credentials.json='#{secret}'"
           kubectl(kube_cmd)
         end
 
