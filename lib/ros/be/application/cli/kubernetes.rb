@@ -75,7 +75,6 @@ module Ros
             STDOUT.puts 'Namespace exists. skipping create. Use -f to force'
           end
           return if options.skip
-          deploy_gcp_bigquery_secret unless options.skip_infra
           deploy_services unless options.skip_infra
           deploy_platform_environment
           deploy_platform
@@ -100,8 +99,11 @@ module Ros
           env_file = "#{services_root}/services.env"
           sync_secret(env_file) if File.exists?(env_file)
           @infra_services.each do |service|
+            if service.eql?(:'kafka-connect')
+              deploy_gcp_bigquery_secret unless application.components.services.components[:'kafka-connect']&.config&.gcp_service_account_key.nil?
+            end
             if service.eql?(:ingress)
-              next true unless get_vs(name: :ingress).empty? or options.force
+              next true unless options.n || get_vs(name: :ingress).empty? || options.force
             else
               next if pod(name: service) unless @force_infra_deploy
             end
@@ -129,8 +131,8 @@ module Ros
 
         def deploy_gcp_bigquery_secret
           return if kubectl("get secret gcp-jsonkey") unless options.force
-          kube_cmd = "create secret generic gcp-jsonkey " \
-          "--from-file=application_default_credentials.json=#{services_root}/big_query_credentials.json"
+          secret = application.components.services.components[:'kafka-connect']&.config&.gcp_service_account_key
+          kube_cmd = "create secret generic gcp-jsonkey --from-literal=application_default_credentials.json=#{secret}"
           kubectl(kube_cmd)
         end
 
@@ -269,8 +271,8 @@ module Ros
         # NOTE: only goes with 'logs' for now
         def command(cmd); "#{cmd}#{options.tail ? ' -f' : ''}" end
 
-        def pod(labels = {}); get_pods(labels, true) end
-        def pods(labels = {}); get_pods(labels) end
+        def pod(labels = {}); get_pods(labels, true) unless options.n end
+        def pods(labels = {}); get_pods(labels) unless options.n end
 
         def get_pods(labels = {}, return_one = false)
           # cmd = "get pod -l app=#{service} -l app.kubernetes.io/instance=#{service} #{labels.map{ |k, v| "-l #{k}=#{v}" }.join(' ')} -o yaml"
@@ -296,7 +298,7 @@ module Ros
             Kernel.exit(1)
           end
           # TODO: Does this effectively handle > 1 pod running
-          YAML.safe_load(stdout)['items'].map { |i| i['metadata']['name'] }
+          YAML.safe_load(stdout)['items'].map { |i| i['metadata']['name'] } unless options.n
         end
 
         # Supporting methods (2)
@@ -346,7 +348,7 @@ module Ros
         def k8s_secrets_content(type = 'platform')
           require 'base64'
           kubectl_capture("get secret #{type} -o yaml")
-          return {} if exit_code.positive?
+          return {} if exit_code.positive? || options.n
           yml = YAML.load(stdout)
           yml['data'].each_with_object({}) { |a, h| h[a[0]] = Base64.decode64(a[1]) }
         end

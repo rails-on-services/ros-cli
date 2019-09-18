@@ -15,11 +15,6 @@ module Ros
           FileUtils.mkdir_p(Ros.environments_dir)
           # If an encrypted version of the environment exists and a key is present
           # then decrypt and write the contents to config/environments
-          if ENV['ROS_MASTER_KEY']
-            if File.exists?("#{Ros.deployments_dir}/big_query_credentials.json.enc")
-              system("ansible-vault decrypt #{Ros.deployments_dir}/big_query_credentials.json.enc --output #{Ros.environments_dir}/big_query_credentials.json")
-            end
-          end
           if File.exist?("#{Ros.deployments_dir}/#{name}.yml.enc")
             if ENV['ROS_MASTER_KEY']
               # then for all encrypted files with associated wit the env, decrypt them all

@@ -159,7 +159,6 @@ module Ros
             return unless infra.cluster_type.eql?('kubernetes')
             directory('../files/helm-charts', "#{deploy_path}/helm-charts")
             FileUtils.mkdir_p("#{destination_root}/#{deploy_path}") unless File.directory?("#{destination_root}/#{deploy_path}")
-            FileUtils.cp("#{Ros.environments_dir}/big_query_credentials.json", "#{destination_root}/#{deploy_path}") if File.exists?("#{Ros.environments_dir}/big_query_credentials.json")
           end
 
           private
