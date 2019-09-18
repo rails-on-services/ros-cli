@@ -54,7 +54,7 @@ module Ros
           # end
 
           def kafka
-            @kafka ||= 
+            @kafka ||=
             if application.components.services.components.kafka&.config&.enabled
               Config::Options.new({
                 bootstrap_servers: "kafka:9092"

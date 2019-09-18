@@ -101,9 +101,18 @@ module "eks-cluster" {
 
   eks_worker_groups = var.eks_worker_groups
 
-  eks_map_users = []
+  eks_map_users = [
+    <%- infra.components.kubernetes.config.admins&.each do |user| -%>
+    {
+      user_arn = "arn:aws:iam::<%= @provider_config.account_id %>:user/<%= user %>"
+      username = "<%= user %>"
+      group    = "system:masters"
+    },
+    <%- end -%>
+  ]
+
   eks_map_roles = module.iam.eks_map_roles
-  
+
   tags = var.tags
 }
 
@@ -125,7 +134,7 @@ provider "kubernetes" {
   host                   = data.aws_eks_cluster.cluster.endpoint
   cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority[0].data)
   token                  = data.aws_eks_cluster_auth.cluster-auth.token
-  # load_config_file       = false
+  load_config_file       = true
 }
 
 provider "helm" {
@@ -139,7 +148,7 @@ provider "helm" {
     host                   = data.aws_eks_cluster.cluster.endpoint
     cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority[0].data)
     token                  = data.aws_eks_cluster_auth.cluster-auth.token
-    # load_config_file       = false
+    load_config_file       = true
   }
 }
 
@@ -176,19 +185,28 @@ module "eks-resources" {
   source                     = "./aws/eks-resources"
   aws_profile                = local.aws_profile
   cluster_name               = local.cluster_name
-  extra_namespaces           = []
   clusterrolebindings        = module.iam.kubernetes_clusterrolebindings
-  enable_external_dns        = <%= infra.components.kubernetes.config.cluster_resources.enable_external_dns.nil? ? false : infra.components.kubernetes.config.cluster_resources.enable_external_dns %>
+  enable_external_dns        = <%= infra.components.kubernetes.components.services.components.external_dns&.config&.enabled.nil? ? false : infra.components.kubernetes.components.services.components.external_dns.config.enabled %>
   external_dns_domainFilters = [module.acm.this.domain_name]
   external_dns_zoneIdFilters = [module.route53.this.zone_id]
-  istio_version              = "<%= infra.components.kubernetes.config.cluster_resources.istio_version %>"
-
+  istio_version              = "<%= infra.components.kubernetes.components.services.components.istio&.config&.version.nil? ? '1.2.5' : infra.components.kubernetes.components.services.components.istio.config.version %>"
+  extra_namespaces           = [
+    <%- infra.components.kubernetes.components.infra.config.extra_namespaces&.each do |v| -%>
+    "<%= v %>" ,
+    <%- end -%>
+    "<%= infra.components.kubernetes.components.services.components.grafana.config.namespace %>"
+   ]
   istio_ingressgateway_alb_cert_arn = module.acm.this.arn
   kubeconfig                        = module.eks-cluster.this.kubeconfig
   vpc_id                            = module.vpc.this.vpc_id
 
-  enable_fluentd_gcp_logging = <%= infra.components.kubernetes.config.cluster_resources&.cluster_logging&.provider == 'gcp' ? true : false %>
+  enable_fluentd_gcp_logging                   = <%= infra.components.kubernetes.components.services.components.cluster_logging.config.provider == 'gcp' ? true : false %>
   fluentd_gcp_logging_service_account_json_key = var.fluentd_gcp_logging_service_account_json_key
+  grafana_namespace                            = "<%= infra.components.kubernetes.components.services.components.grafana.config.namespace %>"
+  grafana_host                                 = "<%= infra.components.dns.config.endpoints&.grafana.nil? ? "grafana" : infra.components.dns.config.endpoints.grafana %>"
+  grafana_endpoint                             = "<%= infra.components.dns.config.endpoints&.grafana.nil? ? "grafana" : infra.components.dns.config.endpoints.grafana %>.${local.domain_name}"
+  grafana_user                                 = "<%= infra.components.kubernetes.components.services.components.grafana&.config&.username.nil? ? "" : infra.components.kubernetes.components.services.components.grafana.config.username %>"
+  grafana_password                             = "<%= infra.components.kubernetes.components.services.components.grafana&.config&.password.nil? ? "" : infra.components.kubernetes.components.services.components.grafana.config.password %>"
 }
 
 output "istio_ingressgateway_alb_arn" {
@@ -201,7 +219,7 @@ module "globalaccelerator" {
   source                      = "./aws/globalaccelerator"
   name                        = local.accelerator_name
   route53_zone_id             = module.route53.this.zone_id
-  add_route53_record          = <%= infra.components.globalaccelerator&.config&.hostname.nil? ? false : true %>    
+  add_route53_record          = <%= infra.components.globalaccelerator&.config&.hostname.nil? ? false : true %>
   route53_record_name         = "<%= infra.components.globalaccelerator&.config&.hostname %>"
   add_elb_listener            = true
   elb_endpoint                = module.eks-resources.istio_ingressgateway_alb_arn

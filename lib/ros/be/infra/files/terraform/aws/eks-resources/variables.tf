@@ -71,7 +71,7 @@ variable "external_dns_zoneIdFilters" {
 }
 
 variable "istio_version" {
-  default     = "1.2.4"
+  default     = "1.2.5"
   description = "Istio version to install"
 }
 
@@ -80,3 +80,27 @@ variable "istio_ingressgateway_alb_cert_arn" {
   description = "[Optional] The AWS TLS certificates ARN (in IAM or ACM) for istio ALB ingress gateway"
 }
 
+variable "grafana_user" {
+  type        = string
+  description = "Grafana admin username"
+}
+
+variable "grafana_password" {
+  type        = string
+  description = "Grafana password"
+}
+
+variable "grafana_host" {
+  type        = string
+  description = "Internal Grafana host"
+}
+
+variable "grafana_endpoint" {
+  type        = string
+  description = "External Grafana DNS hostname"
+}
+
+variable "grafana_namespace" {
+  type        = string
+  description = "Namespace to install Grafana and related resources"
+}
