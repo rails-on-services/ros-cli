@@ -83,7 +83,7 @@ module Ros
         desc 'deploy API', 'deploy to UAT at an endpoint'
         def deploy(tag_name)
           # prefix = Settings.components.be.components.application.config.deploy_tag
-          prefix = 'eanble-api.'
+          prefix = 'enable-api.'
           api_tag_name = "#{prefix}#{tag_name}"
           # delete local tag
           %x(git tag -d #{api_tag_name})

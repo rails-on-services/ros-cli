@@ -51,7 +51,7 @@ module Ros
           # leaving this in in case the behvior reverts back
           # def dockerfile_path; "#{relative_path}/#{config.ros ? 'ros/' : ''}Dockerfile" end
           def dockerfile_path; 'Dockerfile' end
-          def chart_path; "helm-charts/service" end
+          def chart_path; 'helm-charts/service' end
           def is_ros_service; config.ros end
           def pull_policy; 'Always' end
           def pull_secret; Stack.registry_secret_name end

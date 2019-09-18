@@ -1,8 +1,6 @@
 ---
 version: '3'
-services:
-<% @service.profiles.each do |profile| %>
-  <% xname = profile.eql?('server') ? '' : "_#{profile}" %>
+services:<% @service.profiles.each do |profile| %><% xname = profile.eql?('server') ? '' : "_#{profile}" %>
   <%= @service.name %><%= xname %>:
     labels:
       stack.name: <%= @service.stack_name %>
@@ -12,14 +10,10 @@ services:
       platform.feature_set: <%= @service.current_feature_set %>
       service.type: <%= profile %>
       # service.type: ros
-    image: "${IMAGE_REPOSITORY}/<%= @service.name %>:${IMAGE_TAG}"
-    <% if profile.eql?('server') %>
-    command: ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "-P", "/tmp/server.pid"]
-    <% elsif profile.eql?('worker') %>
-    command: ["bundle", "exec", "sidekiq", "-r", "spec/dummy", "-C", "config/sidekiq.yml"]
-    <% elsif profile.eql?('sqs_worker') %>
-    command: ["bundle", "exec", "shoryuken", "-r", "./app/workers", "-C", "config/shoryuken.yml"]
-  <% end %>
+    image: "${IMAGE_REPOSITORY}/<%= @service.name %>:${IMAGE_TAG}"<% if profile.eql?('server') %>
+    command: ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "-P", "/tmp/server.pid"]<% elsif profile.eql?('worker') %>
+    command: ["bundle", "exec", "sidekiq",<% if @service.is_ros_service %> "-r", "spec/dummy",<% end %> "-C", "config/sidekiq.yml"]<% elsif profile.eql?('sqs_worker') %>
+    command: ["bundle", "exec", "shoryuken", "-r", "./app/workers", "-C", "config/shoryuken.yml"]<% end %>
     env_file:<% @service.env_files.each do |env_file| %>
       - <%= env_file %><% end %>
     depends_on:
