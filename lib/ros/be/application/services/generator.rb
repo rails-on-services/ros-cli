@@ -20,6 +20,22 @@ module Ros
           def current_feature_set; application.current_feature_set end
           def has_envs; !environment.nil? end
 
+          def dependency_exclusions
+            {
+              development: %i[wait sftp],
+              test: %i[wait sftp nginx]
+            }[Ros.env.to_sym]
+          end
+
+          def dependency_environments
+            {
+              postgres: '5432',
+              redis: '6379',
+              fluentd: '24224',
+              localstack: '4572'
+            }
+          end
+
           # skaffold only methods
           def relative_path; @relative_path ||= ('../' * deploy_path.split('/').size).chomp('/') end
           def chart_path; 'helm-charts' end

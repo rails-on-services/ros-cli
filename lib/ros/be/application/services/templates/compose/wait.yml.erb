@@ -2,6 +2,6 @@ version: '3'
 services:
   wait:
     image: waisbrot/wait
-    depends_on:<% service_names.reject{ |name| %i(wait sftp).include?(name) }.each do |name| %><%= "\n      - #{name}" %><% end %>
+    depends_on:<% (service_names - @service.dependency_exclusions).each do |name| %><%= "\n      - #{name}" %><% end %>
     environment:
-      TARGETS: "postgres:5432,redis:6379<% if service_names.include?(:fluentd) %>,fluentd:24224<% end %><% if service_names.include?(:localstack) %>,localstack:4572<% end %>"
+      TARGETS: "<% (service_names - @service.dependency_exclusions).each do |name|; if @service.dependency_environments.keys.include?(name) %><%= "#{name}:#{@service.dependency_environments[name]}," %><% end; end %>"
