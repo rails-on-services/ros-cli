@@ -138,8 +138,14 @@ module Ros
         end
 
         def down(services)
-          compose(:down)
-          remove_cache
+          if services.any?
+            compose("stop #{services.join(' ')}")
+            compose("rm -f #{services.join(' ')}")
+            remove_cache('iam') if services.include?('iam')
+          else
+            compose(:down)
+            remove_cache
+          end
         end
 
         def attach(service)
@@ -192,11 +198,7 @@ module Ros
           FileUtils.rm(migration_file) if File.exist?(migration_file)
           if success = compose("run --rm #{name} rails #{prefix}ros:db:reset:seed")
             FileUtils.touch(migration_file)
-            if name.eql?('iam')
-              FileUtils.rm(creds_file) if File.exist?(creds_file)
-              # publish_env_credentials
-              # credentials
-            end
+            remove_cache('iam') if name.eql?('iam')
           else
             errors.add(:database_check, stderr)
           end

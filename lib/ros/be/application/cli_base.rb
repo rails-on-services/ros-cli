@@ -22,8 +22,12 @@ module Ros
         end
 
         # TODO: fully implement so when down is called that all runtime and docs are revmoed
-        def remove_cache
-          FileUtils.rm_rf(runtime_dir)
+        def remove_cache(service = nil)
+          if service.eql?('iam')
+            FileUtils.rm(creds_file) if File.exist?(creds_file)
+          elsif service.nil?
+            FileUtils.rm_rf(runtime_dir)
+          end
         end
 
         def test(services)
@@ -35,7 +39,8 @@ module Ros
             prefix = is_ros ? 'app:' : ''
             exec_dir = is_ros ? 'spec/dummy/' : ''
             next if exec(service, "rails #{prefix}db:test:prepare") && exec(service, "#{exec_dir}bin/spring rspec")
-            return false
+            errors.add("failed_tests_on_#{service}", "#{service} tests failed") if exit_code.positive?
+            return false if options.fail_fast
           end
           true
         end

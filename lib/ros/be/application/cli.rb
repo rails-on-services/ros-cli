@@ -52,6 +52,7 @@ module Ros
         end
 
         desc 'test IMAGE', 'test one or all images'
+        option :fail_fast, type: :boolean, desc: "Do not continue after first service test fails"
         def test(*services)
           command = context(options)
           command.test(services)
