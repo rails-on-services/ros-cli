@@ -81,15 +81,31 @@ module Ros
           command.exit
         end
 
+        desc 'copy', 'Copy file to service'
+        option :environment, type: :string, aliases: '-e', desc: 'Environment'
+        option :profile, type: :string, aliases: '-p', desc: 'profile'
+        def copy(service, src, dest = nil)
+          command = context(options)
+          command.copy(service, src, dest)
+          command.exit
+        end
+
         desc 'deploy API', 'deploy to UAT at an endpoint'
         def deploy(tag_name)
           # prefix = Settings.components.be.components.application.config.deploy_tag
           prefix = 'enable-api.'
           api_tag_name = "#{prefix}#{tag_name}"
-          # delete local tag
-          %x(git tag -d #{api_tag_name})
-          # delete remote tag
-          %x(git push --delete origin #{api_tag_name})
+          existing_local_tags = %x(git tag)
+          if existing_local_tags.split.select { |tag| tag.eql?(api_tag_name) }.any?
+            # delete local tag
+            %x(git tag -d #{api_tag_name})
+          end
+          ls_remote_tags = %x(git ls-remote --tags)
+          existing_remote_tags = ls_remote_tags.split("\n").map { |tag_string| tag_string.split("\t").last.gsub('refs/tags/', '') }
+          if existing_remote_tags.select { |tag| tag.eql?(api_tag_name) }.any?
+            # delete remote tag
+            %x(git push --delete origin #{api_tag_name})
+          end
           # retag local
           %x(git tag -a -m #{api_tag_name} #{api_tag_name})
           # push tag

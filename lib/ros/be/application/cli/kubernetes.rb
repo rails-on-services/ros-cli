@@ -244,8 +244,15 @@ module Ros
           kubectl("cp #{pod}:#{src} #{dest}")
         end
 
+        def copy(service, src, dest = nil)
+          dest ||= src
+          pod = pod(name: service, component: 'server')
+          kubectl("cp #{src} #{pod}:#{dest}")
+        end
+
         def down(services)
           if services.empty?
+            # TODO: Are you sure?
             cmd = "kubectl delete ns #{namespace}"
             system_cmd(cmd)
             remove_cache

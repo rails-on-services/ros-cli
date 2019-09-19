@@ -99,7 +99,9 @@ module Ros
 
     # def platform; @platform ||= Ros::Platform.descendants.first end
     def env; @env ||= StringInquirer.new(ENV['ROS_ENV'] || default_env) end
+    def profile; @profile ||= StringInquirer.new(ENV['ROS_PROFILE'] || '') end
     def env=(env); @env = StringInquirer.new(env) end
+    def profile=(profile); @profile = StringInquirer.new(profile) end
     def default_env; @default_env ||= 'development' end
 
     def root
