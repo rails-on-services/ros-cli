@@ -14,3 +14,4 @@ runcmd:
   - su -c "~/${project_name}/ros/setup/setup.sh" - ubuntu
   - su -c "cd ~/${project_name}/ros/setup && ./backend.yml" - ubuntu
   - su -c "cd ~/${project_name}/ros/setup && ./devops.yml" - ubuntu
+  - su -c "cd ~/${project_name}/ros/setup && ./cli.yml" - ubuntu

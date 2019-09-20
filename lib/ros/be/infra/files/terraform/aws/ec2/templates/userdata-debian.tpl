@@ -14,3 +14,4 @@ runcmd:
   - su -c "~/${project_name}/ros/setup/setup.sh" - admin
   - su -c "cd ~/${project_name}/ros/setup && ./backend.yml" - admin
   - su -c "cd ~/${project_name}/ros/setup && ./devops.yml" - admin
+  - su -c "cd ~/${project_name}/ros/setup && ./cli.yml" - admin
