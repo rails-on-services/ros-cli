@@ -53,7 +53,7 @@ module Ros
     end
 
     def exit
-      STDOUT.puts(errors.messages.map{ |(k, v)| "#{k} error:\n---\n#{v}\n---" }) if errors.size.positive?
+      STDOUT.puts(errors.messages.map{ |(k, v)| "#{v}\n" }) if errors.size.positive?
       Kernel.exit(errors.size)
     end
 

@@ -34,16 +34,26 @@ module Ros
           switch!
           services = enabled_services if services.empty?
           generate_config if stale_config
+          build(services) if options.build
           services.each do |service|
-            is_ros = svc_config(service)&.config&.ros
-            prefix = is_ros ? 'app:' : ''
-            exec_dir = is_ros ? 'spec/dummy/' : ''
-            next if exec(service, "rails #{prefix}db:test:prepare") && exec(service, "#{exec_dir}bin/spring rspec")
-            errors.add("failed_tests_on_#{service}", "#{service} tests failed") if exit_code.positive?
-            return false if options.fail_fast
+            test_commands(service).each do |test_command|
+              exec(service, test_command)
+              next if exit_code.zero?
+              errors.add("#{service} #{test_command}", "#{service} failed on #{test_command}")
+              break if options.fail_fast
+            end
+            break if errors.size.positive? and options.fail_all
+            push([service]) if errors.size.zero? and options.push
           end
-          true
         end
+
+        def test_commands(service)
+          is_ros = svc_config(service)&.config&.ros
+          prefix = is_ros ? 'app:' : ''
+          exec_dir = is_ros ? 'spec/dummy/' : ''
+          ['bundle exec rubocop', "rails #{prefix}db:test:prepare", "#{exec_dir}bin/spring rspec"]
+        end
+
 
         def svc_config(service); Settings.components.be.components.application.components.platform.components.dig(service) end
 

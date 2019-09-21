@@ -44,6 +44,7 @@ module Ros
         end
 
         desc 'build IMAGE', 'build one or all images'
+        option :shell, type: :boolean, aliases: '--sh', desc: 'Connect to service shell after building'
         map %w(b) => :build
         def build(*services)
           command = context(options)
@@ -52,7 +53,10 @@ module Ros
         end
 
         desc 'test IMAGE', 'test one or all images'
-        option :fail_fast, type: :boolean, desc: "Do not continue after first service test fails"
+        option :build, type: :boolean, aliases: '-b', desc: 'Build image before testing'
+        option :fail_all, type: :boolean, aliases: '--fa', desc: 'Skip any remaining services after a test fails'
+        option :fail_fast, type: :boolean, aliases: '--ff', desc: 'Skip any remaining tests for a service after a test fails'
+        option :push, type: :boolean, aliases: '-p', desc: 'Push image after successful testing'
         def test(*services)
           command = context(options)
           command.test(services)
@@ -194,7 +198,8 @@ module Ros
         end
 
         desc 'sh SERVICE', 'execute an interactive shell on a service'
-        # NOTE: shell is a reserved word
+        # NOTE: shell is a reserved word in Thor so it can't be used
+        option :build, type: :boolean, aliases: '-b', desc: 'Build image before executing shell'
         def sh(service)
           exec(service, 'bash')
         end

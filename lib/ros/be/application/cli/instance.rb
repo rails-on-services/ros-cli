@@ -22,6 +22,7 @@ module Ros
           generate_config if stale_config
           compose("build --parallel #{services.join(' ')}")
           errors.add(:build, 'see terminal output') unless exit_code.zero?
+          exec(services.last, 'bash') if options.shell
         end
 
         def pull(services)
@@ -97,6 +98,7 @@ module Ros
 
         def exec(service, command)
           generate_config if stale_config
+          build([service]) if command.eql?('bash') and options.build
           run_string = services.include?(service) ? 'exec' : 'run --rm'
           compose("#{run_string} #{service} #{command}", true)
         end
