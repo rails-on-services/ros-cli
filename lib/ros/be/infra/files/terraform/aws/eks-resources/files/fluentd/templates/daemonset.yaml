@@ -44,7 +44,7 @@ spec:
         # Writing to a file, which is not exported to the back-end prevents it.
         # It also allows to increase the fluentd verbosity by default.
         - name: FLUENTD_OPT
-          value: --no-supervisor -o /var/log/fluentd.log
+          value: --no-supervisor -o /var/log/fluentd.log --log-rotate-age 5 --log-rotate-size 104857600
         - name: K8S_NODE_NAME
           valueFrom:
             fieldRef:
