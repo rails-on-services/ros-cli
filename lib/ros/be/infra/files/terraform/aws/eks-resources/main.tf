@@ -73,12 +73,13 @@ resource "kubernetes_secret" "fluentd-gcp-google-service-account" {
 }
 
 resource "helm_release" "fluentd-gcp" {
-  depends_on = [kubernetes_secret.fluentd-gcp-google-service-account]
-  count      = var.enable_fluentd_gcp_logging ? 1 : 0
-  chart      = "${path.module}/files/fluentd"
-  name       = "fluentd-gcp"
-  namespace  = "kube-system"
-  wait       = true
+  depends_on   = [kubernetes_secret.fluentd-gcp-google-service-account]
+  count        = var.enable_fluentd_gcp_logging ? 1 : 0
+  chart        = "${path.module}/files/fluentd"
+  name         = "fluentd-gcp"
+  namespace    = "kube-system"
+  wait         = true
+  force_update = true
 
   values = [templatefile("${path.module}/templates/helm-fluentd-gcp.tpl", {
     cluster_name               = var.cluster_name,
