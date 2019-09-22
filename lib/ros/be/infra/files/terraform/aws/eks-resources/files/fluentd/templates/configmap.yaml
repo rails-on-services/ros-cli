@@ -228,6 +228,7 @@ data:
           # Cap the combined memory usage of this buffer and the one below to
           # 2MiB/chunk * (6 + 2) chunks = 16 MiB
           # buffer_queue_limit 6
+          total_limit_size 16Mb
           # Never wait more than 5 seconds before flushing logs in the non-error case.
           flush_interval 5s
           # Never wait longer than 30 seconds between retries.
@@ -294,6 +295,7 @@ data:
           # Cap the combined memory usage of this buffer and the one below to
           # 2MiB/chunk * (6 + 2) chunks = 16 MiB
           # buffer_queue_limit 6
+          total_limit_size 16Mb
           # Never wait more than 5 seconds before flushing logs in the non-error case.
           flush_interval 5s
           # Never wait longer than 30 seconds between retries.
