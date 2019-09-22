@@ -18,7 +18,7 @@ spec:
             - curl
             - -X
             - PUT
-            - http://kafka-connect:8083/connectors/<%= name %>/config
+            - http://kafka-connect-<%= @service.current_feature_set %>:8083/connectors/<%= name %>-<%= @service.current_feature_set %>/config
             - -H
             - "Content-Type: application/json"
             - -H

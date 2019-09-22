@@ -26,10 +26,9 @@ deploy:
               memory: 1Gi
           ## Additional env variables
           customEnv:
-            CONNECT_LOG4J_LOGGERS: "com.wepay.kafka.connect.bigquery=DEBUG"
+            CONNECT_LOG4J_LOGGERS: "com.wepay.kafka.connect.bigquery=DEBUG,org.apache.kafka.connect.runtime.rest=DEBUG"
             CONNECT_LOG4J_APPENDER_STDOUT_LAYOUT_CONVERSIONPATTERN: "[%d] %p %X{connector.context}%m (%c:%L)%n"
-            #Below is temporary. Until I find out why env var isn't properly set from cp-schema-registry.url
-            CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: "http://kafka-schema-registry:8081"
+            CONNECT_LOG4J_ROOT_LOGLEVEL: "WARN"
 
           configurationOverrides:
             plugin.path: /usr/share/java,/usr/share/confluent-hub-components
