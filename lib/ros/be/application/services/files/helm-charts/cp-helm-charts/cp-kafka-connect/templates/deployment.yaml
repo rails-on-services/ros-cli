@@ -84,9 +84,9 @@ spec:
               value: {{ template "cp-kafka-connect.fullname" . }}-offset
             - name: CONNECT_STATUS_STORAGE_TOPIC
               value: {{ template "cp-kafka-connect.fullname" . }}-status
-            - name: CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL
-              value: {{ template "cp-kafka-connect.cp-schema-registry.service-name" .}}
             - name: CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL
+              value: {{ template "cp-kafka-connect.cp-schema-registry.service-name" .}}
+            - name: CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL
               value: {{ template "cp-kafka-connect.cp-schema-registry.service-name" .}}
             - name: KAFKA_HEAP_OPTS
               value: "{{ .Values.heapOptions }}"
