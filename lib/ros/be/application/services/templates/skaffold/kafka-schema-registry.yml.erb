@@ -11,6 +11,7 @@ deploy:
           imageTag: 5.3.0
           replicaCount: 1
           fullnameOverride: kafka-schema-registry
+          overrideGroupId: kafka-schema-registry-<%= @service.current_feature_set %>
           podLabels:
             app.kubernetes.io/name: kafka-schema-registry
           kafka:

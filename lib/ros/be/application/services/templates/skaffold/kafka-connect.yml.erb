@@ -13,6 +13,7 @@ deploy:
           imageTag: latest
           nameOverride: kafka-connect
           fullnameOverride: kafka-connect-<%= @service.current_feature_set %>
+          overrideGroupId: kafka-connect-<%= @service.current_feature_set %>
           podLabels:
             app.kubernetes.io/name: kafka-connect
           ## Kafka Connect JVM Heap Option
