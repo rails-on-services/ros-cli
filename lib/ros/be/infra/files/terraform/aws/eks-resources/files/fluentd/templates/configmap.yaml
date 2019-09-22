@@ -202,39 +202,41 @@ data:
 
       <store>
         @type google_cloud
-        
+
         # turn off use_metadata_service will set platform to Platform::OTHER
         use_metadata_service false
         enable_metadata_agent false
 
         k8s_cluster_name "{{ .Values.clusterName }}"
         k8s_cluster_location "{{ .Values.clusterLocation }}"
-        
+
         zone "{{ .Values.clusterLocation }}"
         vm_id "other"
         detect_json true
         use_grpc true
 
-        # Set the buffer type to file to improve the reliability and reduce the memory consumption
-        buffer_type file
-        buffer_path /var/log/fluentd-buffers/kubernetes.containers.buffer
-        # Set queue_full action to block because we want to pause gracefully
-        # in case of the off-the-limits load instead of throwing an exception
-        buffer_queue_full_action block
-        # Set the chunk limit conservatively to avoid exceeding the GCL limit
-        # of 10MiB per write request.
-        buffer_chunk_limit 2M
-        # Cap the combined memory usage of this buffer and the one below to
-        # 2MiB/chunk * (6 + 2) chunks = 16 MiB
-        buffer_queue_limit 6
-        # Never wait more than 5 seconds before flushing logs in the non-error case.
-        flush_interval 5s
-        # Never wait longer than 30 seconds between retries.
-        max_retry_wait 30
-        # Disable the limit on the number of retries (retry forever).
-        disable_retry_limit
-        # Use multiple threads for processing.
-        num_threads 2
+        <buffer>
+          # Set the buffer type to file to improve the reliability and reduce the memory consumption
+          @type file
+          path /var/log/fluentd-buffers/kubernetes.containers.buffer
+          # Set queue_full action to block because we want to pause gracefully
+          # in case of the off-the-limits load instead of throwing an exception
+          overflow_action block
+          # Set the chunk limit conservatively to avoid exceeding the GCL limit
+          # of 10MiB per write request.
+          chunk_limit_size 2M
+          # Cap the combined memory usage of this buffer and the one below to
+          # 2MiB/chunk * (6 + 2) chunks = 16 MiB
+          # buffer_queue_limit 6
+          # Never wait more than 5 seconds before flushing logs in the non-error case.
+          flush_interval 5s
+          # Never wait longer than 30 seconds between retries.
+          retry_max_interval 30
+          # Disable the limit on the number of retries (retry forever).
+          retry_forever true
+          # Use multiple threads for processing.
+          flush_thread_count 2
+        </buffer>
       </store>
       <store>
         @type prometheus
@@ -259,7 +261,7 @@ data:
         logging.googleapis.com/local_resource_id k8s_node.${ENV["K8S_NODE_NAME"].split('.')[0]}
       </record>
     </filter>
-    
+
     # Keep a smaller buffer here since these logs are less important than the user's
     # container logs.
     <match **>
@@ -271,23 +273,36 @@ data:
         use_metadata_service false
         enable_metadata_agent false
         detect_subservice false
-        
+
         k8s_cluster_name "{{ .Values.clusterName }}"
         k8s_cluster_location "{{ .Values.clusterLocation }}"
-        
+
         zone "{{ .Values.clusterLocation }}"
         vm_id "other"
-        
+
         use_grpc true
-        buffer_type file
-        buffer_path /var/log/fluentd-buffers/kubernetes.system.buffer
-        buffer_queue_full_action block
-        buffer_chunk_limit 2M
-        buffer_queue_limit 2
-        flush_interval 5s
-        max_retry_wait 30
-        disable_retry_limit
-        num_threads 2
+        <buffer>
+          # Set the buffer type to file to improve the reliability and reduce the memory consumption
+          @type file
+          path /var/log/fluentd-buffers/kubernetes.system.buffer
+          # Set queue_full action to block because we want to pause gracefully
+          # in case of the off-the-limits load instead of throwing an exception
+          overflow_action block
+          # Set the chunk limit conservatively to avoid exceeding the GCL limit
+          # of 10MiB per write request.
+          chunk_limit_size 2M
+          # Cap the combined memory usage of this buffer and the one below to
+          # 2MiB/chunk * (6 + 2) chunks = 16 MiB
+          # buffer_queue_limit 6
+          # Never wait more than 5 seconds before flushing logs in the non-error case.
+          flush_interval 5s
+          # Never wait longer than 30 seconds between retries.
+          retry_max_interval 30
+          # Disable the limit on the number of retries (retry forever).
+          retry_forever true
+          # Use multiple threads for processing.
+          flush_thread_count 2
+        </buffer>
       </store>
       <store>
         @type prometheus
