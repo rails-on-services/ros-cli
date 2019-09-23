@@ -16,8 +16,9 @@ build:
   local:
     useDockerCLI: true
     push: true
-profiles:<% @service.profiles.each do |profile| %>
-  <% xname = profile.eql?('server') ? '' : "_#{profile}" %>
+profiles:
+  <%- @service.profiles.each do |profile| -%>
+  <%- xname = profile.eql?('server') ? '' : "_#{profile}" -%>
   - name: <%= profile %>
     deploy:
       helm:
@@ -97,4 +98,4 @@ profiles:<% @service.profiles.each do |profile| %>
               requests:
                 cpu: 0.5
                 memory: 2Gi
-<% end %>
+<%- end -%>
