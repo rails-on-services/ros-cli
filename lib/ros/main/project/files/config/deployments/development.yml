@@ -49,7 +49,6 @@ components:
         # Uncomment and set values to a hostname that is mapped to this machine
         # to enable public access to this installation
         config:
-          feature_from_branch: no
           feature_set: mounted
           dns:
             # domain: rails-on-services.org
