@@ -85,11 +85,6 @@ components:
                       key: value
       application:
         config:
-          # Multiple deployments can be configured by setting feature_from_branch to 'yes'
-          # When 'yes' deployments are made into the namespace taken from the branch name
-          feature_from_branch: yes
-          # When feature_from_branch is 'yes' the deployment's endpoint is mapped to api-branch.subdomain.domain
-          # A deployment from the branch with the same name as feature_set will mapped to api.subdomain.domain
           feature_set: master
         components:
           infra:
