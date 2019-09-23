@@ -8,7 +8,7 @@ module Ros
         attr_accessor :services
 
         def clean_kubernetes_name(name)
-          name.gsub(/[^a-zA-Z-]/, '-')
+          name.to_s.gsub(/[^a-zA-Z-]/, '-')
         end
         def initialize(options = {})
           @options = options
@@ -161,7 +161,8 @@ module Ros
               profiles.each do |profile|
                 run_cmd = build_count.zero? ? base_cmd : 'deploy'
                 profile_cmd = " -p #{profile}" unless profile.eql?(:none)
-                skaffold("#{run_cmd} -f #{File.basename(service_file)}#{profile_cmd}",
+                extra_arg = "--images=${SKAFFOLD_DEFAULT_REPO}/#{service}" if run_cmd.eql?('deploy')
+                skaffold("#{run_cmd} -f #{File.basename(service_file)}#{profile_cmd} #{extra_arg}",
                          { 'REPLICA_COUNT' => replica_count })
                 errors.add("skaffold_#{run_cmd}", stderr) if exit_code.positive?
                 kubectl("scale deploy #{clean_kubernetes_name(service)} --replicas=#{replica_count}")
