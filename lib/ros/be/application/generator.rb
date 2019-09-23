@@ -25,28 +25,10 @@ module Ros
           def compose_project_name; "#{Stack.name}_#{current_feature_set}" end
 
           def current_feature_set
-            @feature_set ||=  override_feature_set ? override_feature_set : config.feature_set
+            @feature_set ||=  override_feature_set.empty? ? config.feature_set : override_feature_set
           end
 
-          def override_feature_set
-            if config.feature_from_branch
-              if config.branch_regex
-                regex = Regexp.new(config.branch_regex)
-                Stack.branch_name.match(regex)&.captures&.first
-              else
-                Stack.branch_name
-              end
-            elsif config.feature_from_tag && !Stack.tag_name.nil? && !Stack.tag_name.empty?
-              if config.tag_regex
-                regex = Regexp.new(config.tag_regex)
-                Stack.tag_name.match(regex)&.captures&.first
-              else
-                Stack.tag_name
-              end
-            else
-              nil
-            end
-          end
+          def override_feature_set; StringInquirer.new(ENV['ROS_FS'] || '') end
 
           def environment
             @environment ||= Stack.environment.dup.merge!(c_environment.merge!(application_environment).to_hash)
