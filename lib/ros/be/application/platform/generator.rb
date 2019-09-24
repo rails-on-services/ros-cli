@@ -51,13 +51,13 @@ module Ros
           # leaving this in in case the behvior reverts back
           # def dockerfile_path; "#{relative_path}/#{config.ros ? 'ros/' : ''}Dockerfile" end
           def dockerfile_path; 'Dockerfile' end
-          def compose_version; Settings.components.be.config.compose_version end
           def chart_path; 'helm-charts/service' end
           def is_ros_service; config.ros end
           def pull_policy; 'Always' end
           def pull_secret; Stack.registry_secret_name end
           def secrets_files; environment ? [:platform, name.to_sym] : %i(platform) end
           def skaffold_version; Settings.components.be.config.skaffold_version end
+          def compose_version; Settings.components.be.config.compose_version || '3.2' end
         end
 
         class Generator < Thor::Group

@@ -43,7 +43,7 @@ module Ros
           def api_hostname; application.api_hostname end
           # def bucket_name; stack.current_feature_set end
           def skaffold_version; Settings.components.be.config.skaffold_version end
-          def compose_version; Settings.components.be.config.compose_version end
+          def compose_version; Settings.components.be.config.compose_version || '3.2' end
           def map_ports_to_host; false end
           def expose_ports(port)
             port, proto = port.to_s.split('/')
