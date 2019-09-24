@@ -1,5 +1,5 @@
 ---
-version: '3'
+version: '<%= @service.compose_version %>'
 services:
   fluentd:
     labels:
@@ -10,8 +10,8 @@ services:
       platform.feature_set: <%= @service.current_feature_set %>
     image: railsonservices/fluentd
     ports:
-      - "24224:24224"
-      - "24224:24224/udp"
+      - <%= @service.expose_ports(24224) %>
+      - <%= @service.expose_ports('24224/udp') %>
     volumes:
       - "<%= "#{@service.relative_path}/#{@service.runtime_path}/fluentd/log" %>:/fluentd/log"
       - "../services/fluentd/etc/config.d:/fluentd/etc/config.d"

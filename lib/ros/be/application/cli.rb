@@ -214,6 +214,7 @@ module Ros
         desc 'restart SERVICE', 'Start and stop one or more services'
         option :attach, type: :boolean, aliases: '--at', desc: 'Attach to service after starting'
         option :console, type: :boolean, aliases: '-c', desc: 'Connect to service console after starting'
+        option :daemon, type: :boolean, aliases: '-d', desc: 'Run in the background (default, does noting)'
         option :seed, type: :boolean, aliases: '--seed', desc: 'Seed the database before starting the service'
         option :shell, type: :boolean, aliases: '--sh', desc: 'Connect to service shell after starting'
         def restart(*services)

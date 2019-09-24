@@ -1,5 +1,5 @@
 ---
-version: '3'
+version: '<%= @service.compose_version %>'
 services:<% @service.profiles.each do |profile| %><% xname = profile.eql?('server') ? '' : "_#{profile}" %>
   <%= @service.name %><%= xname %>:
     labels:
@@ -25,9 +25,18 @@ services:<% @service.profiles.each do |profile| %><% xname = profile.eql?('serve
       # - "9876" # druby for pry-remote
       - "3000"<% if @service.config.mount %>
     volumes:
-      - "${<%= @service.context_dir %>}/services/<%= @service.name %>:/home/rails/services/app"
-      - "${<%= @service.context_dir %>}/lib:/home/rails/lib"<% if @service.mount_ros %>
-      - "${ROS_CONTEXT_DIR}/lib:/home/rails/ros/lib"<% end %><% end %>
+      - type: bind
+        source: "${<%= @service.context_dir %>}/services/<%= @service.name %>"
+        target: "/home/rails/services/app"
+        consistency: consistent
+      - type: bind
+        source: "${<%= @service.context_dir %>}/lib"
+        target: "/home/rails/lib"
+        consistency: consistent<% if @service.mount_ros %>
+      - type: bind
+        source: "${ROS_CONTEXT_DIR}/lib"
+        target: "/home/rails/ros/lib"
+        consistency: consistent<% end %><% end %>
     build:
       context: "${<%= @service.context_dir %>}"
       args:<% @service.image.build_args.each_pair do |name, value| %>

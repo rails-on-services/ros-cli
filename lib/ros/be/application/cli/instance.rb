@@ -125,12 +125,15 @@ module Ros
               next unless database_check(service, config)
             end
           end
-          # reload_nginx(services)
-          status
-          return unless services.size.eql? 1
-          console(services[0]) if options.console
-          exec(services[0], 'bash') if options.shell
-          attach(services.last) if options.attach
+          if options.attach
+            attach(services.last)
+          elsif options.shell
+            exec(services.last, 'bash')
+          elsif options.console
+            console(services.last)
+          else
+            status
+          end
         end
 
         def stop(services)

@@ -1,5 +1,5 @@
 ---
-version: '3'
+version: '<%= @service.compose_version %>'
 services:
   kafkastack:
     labels:
@@ -22,7 +22,7 @@ services:
       FORWARDLOGS: 0
       RUNTESTS: 0
     ports:
-      - "8081:8081"
-      - "9092:9092"
-      - "3040:3040"
-      - "7082"
+      - <%= @service.expose_ports(8081) %>
+      - <%= @service.expose_ports(9092) %>
+      - <%= @service.expose_ports(3040) %>
+      - <%= @service.expose_ports(7082) %>

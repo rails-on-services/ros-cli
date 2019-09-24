@@ -1,4 +1,5 @@
-version: '3'
+---
+version: '<%= @service.compose_version %>'
 services:
   localstack:
     labels:
@@ -15,7 +16,7 @@ services:
       HOSTNAME: localstack
       HOSTNAME_EXTERNAL: localstack
     ports:
-      - "4572:4572"
-      - "4574:4574"
-      - "4576:4576"
-      - "8080:8080"
+      - <%= @service.expose_ports(4572) %>
+      - <%= @service.expose_ports(4574) %>
+      - <%= @service.expose_ports(4576) %>
+      - <%= @service.expose_ports(8080) %>
