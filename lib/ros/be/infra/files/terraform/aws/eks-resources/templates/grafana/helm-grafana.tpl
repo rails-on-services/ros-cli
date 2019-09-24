@@ -5,6 +5,8 @@ persistence:
   size: 20Gi
   accessModes:
   - ReadWriteOnce
+deploymentStrategy:
+  type: Recreate
 service:
   type: ClusterIP
 resources:
@@ -24,15 +26,4 @@ sidecar:
   datasources:
     enabled: true
     label: grafana_datasource
-grafana.ini:
-  database:
-    type: sqlite3
-  auth.google:
-    enabled: true
-    client_id: ${client_id}
-    client_secret: ${client_secret}
-    scopes: https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email
-    auth_url: https://accounts.google.com/o/oauth2/auth
-    token_url: https://accounts.google.com/o/oauth2/token
-    allowed_domains: perxtech.com,getperx.com
-    allow_sign_up: true
+${configOverrides}

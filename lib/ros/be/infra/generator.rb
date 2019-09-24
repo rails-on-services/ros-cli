@@ -109,6 +109,9 @@ module Ros
               vars["eks_worker_groups"] = infra.components.kubernetes.config.worker_groups
               vars["fluentd_gcp_logging_service_account_json_key"] = \
                 infra.components.kubernetes.components&.services&.components&.cluster_logging&.config&.gcp_service_account_key || ""
+              infra.components.kubernetes.components&.services&.components.each do |component, config|
+                config.config&.configurationOverrides ? vars["#{component}_config_overrides"] = config.config.configurationOverrides : next
+              end
             end
             return vars
         end

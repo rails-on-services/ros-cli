@@ -33,6 +33,10 @@ variable "fluentd_gcp_logging_service_account_json_key" {
   default = ""
 }
 
+variable "grafana_config_overrides" {
+  default = {}
+}
+
 # Locals
 locals {
   aws_profile                         = "<%= infra.config.cluster.aws_profile.nil? ? "default" : infra.config.cluster.aws_profile %>"
@@ -207,6 +211,9 @@ module "eks-resources" {
   grafana_endpoint                             = "<%= infra.components.dns.config.endpoints&.grafana.nil? ? "grafana" : infra.components.dns.config.endpoints.grafana %>.${local.domain_name}"
   grafana_user                                 = "<%= infra.components.kubernetes.components.services.components.grafana&.config&.username.nil? ? "" : infra.components.kubernetes.components.services.components.grafana.config.username %>"
   grafana_password                             = "<%= infra.components.kubernetes.components.services.components.grafana&.config&.password.nil? ? "" : infra.components.kubernetes.components.services.components.grafana.config.password %>"
+  #grafana_google_client_id                     = "<%= infra.components.kubernetes.components.services.components.grafana&.config&.google_client_id.nil? ? "" : infra.components.kubernetes.components.services.components.grafana.config.google_client_id %>"
+  #grafana_google_client_secret                 = "<%= infra.components.kubernetes.components.services.components.grafana&.config&.google_client_secret.nil? ? "" : infra.components.kubernetes.components.services.components.grafana.config.google_client_secret %>"
+  grafana_config_overrides                     = var.grafana_config_overrides
 }
 
 output "istio_ingressgateway_alb_arn" {
