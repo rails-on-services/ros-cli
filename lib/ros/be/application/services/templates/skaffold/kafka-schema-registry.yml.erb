@@ -12,6 +12,9 @@ deploy:
           replicaCount: 1
           fullnameOverride: kafka-schema-registry
           overrideGroupId: kafka-schema-registry-<%= @service.current_feature_set %>
+          customEnv:
+            SCHEMA_REGISTRY_DEBUG: true
+            SCHEMA_REGISTRY_SCHEMA_REGISTRY_GROUP_ID: schema-registry-<%= @service.current_feature_set %>
           podLabels:
             app.kubernetes.io/name: kafka-schema-registry
           kafka:
