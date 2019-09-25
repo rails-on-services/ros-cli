@@ -86,8 +86,8 @@ profiles:
               <%- if environment.platform&.metrics&.enabled -%>
               enabled: true
               <%- if profile.eql?('server') -%>
-              command: ["bundle", "exec", "prometheus_exporter", "-a", "/home/rails/lib/core/lib/ros/prometheus_exporter/web_collector.rb"]
-              <%-end -%>
+              command: ["bundle", "exec", "prometheus_exporter", "-a", "/home/rails/<% unless @service.is_ros_service %>ros/<% end %>lib/core/lib/ros/prometheus_exporter/web_collector.rb"]
+              <%- end -%>
               <%- else -%>
               enabled: false
               <%- end -%>
