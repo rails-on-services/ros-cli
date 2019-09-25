@@ -8,6 +8,16 @@ resource "null_resource" "helm-repository-incubator" {
   }
 }
 
+resource "null_resource" "helm-repository-ros" {
+  triggers = {
+    always = timestamp()
+  }
+
+  provisioner "local-exec" {
+    command = "helm repo add ros https://rails-on-services.github.io/helm-charts"
+  }
+}
+
 #resource "null_resource" "helm-repository-kube-eagle" {
 #  triggers = {
 #    always = timestamp()
@@ -72,11 +82,12 @@ resource "kubernetes_secret" "fluentd-gcp-google-service-account" {
   }
 }
 
-resource "helm_release" "fluentd-gcp" {
-  depends_on   = [kubernetes_secret.fluentd-gcp-google-service-account]
+resource "helm_release" "cluster-logging-fluentd" {
+  depends_on   = [null_resource.helm-repository-ros, kubernetes_secret.fluentd-gcp-google-service-account]
   count        = var.enable_fluentd_gcp_logging ? 1 : 0
-  chart        = "${path.module}/files/fluentd"
-  name         = "fluentd-gcp"
+  repository   = "ros"
+  chart        = "k8s-cluster-logging"
+  name         = "cluster-logging-fluentd"
   namespace    = "kube-system"
   wait         = true
   force_update = true
@@ -88,6 +99,11 @@ resource "helm_release" "fluentd-gcp" {
     }
     )
   ]
+
+  set {
+    name  = "fullnameOverride"
+    value = "cluster-logging-fluentd"
+  }
 }
 
 resource "helm_release" "aws-alb-ingress-controller" {
@@ -151,6 +167,7 @@ resource "helm_release" "istio-init" {
   name       = "istio-init"
   repository = "istio"
   chart      = "istio-init"
+  version    = var.istio_version
   namespace  = "istio-system"
   wait       = true
 
@@ -191,9 +208,10 @@ resource "helm_release" "istio" {
 }
 
 resource "helm_release" "istio-alb-ingressgateway" {
-  depends_on = [helm_release.istio]
+  depends_on = [null_resource.helm-repository-ros, helm_release.istio]
+  repository = "ros"
+  chart      = "istio-alb-ingressgateway"
   name       = "istio-alb-ingressgateway"
-  chart      = "${path.module}/files/istio-alb-ingressgateway"
   namespace  = "istio-system"
   wait       = true
 
@@ -240,7 +258,7 @@ resource "kubernetes_secret" "grafana-datasources" {
 }
 
 resource "kubernetes_config_map" "grafana-dashboards" {
-  count = length(fileset(path.module, "files/grafana/dashboards/*.json"))
+  count      = length(fileset(path.module, "files/grafana/dashboards/*.json"))
   depends_on = [kubernetes_namespace.extra_namespaces]
 
   metadata {
@@ -269,7 +287,7 @@ resource "helm_release" "grafana-ingress" {
   wait      = true
 
   values = [templatefile("${path.module}/templates/grafana/helm-grafana-ingress.tpl", {
-    host = var.grafana_host,
+    host     = var.grafana_host,
     endpoint = var.grafana_endpoint
     }
     )
@@ -277,23 +295,23 @@ resource "helm_release" "grafana-ingress" {
 }
 
 resource "helm_release" "grafana" {
- depends_on = [
-   kubernetes_namespace.extra_namespaces,
-   kubernetes_secret.grafana-credentials,
-   kubernetes_config_map.grafana-dashboards,
-   kubernetes_secret.grafana-datasources
- ]
+  depends_on = [
+    kubernetes_namespace.extra_namespaces,
+    kubernetes_secret.grafana-credentials,
+    kubernetes_config_map.grafana-dashboards,
+    kubernetes_secret.grafana-datasources
+  ]
 
- name       = "grafana"
- chart      = "grafana"
- repository = "stable"
- namespace  = var.grafana_namespace
- wait       = true
+  name       = "grafana"
+  chart      = "grafana"
+  repository = "stable"
+  namespace  = var.grafana_namespace
+  wait       = true
 
- values = [templatefile("${path.module}/templates/grafana/helm-grafana.tpl", {
-   }
-   )
- ]
+  values = [templatefile("${path.module}/templates/grafana/helm-grafana.tpl", {
+    }
+    )
+  ]
 }
 
 # This is to create an extra kubernetes clusterrole for developers
