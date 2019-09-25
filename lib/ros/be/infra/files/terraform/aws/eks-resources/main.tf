@@ -204,7 +204,10 @@ resource "helm_release" "istio" {
   version    = var.istio_version
   namespace  = "istio-system"
   wait       = true
-  values     = [file("${path.module}/files/helm-istio.yaml")]
+  values     = [
+    file("${path.module}/files/helm-istio.yaml"),
+    jsonencode(lookup(var.helm_configuration_overrides, "istio", {}))
+  ]
 }
 
 resource "helm_release" "istio-alb-ingressgateway" {
@@ -311,7 +314,7 @@ resource "helm_release" "grafana" {
 
   values = [
     templatefile("${path.module}/templates/grafana/helm-grafana.tpl", {}),
-    yamlencode(lookup(var.helm_configuration_overrides, "grafana", {}))
+    jsonencode(lookup(var.helm_configuration_overrides, "grafana", {}))
   ]
 }
 # This is to create an extra kubernetes clusterrole for developers
