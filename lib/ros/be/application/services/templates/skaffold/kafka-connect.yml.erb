@@ -58,7 +58,7 @@ deploy:
             producer.sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="<%= @service.kafka.username %>" password="<%= @service.kafka.password %>";
             <%- end -%>
             <%- end -%>
-            <%- @service.kafka_connect.configurationOverrides&.reject{ |k, v| v.nil? }&.each do |k, v| -%>
+            <%- @service.kafka_connect.configuration_overrides&.reject{ |k, v| v.nil? }&.each do |k, v| -%>
             <%= k %>: <%= v %>
             <%- end -%>
 

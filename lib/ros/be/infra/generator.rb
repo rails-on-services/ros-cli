@@ -46,6 +46,7 @@ module Ros
             @provider_config = Stack.config.infra[provider]
             template("terraform/#{provider}/#{infra.cluster_type}.tf.erb", "#{infra.deploy_path}/#{provider}-main.tf")
           end
+
           create_file("#{infra.deploy_path}/terraform.tfvars.json", "#{JSON.pretty_generate(tf_vars)}")
         end
 
@@ -109,8 +110,11 @@ module Ros
               vars["eks_worker_groups"] = infra.components.kubernetes.config.worker_groups
               vars["fluentd_gcp_logging_service_account_json_key"] = \
                 infra.components.kubernetes.components&.services&.components&.cluster_logging&.config&.gcp_service_account_key || ""
+
+              helm_configuration_overrides = {}
               infra.components.kubernetes.components&.services&.components.each do |component, config|
-                config.config&.configurationOverrides ? vars["#{component}_config_overrides"] = config.config.configurationOverrides : next
+                config.config&.configuration_overrides ? helm_configuration_overrides[component] = config.config.configuration_overrides : next
+                vars["helm_configuration_overrides"] = helm_configuration_overrides
               end
             end
             return vars
