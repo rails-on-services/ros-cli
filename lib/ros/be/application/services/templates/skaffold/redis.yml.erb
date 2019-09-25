@@ -6,7 +6,7 @@ deploy:
     releases:
       - name: redis
         chartPath: stable/redis
-        skipBuildDependencies: true
+        remote: true
         overrides:
           master:
             podLabels:

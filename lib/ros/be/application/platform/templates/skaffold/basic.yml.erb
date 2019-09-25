@@ -5,8 +5,8 @@ deploy:
   helm:
     releases:
       - name: <%= @service.name %>
-        chartPath: helm-charts/basic
-        skipBuildDependencies: true
+        chartPath: ros/basic
+        remote: true
         wait: false
         setValueTemplates:
           replicaCount: "{{.REPLICA_COUNT}}"

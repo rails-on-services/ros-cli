@@ -5,8 +5,8 @@ deploy:
   helm:
     releases:
       - name: sftp
-        chartPath: <%= @service.chart_path %>/sftp
-        skipBuildDependencies: true
+        chartPath: ros/sftp
+        remote: true
         overrides:
           labels:
             # app.kubernetes.io/name: <%= @service.name %>

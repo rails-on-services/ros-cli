@@ -5,7 +5,8 @@ deploy:
   helm:
     releases:
       - name: ingress
-        chartPath: <%= @service.chart_path %>/ingress
+        chartPath: ros/ingress
+        remote: true
         overrides:
           labels:
             # app.kubernetes.io/name: <%= @service.name %>
