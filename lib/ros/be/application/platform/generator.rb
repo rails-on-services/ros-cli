@@ -51,7 +51,6 @@ module Ros
           # leaving this in in case the behvior reverts back
           # def dockerfile_path; "#{relative_path}/#{config.ros ? 'ros/' : ''}Dockerfile" end
           def dockerfile_path; 'Dockerfile' end
-          def chart_path; 'helm-charts/service' end
           def is_ros_service; config.ros end
           def pull_policy; 'Always' end
           def pull_secret; Stack.registry_secret_name end
@@ -94,11 +93,6 @@ module Ros
             content = "# This file was auto generated\n# The values are used by docker-compose\n# #{Ros.env}\n#{content}"
             # empty_directory(Ros::Generators::Stack.compose_dir)
             create_file(application.compose_file, "#{content}\n")
-          end
-
-          def copy_kubernetes_helm_charts
-            return unless infra.cluster_type.eql?('kubernetes')
-            directory('../files/helm-charts', "#{deploy_path}/helm-charts")
           end
 
           def write_nginx

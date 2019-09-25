@@ -24,8 +24,8 @@ profiles:
       helm:
         releases:
         - name: <%= @service.name.to_s.gsub('_', '-') %><%= xname.gsub('_', '-') %>
-          chartPath: <%= @service.chart_path %>
-          skipBuildDependencies: true
+          chartPath: ros/service
+          remote: true
           # values:
             # image: <%= @service.name %>
           # imageStrategy:

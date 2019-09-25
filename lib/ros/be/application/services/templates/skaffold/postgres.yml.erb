@@ -6,7 +6,7 @@ deploy:
     releases:
       - name: postgres
         chartPath: stable/postgresql
-        skipBuildDependencies: true
+        remote: true
         overrides:
           master:
             podLabels:
