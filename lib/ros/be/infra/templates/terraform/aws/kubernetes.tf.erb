@@ -230,6 +230,19 @@ output "globalaccelerator_ips" {
 }
 <% end -%>
 
+<%- if infra.components.cdn&.config&.enabled -%>
+module "cloudfront-s3" {
+  source                 = "./aws/cloudfront-s3"
+  aws_profile            = local.aws_profile
+  s3_bucket_name         = "<%= infra.components.cdn.config.name %>-${replace(local.domain_name, ".", "-")}"
+  cloudfront_cname       = "<%= infra.components.cdn.config.name %>.${local.domain_name}"
+  create_acm_certificate = true
+  add_route53_record     = true
+  route53_zone_id        = module.route53.this.zone_id
+  tags                   = var.tags
+}
+<% end -%>
+
 <%- if infra.components&.databases&.config&.enabled -%>
 <%- infra.components.databases.config.clusters&.each do |key, config| -%>
 module "rds-<%= key %>" {
