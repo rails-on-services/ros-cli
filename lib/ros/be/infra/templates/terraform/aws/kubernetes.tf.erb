@@ -33,7 +33,7 @@ variable "fluentd_gcp_logging_service_account_json_key" {
   default = ""
 }
 
-variable "grafana_config_overrides" {
+variable "helm_configuration_overrides" {
   default = {}
 }
 
@@ -213,7 +213,7 @@ module "eks-resources" {
   grafana_password                             = "<%= infra.components.kubernetes.components.services.components.grafana&.config&.password.nil? ? "" : infra.components.kubernetes.components.services.components.grafana.config.password %>"
   #grafana_google_client_id                     = "<%= infra.components.kubernetes.components.services.components.grafana&.config&.google_client_id.nil? ? "" : infra.components.kubernetes.components.services.components.grafana.config.google_client_id %>"
   #grafana_google_client_secret                 = "<%= infra.components.kubernetes.components.services.components.grafana&.config&.google_client_secret.nil? ? "" : infra.components.kubernetes.components.services.components.grafana.config.google_client_secret %>"
-  grafana_config_overrides                     = var.grafana_config_overrides
+  helm_configuration_overrides                 = var.helm_configuration_overrides
 }
 
 output "istio_ingressgateway_alb_arn" {

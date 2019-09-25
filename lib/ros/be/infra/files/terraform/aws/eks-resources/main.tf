@@ -309,21 +309,11 @@ resource "helm_release" "grafana" {
   wait         = true
   force_update = true
 
-  values = [templatefile("${path.module}/templates/grafana/helm-grafana.tpl", {
-    configOverrides = yamlencode(var.grafana_config_overrides)
-    }
-    )
+  values = [
+    templatefile("${path.module}/templates/grafana/helm-grafana.tpl", {}),
+    yamlencode(lookup(var.helm_configuration_overrides, "grafana", {}))
   ]
-
-  # values = [templatefile("${path.module}/templates/grafana/helm-grafana.tpl", {
-    # client_id     = var.grafana_google_client_id,
-    # client_secret = var.grafana_google_client_secret,
-    # url           = var.grafana_endpoint
-    # }
-    # )
-  # ]
 }
-
 # This is to create an extra kubernetes clusterrole for developers
 resource "kubernetes_cluster_role" "developer" {
   metadata {

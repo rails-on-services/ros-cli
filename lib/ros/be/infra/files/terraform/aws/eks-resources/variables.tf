@@ -105,17 +105,6 @@ variable "grafana_namespace" {
   description = "Namespace to install Grafana and related resources"
 }
 
-# variable "grafana_google_client_id" {
-  # type        = string
-  # description = "Google client id string for external authentication"
-# }
-#
-# variable "grafana_google_client_secret" {
-  # type        = string
-  # description = "Google client secret string for external authentication"
-# }
-
-variable "grafana_config_overrides" {
-  type    = map(any)
-  default = {}
+variable "helm_configuration_overrides" {
+  description = "JSON string of Helm configurationOverrides key: values"
 }

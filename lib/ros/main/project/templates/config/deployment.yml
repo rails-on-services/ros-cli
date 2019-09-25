@@ -71,7 +71,7 @@ components:
               services:
                 components:
                   # NOTE: should also have separate credentials from logging
-                  fluentd:
+                  cluster_logging:
                     environment:
                       # This will be passed to terraform which invokes helm to deploy fluentd
                       destinations: ['s3'] # google_logging cloudwatch
