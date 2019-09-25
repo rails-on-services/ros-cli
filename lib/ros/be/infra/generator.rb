@@ -69,7 +69,8 @@ module Ros
             iam: ['eks-iam'],
             globalaccelerator: ['globalaccelerator'],
             databases: ['rds'],
-            redis: ['elasticache-redis']
+            redis: ['elasticache-redis'],
+            cdn: ['cloudfront-s3']
           }[type]
         end
 
