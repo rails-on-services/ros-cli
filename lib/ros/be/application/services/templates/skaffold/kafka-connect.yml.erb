@@ -71,3 +71,24 @@ deploy:
 
           cp-schema-registry:
             url: "http://kafka-schema-registry:8081"
+      <%- if @service.kafka_connect.ui -%>
+      - name: kafka-connect-ui
+        chartPath: ros/basic
+        remote: true
+        overrides:
+          nameOverride: kafka-connect-ui
+          image:
+            repository: landoop/kafka-connect-ui
+          containerPort: 8000
+          env:
+            PORT: "8000"
+            CONNECT_URL: "http://kafka-connect-<%= @service.current_feature_set %>:8083;default"
+            PROXY: "true"
+          resources:
+            limits:
+              cpu: 1
+              memory: 100Mi
+            requests:
+              cpu: 50m
+              memory: 50Mi
+      <%- end -%>

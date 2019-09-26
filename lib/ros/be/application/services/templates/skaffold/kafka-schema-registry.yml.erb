@@ -23,7 +23,6 @@ deploy:
             <%- else -%>
             bootstrapServers: "PLAINTEXT://<%= @service.kafka.bootstrap_servers %>"
             <%- end -%>
-
           configurationOverrides:
             <%- if @service.kafka.security_protocol == "SASL_SSL" -%>
             kafkastore.security.protocol: SASL_SSL
@@ -33,7 +32,6 @@ deploy:
             <%- end -%>
             <%- end -%>
             kafkastore.topic: _schemas_<%= @service.current_feature_set %>
-
           heapOptions: "-Xms1024M -Xmx1024M"
           resources:
             limits:
@@ -42,3 +40,26 @@ deploy:
             requests:
               cpu: 200m
               memory: 1Gi
+      <%- if @service.kafka_schema_registry.ui -%>
+      - name: kafka-schema-registry-ui
+        chartPath: ros/basic
+        remote: true
+        overrides:
+          nameOverride: kafka-schema-registry-ui
+          image:
+            repository: landoop/schema-registry-ui
+          containerPort: 8000
+          env:
+            SCHEMAREGISTRY_URL: http://kafka-schema-registry:8081
+            PROXY: "true"
+            ALLOW_GLOBAL: 1
+            ALLOW_TRANSITIVE: 1
+            ALLOW_DELETION: 1
+          resources:
+            limits:
+              cpu: 1
+              memory: 150Mi
+            requests:
+              cpu: 50m
+              memory: 100Mi
+      <%- end -%>
