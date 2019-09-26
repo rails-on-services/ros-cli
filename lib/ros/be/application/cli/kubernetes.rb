@@ -282,6 +282,10 @@ module Ros
           end
         end
 
+        def attach(service)
+          kubectl("attach -it #{service_pod(service)} -c #{service}", true)
+        end
+
         # Supporting methods (1)
         # NOTE: only goes with 'logs' for now
         def command(cmd); "#{cmd}#{options.tail ? ' -f' : ''}" end
