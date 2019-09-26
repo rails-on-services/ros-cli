@@ -248,6 +248,18 @@ module "cloudfront-s3" {
 }
 <% end -%>
 
+<%- if infra.components.object_storage&.config&.buckets -%>
+module "s3" {
+  source          = "./aws/s3"
+  s3_bucket_names = [
+    <%- infra.components.object_storage.config.buckets.each do |bucket| -%>
+    "<%= bucket.name %>-${replace(local.domain_name, ".", "-")}",
+    <%- end -%>
+  ]
+  tags            = var.tags
+}
+<%- end -%>
+
 <%- if infra.components&.databases&.config&.enabled -%>
 <%- infra.components.databases.config.clusters&.each do |key, config| -%>
 module "rds-<%= key %>" {

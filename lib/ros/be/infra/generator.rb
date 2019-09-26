@@ -71,7 +71,8 @@ module Ros
             globalaccelerator: ['globalaccelerator'],
             databases: ['rds'],
             redis: ['elasticache-redis'],
-            cdn: ['cloudfront-s3']
+            cdn: ['cloudfront-s3'],
+            object_storage: ['s3']
           }[type]
         end
 
