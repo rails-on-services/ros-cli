@@ -33,18 +33,46 @@ spec:
                 "autoCreateTables": "true",
                 "sanitizeTopics": "true",
                 "tasks.max": "<%= config.tasks ? config.tasks : 2 %>",
-                "topics": "<%= config.topics %>",
+                "topics": "<%= application.cloudevents_subjects.join(',') %>",
                 "schemaRegistryLocation": "http://kafka-schema-registry:8081",
                 "topicsToTables": "(\\w+)\\.(\\w+)=$1_$2",
                 "project": "<%= config.project %>",
-                "datasets": ".*=<%= config.dataset %>",
+                "datasets": ".*=<%= application.bigquery_dataset %>",
                 "keyfile": "/etc/google/auth/application_default_credentials.json",
                 "schemaRetriever": "com.wepay.kafka.connect.bigquery.schemaregistry.schemaretriever.SchemaRegistrySchemaRetriever",
                 "key.converter": "org.apache.kafka.connect.storage.StringConverter"
               }
               <%- end -%>
-          <%- end -%>
+        <%- if config.type == 'bigquery' -%>
+        - image: google/cloud-sdk:alpine
+          name: <%= name %>-create-bq-dataset
+          env:
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /etc/google/auth/application_default_credentials.json
+          command:
+            - sh
+            - -c
+            - |
+              gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
+              exists=$(bq --project_id <%= config.project %> ls -d | grep -w <%= application.bigquery_dataset %>)
+              if [ -n "$exists" ]; then
+                echo "Not creating <%= application.bigquery_dataset %> since it already exists"
+              else
+                echo "Creating <%= application.bigquery_dataset %>"
+                bq --project_id <%= config.project %> mk <%= application.bigquery_dataset %>
+              fi
+          volumeMounts:
+            - name: gcp-jsonkey
+              mountPath: /etc/google/auth
+        <%- end -%>
+        <%- end -%>
       containers:
         - image: busybox:latest
           name: echo
           command: ['sh', '-c', 'echo Connectors created. Check above logs!']
+      volumes:
+        - name: gcp-jsonkey
+          secret:
+            defaultMode: 420
+            secretName: gcp-jsonkey
+            optional: true

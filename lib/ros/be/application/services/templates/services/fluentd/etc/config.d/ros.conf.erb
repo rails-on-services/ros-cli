@@ -23,8 +23,8 @@
     <match **.rack-traffic-log>
       @type kafka_buffered
       brokers <%= @service.kafka.bootstrap_servers %>
-      ssl_ca_certs_from_system true
       <%- if @service.kafka.security_protocol == "SASL_SSL" -%>
+      ssl_ca_certs_from_system true
       sasl_over_ssl true
       <%- end -%>
       <%- if @service.kafka.sasl_mechanism == "PLAIN" -%>
@@ -44,8 +44,8 @@
       topic_key type
       message_key_key id
       brokers <%= @service.kafka.bootstrap_servers %>
-      ssl_ca_certs_from_system true
       <%- if @service.kafka.security_protocol == "SASL_SSL" -%>
+      ssl_ca_certs_from_system true
       sasl_over_ssl true
       <%- end -%>
       <%- if @service.kafka.sasl_mechanism == "PLAIN" -%>

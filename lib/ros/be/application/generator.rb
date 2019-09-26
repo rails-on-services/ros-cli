@@ -81,6 +81,16 @@ module Ros
             @bucket_name ||= "#{current_feature_set}-#{Stack.name}-#{cluster.name}"
           end
 
+          # TODO cloud events subjects list
+          def cloudevents_subjects
+            ["cognito.user"]
+          end
+
+          # bigquery dataset to write data into
+          def bigquery_dataset
+            @bigquery_dataset ||= override_feature_set.empty? ? "warehouse" : "warehouse_" + current_feature_set.gsub(/\W/, '_')
+          end
+
           def infra; Ros::Be::Infra::Model end
           def cluster; Ros::Be::Infra::Cluster::Model end
         end

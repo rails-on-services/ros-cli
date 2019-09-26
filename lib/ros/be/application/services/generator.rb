@@ -94,8 +94,7 @@ module Ros
 
           # kafka topics involved
           def kafka_topics
-            # TODO, need to all all avro event log topics and
-            [fluentd.http_log_kafka_topic]
+            [fluentd.http_log_kafka_topic] + application.cloudevents_subjects
           end
 
           # Configuration values for fluentd request logging config file

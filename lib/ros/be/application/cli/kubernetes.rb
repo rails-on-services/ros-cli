@@ -100,10 +100,10 @@ module Ros
           sync_secret(env_file) if File.exists?(env_file)
           update_helm_repo
           @infra_services.each do |service|
-            if service.eql?(:'kafka-connect')
+            if service.to_s.eql?('kafka-connect')
               deploy_gcp_bigquery_secret unless application.components.services.components[:'kafka-connect']&.config&.gcp_service_account_key.nil?
             end
-            if service.eql?(:ingress)
+            if service.to_s.eql?('ingress')
               next true unless options.n || get_vs(name: :ingress).empty? || options.force
             else
               next if pod(name: service) unless @force_infra_deploy
