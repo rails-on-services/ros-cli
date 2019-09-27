@@ -1,42 +1,71 @@
-resource "null_resource" "helm-repository-incubator" {
-  triggers = {
-    always = timestamp()
-  }
-
-  provisioner "local-exec" {
-    command = "helm repo add incubator https://kubernetes-charts-incubator.storage.googleapis.com"
-  }
-}
-
-resource "null_resource" "helm-repository-ros" {
-  triggers = {
-    always = timestamp()
-  }
-
-  provisioner "local-exec" {
-    command = "helm repo add ros https://rails-on-services.github.io/helm-charts"
-  }
-}
-
-#resource "null_resource" "helm-repository-kube-eagle" {
+# resource "null_resource" "helm-repository-incubator" {
 #  triggers = {
-#    always = timestamp()
+  #  always = timestamp()
 #  }
 #
 #  provisioner "local-exec" {
-#    command = "helm repo add kube-eagle https://raw.githubusercontent.com/google-cloud-tools/kube-eagle-helm-chart/master"
+  #  command = "helm repo add incubator https://kubernetes-charts-incubator.storage.googleapis.com"
 #  }
-#}
+# }
 
-resource "null_resource" "helm-repository-istio" {
-  triggers = {
-    always = timestamp()
-  }
+# resource "null_resource" "helm-repository-ros" {
+#  triggers = {
+  #  always = timestamp()
+#  }
+#
+#  provisioner "local-exec" {
+  #  command = "helm repo add ros https://rails-on-services.github.io/helm-charts"
+#  }
+# }
 
-  provisioner "local-exec" {
-    command = "helm repo add istio https://gcsweb.istio.io/gcs/istio-release/releases/${var.istio_version}/charts/"
-  }
+# resource "null_resource" "update-helm-repos" {
+#  depends_on = [
+  #  null_resource.helm-repository-incubator,
+  #  null_resource.helm-repository-ros,
+  #  null_resource.helm-repository-istio
+#  ]
+#  triggers = {
+  #  always = timestamp()
+#  }
+#  provisioner "local-exec" {
+  #  command = "helm repo update"
+#  }
+# }
+
+data "helm_repository" "incubator" {
+    name = "incubator"
+    url  = "https://kubernetes-charts-incubator.storage.googleapis.com"
 }
+
+data "helm_repository" "ros" {
+    name = "ros"
+    url  = "https://rails-on-services.github.io/helm-charts"
+}
+
+# data "helm_repository" "istio" {
+    # name = "istio"
+    # url  = "https://gcsweb.istio.io/gcs/istio-release/releases/${var.istio_version}/charts/"
+# }
+
+# resource "null_resource" "helm-repository-kube-eagle" {
+#  triggers = {
+  #  always = timestamp()
+#  }
+# 
+#  provisioner "local-exec" {
+  #  command = "helm repo add kube-eagle https://raw.githubusercontent.com/google-cloud-tools/kube-eagle-helm-chart/master"
+#  }
+# }
+
+# resource "null_resource" "helm-repository-istio" {
+  # triggers = {
+    # always = timestamp()
+  # }
+# 
+  # provisioner "local-exec" {
+    # command = "helm repo add istio https://gcsweb.istio.io/gcs/istio-release/releases/${var.istio_version}/charts/"
+  # }
+# }
 
 resource "kubernetes_namespace" "extra_namespaces" {
   count = length(var.extra_namespaces)
@@ -83,14 +112,18 @@ resource "kubernetes_secret" "fluentd-gcp-google-service-account" {
 }
 
 resource "helm_release" "cluster-logging-fluentd" {
-  depends_on   = [null_resource.helm-repository-ros, kubernetes_secret.fluentd-gcp-google-service-account]
+  depends_on   = [
+    #null_resource.helm-repository-ros, 
+    kubernetes_secret.fluentd-gcp-google-service-account]
   count        = var.enable_fluentd_gcp_logging ? 1 : 0
-  repository   = "ros"
+  # repository   = "ros"
+  repository   = data.helm_repository.ros.metadata.0.name
   chart        = "k8s-cluster-logging"
   name         = "cluster-logging-fluentd"
   namespace    = "kube-system"
   wait         = true
   force_update = true
+  version      = "0.0.1"
 
   values = [templatefile("${path.module}/templates/helm-fluentd-gcp.tpl", {
     cluster_name               = var.cluster_name,
@@ -107,9 +140,10 @@ resource "helm_release" "cluster-logging-fluentd" {
 }
 
 resource "helm_release" "aws-alb-ingress-controller" {
-  depends_on = [null_resource.helm-repository-incubator]
+  # depends_on = [null_resource.helm-repository-incubator]
   name       = "aws-alb-ingress-controller"
-  repository = "incubator"
+  #repository = "incubator"
+  repository = data.helm_repository.incubator.metadata.0.name
   chart      = "aws-alb-ingress-controller"
   namespace  = "kube-system"
   wait       = true
@@ -163,9 +197,10 @@ resource "kubernetes_cluster_role_binding" "this" {
 }
 
 resource "helm_release" "istio-init" {
-  depends_on = [null_resource.helm-repository-istio]
+  # depends_on = [null_resource.helm-repository-istio]
   name       = "istio-init"
   repository = "istio"
+  # repository = data.helm_repository.istio.metadata.0.name
   chart      = "istio-init"
   version    = var.istio_version
   namespace  = "istio-system"
@@ -194,12 +229,13 @@ EOS
 
 resource "helm_release" "istio" {
   depends_on = [
-    null_resource.helm-repository-istio,
+    #null_resource.helm-repository-istio,
     helm_release.istio-init,
     null_resource.delay,
   ]
   name       = "istio"
   repository = "istio"
+  # repository = data.helm_repository.istio.metadata.0.name
   chart      = "istio"
   version    = var.istio_version
   namespace  = "istio-system"
@@ -211,8 +247,12 @@ resource "helm_release" "istio" {
 }
 
 resource "helm_release" "istio-alb-ingressgateway" {
-  depends_on = [null_resource.helm-repository-ros, helm_release.istio]
-  repository = "ros"
+  depends_on = [
+    #null_resource.helm-repository-ros, 
+    helm_release.istio
+  ]
+  # repository = "ros"
+  repository = data.helm_repository.ros.metadata.0.name
   chart      = "istio-alb-ingressgateway"
   name       = "istio-alb-ingressgateway"
   namespace  = "istio-system"
