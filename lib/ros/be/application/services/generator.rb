@@ -100,7 +100,6 @@ module Ros
 
           def cloudevents_subjects
             subjects = []
-            binding.pry
             platform_components.each do |service, definition|
               ros_prefix = definition.config.ros ? "ros/" : ""
               Dir.glob("#{ros_prefix}services/#{service.to_s}/doc/schemas/cloud_events/#{service.to_s}/*.avsc") do |file|
