@@ -115,9 +115,9 @@ module "eks-cluster" {
   eks_map_users = [
     <%- infra.components.kubernetes.config.admins&.each do |user| -%>
     {
-      user_arn = "arn:aws:iam::<%= @provider_config.account_id %>:user/<%= user %>"
+      userarn = "arn:aws:iam::<%= @provider_config.account_id %>:user/<%= user %>"
       username = "<%= user %>"
-      group    = "system:masters"
+      groups    = ["system:masters"]
     },
     <%- end -%>
   ]

@@ -26,7 +26,7 @@ resource "aws_security_group_rule" "eks-cluster-ingress-internet-https" {
 
 module "eks" {
   source       = "terraform-aws-modules/eks/aws"
-  version      = "~> 5.1.0"
+  version      = "~> 6.0.0"
   cluster_name = var.cluster_name
   subnets      = concat(var.public_subnets, var.private_subnets)
   vpc_id       = var.vpc_id
