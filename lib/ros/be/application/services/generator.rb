@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 require 'ros/be/generator'
+require 'json'
 
 module Ros
   module Be
@@ -94,7 +95,29 @@ module Ros
 
           # kafka topics involved
           def kafka_topics
-            [fluentd.http_log_kafka_topic] + application.cloudevents_subjects
+            @kafka_topics ||= [fluentd.http_log_kafka_topic] + cloudevents_subjects
+          end
+
+          def cloudevents_subjects
+            subjects = []
+            binding.pry
+            platform_components.each do |service, definition|
+              ros_prefix = definition.config.ros ? "ros/" : ""
+              Dir.glob("#{ros_prefix}services/#{service.to_s}/doc/schemas/cloud_events/#{service.to_s}/*.avsc") do |file|
+                json = JSON.parse(File.read(file))
+                subjects.push(json["name"])
+              end
+            end
+            subjects
+          end
+
+          def platform_components
+           application.settings.components.platform.components.to_h.select{|k, v| v.nil? || v.dig(:config, :enabled).nil? || v.dig(:config, :enabled) }
+          end
+
+          # bigquery dataset to write data into
+          def bigquery_dataset
+            @bigquery_dataset ||= application.override_feature_set.empty? ? "warehouse" : "warehouse_" + current_feature_set.gsub(/\W/, '_')
           end
 
           # Configuration values for fluentd request logging config file
