@@ -63,3 +63,9 @@ variable "eks_map_roles" {
   default     = []
   description = "IAM roles to add to the aws-auth configmap, see example here: https://github.com/terraform-aws-modules/terraform-aws-eks/blob/master/examples/eks_test_fixture/variables.tf"
 }
+
+variable "s3_buckets_to_gain_access" {
+  type        = list(string)
+  default     = []
+  description = "The list of s3 buckets to create extra IAM policies"
+}

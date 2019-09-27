@@ -39,14 +39,24 @@ variable "helm_configuration_overrides" {
 
 # Locals
 locals {
-  aws_profile                         = "<%= infra.config.cluster.aws_profile.nil? ? "default" : infra.config.cluster.aws_profile %>"
-  vpc_cidr                            = "<%= infra.components.vpc&.config&.cidr.nil? ? "10.0.0.0/16" : infra.components.vpc.config.cidr %>"
-  cluster_name                        = "<%= infra.components.kubernetes&.config&.name.nil? ? infra.config.cluster.name : infra.components.kubernetes.config.name %>"
-  vpc_name                            = "<%= infra.components.vpc&.config&.name.nil? ? infra.config.cluster.name : infra.components.vpc.config.name %>"
-  accelerator_name                    = "<%= infra.components.globalaccelerator&.config&.name.nil? ? infra.config.cluster.name : infra.components.globalaccelerator.config.name %>"
-  iam_name                            = "<%= infra.components.iam&.config&.name.nil? ? infra.config.cluster.name : infra.components.iam.config.name %>"
-  tags                                = var.tags
-  domain_name                         = "<%= infra.dns.sub_domain %><%= infra.dns.sub_domain.nil? ? "" : "."%><%= infra.dns.root_domain %>"
+  aws_profile      = "<%= infra.config.cluster.aws_profile.nil? ? "default" : infra.config.cluster.aws_profile %>"
+  vpc_cidr         = "<%= infra.components.vpc&.config&.cidr.nil? ? "10.0.0.0/16" : infra.components.vpc.config.cidr %>"
+  cluster_name     = "<%= infra.components.kubernetes&.config&.name.nil? ? infra.config.cluster.name : infra.components.kubernetes.config.name %>"
+  vpc_name         = "<%= infra.components.vpc&.config&.name.nil? ? infra.config.cluster.name : infra.components.vpc.config.name %>"
+  accelerator_name = "<%= infra.components.globalaccelerator&.config&.name.nil? ? infra.config.cluster.name : infra.components.globalaccelerator.config.name %>"
+  iam_name         = "<%= infra.components.iam&.config&.name.nil? ? infra.config.cluster.name : infra.components.iam.config.name %>"
+  tags             = var.tags
+  domain_name      = "<%= infra.dns.sub_domain %><%= infra.dns.sub_domain.nil? ? "" : "."%><%= infra.dns.root_domain %>"
+  s3_buckets       = [
+    <%- if infra.components.cdn&.config&.enabled -%>
+    "<%= infra.components.cdn.config.name %>-${replace(local.domain_name, ".", "-")}",
+    <%- end -%>
+    <%- if infra.components.object_storage&.config&.buckets -%>
+    <%- infra.components.object_storage.config.buckets.each do |bucket| -%>
+    "<%= bucket.name %>-${replace(local.domain_name, ".", "-")}",
+    <%- end -%>
+    <%- end -%>
+  ]
 }
 
 # VPC
@@ -115,9 +125,9 @@ module "eks-cluster" {
     <%- end -%>
   ]
 
-  eks_map_roles = module.iam.eks_map_roles
-
-  tags = var.tags
+  eks_map_roles             = module.iam.eks_map_roles
+  s3_buckets_to_gain_access = local.s3_buckets
+  tags                      = var.tags
 }
 
 output "eks" {

@@ -95,13 +95,45 @@ resource "aws_iam_policy" "eks-worker-external-dns" {
   policy      = file("${path.module}/files/aws-external-dns-iam-policy.json")
 }
 
-#resource "aws_iam_policy" "eks-worker-extra" {
-#  count       = var.extra_eks_iam_policy != "" ? 1 : 0
-#  name_prefix = "eks-worker-extra-${var.cluster_name}"
-#  description = "Extra IAM permissions for eks worker"
-#  policy      = var.extra_eks_iam_policy
-#}
-#
+data "aws_iam_policy_document" "s3_buckets" {
+  statement {
+    actions   = ["s3:GetObject", "s3:PutObject"]
+    resources = ["arn:aws:s3:::$${bucket_name}$${origin_path}*"]
+
+    principals {
+      type        = "AWS"
+      identifiers = module.eks.worker_iam_instance_profile_arns
+    }
+  }
+
+  statement {
+    actions   = ["s3:ListBucket"]
+    resources = ["arn:aws:s3:::$${bucket_name}"]
+
+    principals {
+      type        = "AWS"
+      identifiers = module.eks.worker_iam_instance_profile_arns
+    }
+  }
+}
+
+data "template_file" "aws_iam_policy_document_s3" {
+  count    = length(var.s3_buckets_to_gain_access)
+  template = data.aws_iam_policy_document.s3_buckets.json
+
+  vars = {
+    bucket_name = var.s3_buckets_to_gain_access[count.index]
+    origin_path = "/"
+  }
+}
+
+resource "aws_iam_policy" "eks_worker_s3" {
+  count       = length(var.s3_buckets_to_gain_access)
+  name_prefix = "eks-worker-s3-${var.cluster_name}"
+  description = "S3 bucket access permissions for eks worker"
+  policy      = data.template_file.aws_iam_policy_document_s3[count.index].rendered
+}
+
 #resource "aws_iam_role_policy_attachment" "eks-worker-extra" {
 #  count      = var.extra_eks_iam_policy != "" ? 1 : 0
 #  policy_arn = aws_iam_policy.eks-worker-extra[0].arn
