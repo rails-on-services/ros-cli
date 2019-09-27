@@ -218,6 +218,14 @@ output "istio_ingressgateway_alb_arn" {
   value = module.eks-resources.istio_ingressgateway_alb_arn
 }
 
+output "ros_repo" {
+  value = module.eks-resources.ros_repo
+}
+
+output "incubator" {
+  value = module.eks-resources.incubator
+}
+
 <%- if infra.components.globalaccelerator&.config&.enabled -%>
 # Global accelerator
 module "globalaccelerator" {
