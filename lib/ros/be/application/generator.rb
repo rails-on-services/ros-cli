@@ -38,7 +38,6 @@ module Ros
           def application_environment
             {
               infra: {
-                # provider: Settings.components.be.config.provider,
                 provider: cluster.config.provider,
               },
               platform: {
@@ -46,14 +45,21 @@ module Ros
                 infra: {
                   resources: {
                     storage: {
-                      primary: {
-                        bucket_name: bucket_name
-                      }
-                    }
+                      buckets:
+                      infra.settings.components.object_storage.components.each_with_object({}) do |(name, config), hash|
+                        config.services.each { |dir| hash[name] = "#{name}-#{bucket_base}" }
+                      end,
+                      services:
+                      infra.settings.components.object_storage.components.each_with_object({}) do |(name, config), hash|
+                        config.services.each do |dir|
+                          hash[dir] = "#{name}"
+                        end
+                      end
+                    },
+                    cdns: infra.settings.components.cdn.components.to_hash
                   }
                 }
-              },
-              bucket_name: bucket_name
+              }
             }
           end
 
@@ -77,8 +83,8 @@ module Ros
             @dns_domain ||= "#{infra.dns.sub_domain}.#{infra.dns.root_domain}"
           end
 
-          def bucket_name
-            @bucket_name ||= "#{current_feature_set}-#{Stack.name}-#{cluster.name}"
+          def bucket_base
+            @bucket_base ||= "#{dns_domain.gsub('.', '-')}"
           end
 
           def infra; Ros::Be::Infra::Model end

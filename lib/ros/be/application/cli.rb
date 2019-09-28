@@ -135,11 +135,11 @@ module Ros
 
         desc 'server PROFILE', 'Start all services (short-cut alias: "s")'
         option :daemon, type: :boolean, aliases: '-d'
-        option :environment, type: :string, aliases: '-e', default: 'development'
+        # option :environment, type: :string, aliases: '-e', default: 'development'
         map %w(s) => :server
-        def server
+        def server(*services)
           # TODO: Test this
-          Ros.load_env(options.environment) if options.environment != Ros.default_env
+          # Ros.load_env(options.environment) if options.environment != Ros.default_env
           command = context(options)
           command.up(services)
           command.exit

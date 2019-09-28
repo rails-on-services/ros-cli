@@ -81,6 +81,7 @@ module Ros
 
           def environment_file
             content = Ros.format_envs('', environment).join("\n")
+            content = content.split("\n").sort.select { |a| a.split('=').size > 1 }.join("\n")
             create_file("#{destination_root}/#{deploy_path}/platform.env", "#{content}\n")
           end
 

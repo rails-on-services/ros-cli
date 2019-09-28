@@ -27,9 +27,18 @@ module Ros
 
     desc 'console', 'Start the Ros console (short-cut alias: "c")'
     map %w(c) => :console
-    def console
-      # context(options).switch!
-      Pry.start
+    def console(service = nil)
+      if service.nil?
+        Pry.start
+        return
+      end
+      Ros::Be::Application::Cli.new([], { v: true, }).console(service)
+    end
+
+    desc 'server', 'Start the Ros console (short-cut alias: "s")'
+    map %w(s) => :server
+    def server(service)
+      Ros::Be::Application::Cli.new([], { v: true, daemon: true, attach: true }).server(service)
     end
 
     desc 'be COMMAND', 'Invoke backend commands'
