@@ -54,8 +54,10 @@ profiles:
             app:
               <%- if profile.eql?('server') -%>
               command: ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "-P", "/tmp/server.pid"]
-              <%- elsif profile.eql?('worker') -%>
+              <%- elsif profile.eql?('worker') and @service.is_ros_service -%>
               command: ["bundle", "exec", "sidekiq", "-r", "spec/dummy", "-C", "config/sidekiq.yml"]
+              <%- elsif profile.eql?('worker') and not @service.is_ros_service -%>
+              command: ["bundle", "exec", "sidekiq", "-C", "config/sidekiq.yml"]
               <%- elsif profile.eql?('sqs_worker') -%>
               command: ["bundle", "exec", "shoryuken", "-r", "./app/workers", "-C", "config/shoryuken.yml"]
               <%- end -%>
