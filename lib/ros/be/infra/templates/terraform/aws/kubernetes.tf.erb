@@ -48,12 +48,9 @@ locals {
   tags             = var.tags
   domain_name      = "<%= infra.dns.sub_domain %><%= infra.dns.sub_domain.nil? ? "" : "."%><%= infra.dns.root_domain %>"
   s3_buckets       = [
-    <%- if infra.components.cdn&.config&.enabled -%>
-    "<%= infra.components.cdn.config.name %>-${replace(local.domain_name, ".", "-")}",
-    <%- end -%>
-    <%- if infra.components.object_storage&.config&.buckets -%>
-    <%- infra.components.object_storage.config.buckets.each do |bucket| -%>
-    "<%= bucket.name %>-${replace(local.domain_name, ".", "-")}",
+    <%- unless infra.components.object_storage&.components.nil? -%>
+     <%- infra.components.object_storage.components.each do |bucket, config| -%>
+    "<%= bucket %>-${replace(local.domain_name, ".", "-")}",
     <%- end -%>
     <%- end -%>
   ]
@@ -245,12 +242,12 @@ output "globalaccelerator_ips" {
 }
 <% end -%>
 
-<%- if infra.components.cdn&.config&.enabled -%>
+<%- if infra.components.cdn&.components&.cdn&.enabled -%>
 module "cloudfront-s3" {
   source                 = "./aws/cloudfront-s3"
   aws_profile            = local.aws_profile
-  s3_bucket_name         = "<%= infra.components.cdn.config.name %>-${replace(local.domain_name, ".", "-")}"
-  cloudfront_cname       = "<%= infra.components.cdn.config.name %>.${local.domain_name}"
+  s3_bucket_name         = "${replace(replace("<%= infra.components.cdn.components.cdn.url %>", "https://", ""), ".", "-")}"
+  cloudfront_cname       = "${replace("<%= infra.components.cdn.components.cdn.url %>", "https://", "")}"
   create_acm_certificate = true
   add_route53_record     = true
   route53_zone_id        = module.route53.this.zone_id
@@ -258,20 +255,27 @@ module "cloudfront-s3" {
 }
 <% end -%>
 
-<%- if infra.components.object_storage&.config&.buckets -%>
+<%- unless infra.components.object_storage&.components.nil? -%>
 module "s3" {
   source          = "./aws/s3"
   s3_bucket_names = [
-    <%- infra.components.object_storage.config.buckets.each do |bucket| -%>
-    "<%= bucket.name %>-${replace(local.domain_name, ".", "-")}",
+    <%- infra.components.object_storage.components.each do |bucket, config| -%>
+    <%- unless bucket.to_s == "cdn" -%>
+    "<%= bucket %>-${replace(local.domain_name, ".", "-")}",
+    <%- end -%>
     <%- end -%>
   ]
   tags            = var.tags
+}
+
+output "s3" {
+  value = module.s3.this
 }
 <%- end -%>
 
 <%- if infra.components&.databases&.config&.enabled -%>
 <%- infra.components.databases.config.clusters&.each do |key, config| -%>
+# RDS
 module "rds-<%= key %>" {
   source        = "./aws/rds"
   name          = "<%= config.name %>"
@@ -291,6 +295,7 @@ module "rds-<%= key %>" {
 
 <%- if infra.components&.redis&.config&.enabled -%>
 <%- infra.components.redis.config.clusters&.each do |key, config| -%>
+# Elasticache
 module "elasticache-redis-<%= key %>" {
   source        = "./aws/elasticache-redis"
   name          = "<%= config.name %>"
@@ -315,21 +320,11 @@ data "aws_iam_policy_document" "s3_buckets" {
   statement {
     actions   = ["s3:GetObject", "s3:PutObject"]
     resources = ["arn:aws:s3:::$${bucket_name}$${origin_path}*"]
-
-    principals {
-      type        = "AWS"
-      identifiers = module.eks-cluster.this.worker_iam_instance_profile_arns
-    }
   }
 
   statement {
     actions   = ["s3:ListBucket"]
     resources = ["arn:aws:s3:::$${bucket_name}"]
-
-    principals {
-      type        = "AWS"
-      identifiers = module.eks-cluster.this.worker_iam_instance_profile_arns
-    }
   }
 }
 

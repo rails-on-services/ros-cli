@@ -8,6 +8,13 @@ resource "aws_s3_bucket" "this" {
   bucket = var.s3_bucket_name
   acl    = "private"
 
+  cors_rule {
+    allowed_headers = ["*"]
+    allowed_methods = ["GET"]
+    allowed_origins = ["*"]
+    max_age_seconds = 1800
+  }
+
   tags = var.tags
 }
 
@@ -113,6 +120,11 @@ resource "aws_cloudfront_distribution" "this" {
 
     forwarded_values {
       query_string = false
+      headers = [
+        "Access-Control-Request-Headers",
+        "Access-Control-Request-Method",
+        "Origin",
+      ]
 
       cookies {
         forward = "none"
