@@ -39,14 +39,21 @@ variable "helm_configuration_overrides" {
 
 # Locals
 locals {
-  aws_profile                         = "<%= infra.config.cluster.aws_profile.nil? ? "default" : infra.config.cluster.aws_profile %>"
-  vpc_cidr                            = "<%= infra.components.vpc&.config&.cidr.nil? ? "10.0.0.0/16" : infra.components.vpc.config.cidr %>"
-  cluster_name                        = "<%= infra.components.kubernetes&.config&.name.nil? ? infra.config.cluster.name : infra.components.kubernetes.config.name %>"
-  vpc_name                            = "<%= infra.components.vpc&.config&.name.nil? ? infra.config.cluster.name : infra.components.vpc.config.name %>"
-  accelerator_name                    = "<%= infra.components.globalaccelerator&.config&.name.nil? ? infra.config.cluster.name : infra.components.globalaccelerator.config.name %>"
-  iam_name                            = "<%= infra.components.iam&.config&.name.nil? ? infra.config.cluster.name : infra.components.iam.config.name %>"
-  tags                                = var.tags
-  domain_name                         = "<%= infra.dns.sub_domain %><%= infra.dns.sub_domain.nil? ? "" : "."%><%= infra.dns.root_domain %>"
+  aws_profile      = "<%= infra.config.cluster.aws_profile.nil? ? "default" : infra.config.cluster.aws_profile %>"
+  vpc_cidr         = "<%= infra.components.vpc&.config&.cidr.nil? ? "10.0.0.0/16" : infra.components.vpc.config.cidr %>"
+  cluster_name     = "<%= infra.components.kubernetes&.config&.name.nil? ? infra.config.cluster.name : infra.components.kubernetes.config.name %>"
+  vpc_name         = "<%= infra.components.vpc&.config&.name.nil? ? infra.config.cluster.name : infra.components.vpc.config.name %>"
+  accelerator_name = "<%= infra.components.globalaccelerator&.config&.name.nil? ? infra.config.cluster.name : infra.components.globalaccelerator.config.name %>"
+  iam_name         = "<%= infra.components.iam&.config&.name.nil? ? infra.config.cluster.name : infra.components.iam.config.name %>"
+  tags             = var.tags
+  domain_name      = "<%= infra.dns.sub_domain %><%= infra.dns.sub_domain.nil? ? "" : "."%><%= infra.dns.root_domain %>"
+  s3_buckets       = [
+    <%- unless infra.components.object_storage&.components.nil? -%>
+     <%- infra.components.object_storage.components.each do |bucket, config| -%>
+    "<%= bucket %>-${replace(local.domain_name, ".", "-")}",
+    <%- end -%>
+    <%- end -%>
+  ]
 }
 
 # VPC
@@ -115,9 +122,9 @@ module "eks-cluster" {
     <%- end -%>
   ]
 
-  eks_map_roles = module.iam.eks_map_roles
-
-  tags = var.tags
+  eks_map_roles      = module.iam.eks_map_roles
+  eks_extra_policies = data.template_file.aws_iam_policy_document_s3[*].rendered
+  tags               = var.tags
 }
 
 output "eks" {
@@ -235,12 +242,12 @@ output "globalaccelerator_ips" {
 }
 <% end -%>
 
-<%- if infra.components.cdn&.config&.enabled -%>
+<%- if infra.components.cdn&.components&.cdn&.enabled -%>
 module "cloudfront-s3" {
   source                 = "./aws/cloudfront-s3"
   aws_profile            = local.aws_profile
-  s3_bucket_name         = "<%= infra.components.cdn.config.name %>-${replace(local.domain_name, ".", "-")}"
-  cloudfront_cname       = "<%= infra.components.cdn.config.name %>.${local.domain_name}"
+  s3_bucket_name         = "${replace(replace("<%= infra.components.cdn.components.cdn.url %>", "https://", ""), ".", "-")}"
+  cloudfront_cname       = "${replace("<%= infra.components.cdn.components.cdn.url %>", "https://", "")}"
   create_acm_certificate = true
   add_route53_record     = true
   route53_zone_id        = module.route53.this.zone_id
@@ -248,20 +255,27 @@ module "cloudfront-s3" {
 }
 <% end -%>
 
-<%- if infra.components.object_storage&.config&.buckets -%>
+<%- unless infra.components.object_storage&.components.nil? -%>
 module "s3" {
   source          = "./aws/s3"
   s3_bucket_names = [
-    <%- infra.components.object_storage.config.buckets.each do |bucket| -%>
-    "<%= bucket.name %>-${replace(local.domain_name, ".", "-")}",
+    <%- infra.components.object_storage.components.each do |bucket, config| -%>
+    <%- unless bucket.to_s == "cdn" -%>
+    "<%= bucket %>-${replace(local.domain_name, ".", "-")}",
+    <%- end -%>
     <%- end -%>
   ]
   tags            = var.tags
+}
+
+output "s3" {
+  value = module.s3.this
 }
 <%- end -%>
 
 <%- if infra.components&.databases&.config&.enabled -%>
 <%- infra.components.databases.config.clusters&.each do |key, config| -%>
+# RDS
 module "rds-<%= key %>" {
   source        = "./aws/rds"
   name          = "<%= config.name %>"
@@ -281,6 +295,7 @@ module "rds-<%= key %>" {
 
 <%- if infra.components&.redis&.config&.enabled -%>
 <%- infra.components.redis.config.clusters&.each do |key, config| -%>
+# Elasticache
 module "elasticache-redis-<%= key %>" {
   source        = "./aws/elasticache-redis"
   name          = "<%= config.name %>"
@@ -299,3 +314,27 @@ module "elasticache-redis-<%= key %>" {
 }
 <% end -%>
 <% end -%>
+
+# EKS extra policy templates
+data "aws_iam_policy_document" "s3_buckets" {
+  statement {
+    actions   = ["s3:GetObject", "s3:PutObject"]
+    resources = ["arn:aws:s3:::$${bucket_name}$${origin_path}*"]
+  }
+
+  statement {
+    actions   = ["s3:ListBucket"]
+    resources = ["arn:aws:s3:::$${bucket_name}"]
+  }
+}
+
+data "template_file" "aws_iam_policy_document_s3" {
+  count    = length(local.s3_buckets)
+  template = data.aws_iam_policy_document.s3_buckets.json
+
+  vars = {
+    bucket_name = local.s3_buckets[count.index]
+    origin_path = "/"
+  }
+}
+

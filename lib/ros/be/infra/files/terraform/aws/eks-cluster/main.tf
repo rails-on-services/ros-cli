@@ -95,22 +95,23 @@ resource "aws_iam_policy" "eks-worker-external-dns" {
   policy      = file("${path.module}/files/aws-external-dns-iam-policy.json")
 }
 
-#resource "aws_iam_policy" "eks-worker-extra" {
-#  count       = var.extra_eks_iam_policy != "" ? 1 : 0
-#  name_prefix = "eks-worker-extra-${var.cluster_name}"
-#  description = "Extra IAM permissions for eks worker"
-#  policy      = var.extra_eks_iam_policy
-#}
-#
-#resource "aws_iam_role_policy_attachment" "eks-worker-extra" {
-#  count      = var.extra_eks_iam_policy != "" ? 1 : 0
-#  policy_arn = aws_iam_policy.eks-worker-extra[0].arn
-#  role       = module.eks.worker_iam_role_name
-#}
-
 resource "aws_iam_role_policy_attachment" "eks-worker-external-dns" {
   policy_arn = aws_iam_policy.eks-worker-external-dns.arn
   role       = module.eks.worker_iam_role_name
+}
+
+## attach extra iam policies
+resource "aws_iam_policy" "eks-worker-extra" {
+  count       = length(var.eks_extra_policies)
+  name_prefix = "eks-worker-extra-${var.cluster_name}"
+  description = "EKS worker node extra permissions for cluster ${var.cluster_name}"
+  policy      = var.eks_extra_policies[count.index]
+}
+
+resource "aws_iam_role_policy_attachment" "eks-worker-extra" {
+ count      = length(var.eks_extra_policies)
+ policy_arn = aws_iam_policy.eks-worker-extra[count.index].arn
+ role       = module.eks.worker_iam_role_name
 }
 
 resource "null_resource" "k8s-tiller-rbac" {

@@ -10,7 +10,8 @@ variable "aws_profile" {
 }
 
 variable "s3_bucket_name" {
-  type = string
+  type        = string
+  description = "S3 bucket name"
 }
 
 variable "cloudfront_cname" {
