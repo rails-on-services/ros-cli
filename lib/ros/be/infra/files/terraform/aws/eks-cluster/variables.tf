@@ -53,13 +53,21 @@ variable "eks_worker_groups" {
 }
 
 variable "eks_map_users" {
-  type        = list(map(string))
+  type = list(object({
+    userarn  = string
+    username = string
+    groups   = list(string)
+  }))
   default     = []
   description = "IAM users to add to the aws-auth configmap, see example here: https://github.com/terraform-aws-modules/terraform-aws-eks/blob/master/examples/eks_test_fixture/variables.tf"
 }
 
 variable "eks_map_roles" {
-  type        = list(map(string))
+  type = list(object({
+    rolearn  = string
+    username = string
+    groups   = list(string)
+  }))
   default     = []
   description = "IAM roles to add to the aws-auth configmap, see example here: https://github.com/terraform-aws-modules/terraform-aws-eks/blob/master/examples/eks_test_fixture/variables.tf"
 }

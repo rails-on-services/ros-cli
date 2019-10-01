@@ -9,19 +9,19 @@ output "iam_groups" {
 output "eks_map_roles" {
   description = "The intended eks_map_roles can be pass to module terraform-aws-modules/eks/aws"
 
-  value = [for i in range(0, 4) : 
+  value = [for i in range(0, 4) :
     {
-      role_arn = element(aws_iam_role.eks-roles.*.arn, i)
+      rolearn  = element(aws_iam_role.eks-roles.*.arn, i)
       username = "aws:{{AccountID}}:session:{{SessionName}}"
-      group    = element(aws_iam_group.eks-groups.*.name, i)
+      groups   = [element(aws_iam_group.eks-groups.*.name, i)]
     }
-  ] 
+  ]
 }
 
 output "kubernetes_clusterrolebindings" {
   description = "The intended kubernetes clusterrolesbindings can be pass to module eks-resources"
 
-  value = [for i in range(0, 4) : 
+  value = [for i in range(0, 4) :
     {
       name        = local.eks_roles[i]
       group       = element(aws_iam_group.eks-groups.*.name, i)
