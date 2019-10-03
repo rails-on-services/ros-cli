@@ -11,8 +11,7 @@ spec:
     spec:
       restartPolicy: OnFailure
       containers:
-        <%- @service.kafka_topics.each_with_index do |topic, index| -%>
-        - name: create-topic-<%= index %>
+        - name: create-topic
           image: confluentinc/cp-kafka:5.3.0
           command:
             - bash
@@ -30,12 +29,16 @@ spec:
               <%- end -%>
               <%- end -%>
               EOT
-              if kafka-topics --bootstrap-server <%= @service.kafka.bootstrap_servers %> --command-config ./config --list | grep "<%= topic %>" ; then
-                echo "Topic already exist, nothing to do"
-              else
-                kafka-topics --bootstrap-server <%= @service.kafka.bootstrap_servers %> \
-                --command-config ./config --create --topic <%= topic %> \
-                --config cleanup.policy=compact --config segment.ms=600000 \
-                --config delete.retention.ms=600000 --partitions 3 --replication-factor 3
-              fi
-        <%- end -%>
+
+              topics=(<%= @service.kafka_topics.join(" ") %>)
+              for topic in ${topics[@]}; do
+                if kafka-topics --bootstrap-server <%= @service.kafka.bootstrap_servers %> --command-config ./config --list | grep "${topic}" ; then
+                  echo "Topic already exist, nothing to do"
+                else
+                  kafka-topics --bootstrap-server <%= @service.kafka.bootstrap_servers %> \
+                  --command-config ./config --create --topic "${topic}" \
+                  --config cleanup.policy=compact --config segment.ms=600000 \
+                  --config delete.retention.ms=600000 --partitions <%= @service.kafka.topic_partitions || 1 %> \
+                  --replication-factor <%= @service.kafka.topic_replication_factor || 1 %>
+                fi
+              done
