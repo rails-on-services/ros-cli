@@ -12,6 +12,7 @@ services:
     ports:
       - <%= @service.expose_ports(24224) %>
       - <%= @service.expose_ports('24224/udp') %>
+      - <%= @service.expose_ports(9880) %>
     volumes:
       - "<%= "#{@service.relative_path}/#{@service.runtime_path}/fluentd/log" %>:/fluentd/log"
       - "../services/fluentd/etc/config.d:/fluentd/etc/config.d"

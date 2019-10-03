@@ -123,7 +123,7 @@ module Ros
           def fluentd
             @fluentd ||= Config::Options.new({
               header: cluster.infra.cluster_type.eql?('kubernetes') ? "configMaps:\n  ros.conf: |" : '',
-              include_tcp_source: cluster.infra.cluster_type.eql?('kubernetes') ? false : true,
+              include_input_source: cluster.infra.cluster_type.eql?('kubernetes') ? false : true,
               current_feature_set: application.current_feature_set,
               http_log_kafka_topic: "http_request_log"
             }).merge!((application.components.services.components[:'fluentd'].config)&.to_hash)
