@@ -37,6 +37,10 @@ services:<% @service.profiles.each do |profile| %><% xname = profile.eql?('serve
         source: "${ROS_CONTEXT_DIR}/lib"
         target: "/home/rails/ros/lib"
         consistency: consistent<% end %><% end %>
+      - type: bind
+        source: "${<%= @service.context_dir %>}/sre"
+        target: "/home/rails/sre"
+        consistency: consistent
     build:
       context: "${<%= @service.context_dir %>}"
       args:<% @service.image.build_args.each_pair do |name, value| %>
