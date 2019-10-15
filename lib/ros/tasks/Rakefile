@@ -74,26 +74,33 @@ namespace :ros do
   namespace :db do
     desc 'Clean a database (removes all tenants)'
     task :clean, %i(service) do |task, args|
-      Ros::Exec.new.execute(task.name, args[:service])
+      Ros.exec_from_rake(task.name, args[:service])
     end
 
     namespace :clean do
       desc 'Clean a database and seed it'
       task :seed, %i(service) do |task, args|
-        Ros::Exec.new.execute(task.name, args[:service])
+        Ros.exec_from_rake(task.name, args[:service])
       end
 
       desc 'Reset a database (drop, create and run migrations)'
       task :reset, %i(service) do |task, args|
-        Ros::Exec.new.execute(task.name, args[:service])
+        Ros.exec_from_rake(task.name, args[:service])
       end
     end
 
     namespace :reset do
       desc 'Reset a database and seed it'
       task :seed, %i(service) do |task, args|
-        Ros::Exec.new.execute(task.name, args[:service])
+        Ros.exec_from_rake(task.name, args[:service])
       end
+    end
+  end
+
+  namespace :avro do
+    desc 'Register Avro schemas'
+    task :register, %i(service) do |task, args|
+      Ros.exec_from_rake(task.name, args[:service])
     end
   end
 end
@@ -102,7 +109,7 @@ namespace :db do
   namespace :migrate do
     desc 'Display status of migrations'
     task :status, %i(service) do |task, args|
-      Ros::Exec.new.execute(task.name, args[:service])
+      Ros.exec_from_rake(task.name, args[:service])
     end
   end
 end
