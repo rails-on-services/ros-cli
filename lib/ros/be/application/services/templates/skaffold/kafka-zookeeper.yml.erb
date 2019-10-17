@@ -5,10 +5,10 @@ deploy:
   helm:
     releases:
       - name: kafka-zookeeper
-        chartPath: <%= @service.chart_path %>/cp-helm-charts/cp-zookeeper
+        chartPath: ros/cp-zookeeper
         skipBuildDependencies: true
         overrides:
-          imageTag: 5.3.0
+          imageTag: 5.3.1
           servers: 1
           fullnameOverride: kafka-zookeeper
           podLabels:

@@ -5,7 +5,7 @@ deploy:
   helm:
     releases:
       - name: kafka-connect
-        chartPath: <%= @service.chart_path %>/cp-helm-charts/cp-kafka-connect
+        chartPath: ros/cp-kafka-connect
         skipBuildDependencies: true
         overrides:
           replicaCount: 1
