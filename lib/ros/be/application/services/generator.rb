@@ -201,12 +201,6 @@ module Ros
             directory('../files/kubernetes', "#{deploy_path}/kubernetes")
           end
 
-          def copy_kubernetes_helm_charts
-            return unless infra.cluster_type.eql?('kubernetes')
-            directory('../files/helm-charts', "#{deploy_path}/helm-charts")
-            FileUtils.mkdir_p("#{destination_root}/#{deploy_path}") unless File.directory?("#{destination_root}/#{deploy_path}")
-          end
-
           private
 
           def nginx_services; @nginx_services ||= (args[0] || platform_service_names) end
