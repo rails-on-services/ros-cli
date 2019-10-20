@@ -68,7 +68,7 @@ profiles:
             <%- if profile.eql?('server') -%>
             bootstrap:
               enabled: true
-              command: ["bundle", "exec", "rails", "<% if @service.is_ros_service %>app:<% end %>ros:db:reset", "<% if @service.is_ros_service %>app:ros:<%= @service.name %>:<% end %>db:seed"]
+              command: ["bundle", "exec", "rails", "<% if @service.is_ros_service %>app:<% end %>ros:db:reset", "<% if @service.is_ros_service %>app:ros:<%= @service.name %>:<% end %>db:seed"<% if services_components[:"kafka-schema-registry"]&.config&.enabled%>, "app:ros:avro:register"<% end %>]
             hook:
               upgradeMigration:
                 enabled: true
