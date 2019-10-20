@@ -40,7 +40,7 @@ deploy:
             requests:
               cpu: 200m
               memory: 1Gi
-      <%- if @service.kafka_schema_registry.ui -%>
+      <%- if @service.kafka_schema_registry&.ui -%>
       - name: kafka-schema-registry-ui
         chartPath: ros/basic
         remote: true
