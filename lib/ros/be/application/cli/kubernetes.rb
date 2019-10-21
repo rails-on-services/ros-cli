@@ -75,6 +75,7 @@ module Ros
             STDOUT.puts 'Namespace exists. skipping create. Use -f to force'
           end
           return if options.skip
+          update_helm_repo
           deploy_services unless options.skip_infra
           deploy_platform_environment
           deploy_platform
@@ -98,7 +99,6 @@ module Ros
         def deploy_services
           env_file = "#{services_root}/services.env"
           sync_secret(env_file) if File.exists?(env_file)
-          update_helm_repo
           @infra_services.each do |service|
             if service.to_s.eql?('kafka-connect')
               deploy_gcp_bigquery_secret unless application.components.services.components[:'kafka-connect']&.config&.gcp_service_account_key.nil?
@@ -146,7 +146,6 @@ module Ros
 
         def deploy_platform
           update_platform_env
-          update_helm_repo
           @platform_services.each do |service|
             #next unless platform.components.keys.include?(service.to_sym)
             env_file = "#{platform_root}/#{service}.env"
