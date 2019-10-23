@@ -1,0 +1,5 @@
+--output-dir docs/
+--no-private
+--title "Rails on Services"
+--plugin rails
+--plugin rspec
