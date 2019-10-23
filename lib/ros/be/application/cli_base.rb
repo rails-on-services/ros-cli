@@ -77,7 +77,7 @@ module Ros
           infra_services = { 'Infra Services' => 'Status' }
           application.components.platform.components.keys.sort.each do |svc_name|
             svc = application.components.platform.components[svc_name.to_s]
-            svc.config.profiles.each do |profile|
+            (svc.config.profiles || {}).each do |profile|
               name = profile.eql?('server') ? svc_name : "#{svc_name}_#{profile}"
               status =
                 if running_services.include?(name.to_s)
