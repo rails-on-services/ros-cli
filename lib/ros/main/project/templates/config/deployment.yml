@@ -13,6 +13,8 @@ config:
 
 components:
   fe:
+    config:
+      base_url: http://frontend
     components:
       server:
         config:
@@ -126,7 +128,7 @@ components:
                 event_logging:
                   enabled: no
                 smtp:
-                  username: replace-with-valid-credentials
+                  enabled: yes
             components:
               account:
                 config:
