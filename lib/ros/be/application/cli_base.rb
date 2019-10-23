@@ -75,18 +75,21 @@ module Ros
           my_services = { 'Platform Services' => 'Status' }
           ros_services = { 'Core Services' => 'Status' }
           infra_services = { 'Infra Services' => 'Status' }
-          application.components.platform.components.keys.sort.each do |name|
-            svc = application.components.platform.components[name.to_s]
-            status =
-              if running_services.include?(name.to_s)
-                'Running'
-              elsif svc.dig(:config, :enabled).nil? || svc.dig(:config, :enabled)
-                'Stopped'
-              else
-                'Not Enabled'
-              end
-            ros_services[name] = status if svc.dig(:config, :ros)
-            my_services[name] = status unless svc.dig(:config, :ros)
+          application.components.platform.components.keys.sort.each do |svc_name|
+            svc = application.components.platform.components[svc_name.to_s]
+            svc.config.profiles.each do |profile|
+              name = profile.eql?('server') ? svc_name : "#{svc_name}_#{profile}"
+              status =
+                if running_services.include?(name.to_s)
+                  'Running'
+                elsif svc.dig(:config, :enabled).nil? || svc.dig(:config, :enabled)
+                  'Stopped'
+                else
+                  'Not Enabled'
+                end
+              ros_services[name] = status if svc.dig(:config, :ros)
+              my_services[name] = status unless svc.dig(:config, :ros)
+            end
           end
           (application.components.services.components.keys - %i(wait)).sort.each do |name|
             svc = application.components.services.components[name.to_s]
@@ -125,7 +128,12 @@ module Ros
             # STDOUT.puts '-' * 100 unless header_printed
             header_printed = true
           end
+          show_environment
           show_endpoint
+        end
+
+        def show_environment
+          STDOUT.puts "\nEnv: #{Ros.env}#{' ' * 10}Profile: #{Ros.profile}#{' ' * 10}Feature Set: #{Ros::Be::Application::Model.current_feature_set}"
         end
 
         def show_endpoint

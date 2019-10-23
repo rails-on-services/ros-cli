@@ -47,7 +47,9 @@ module Ros
                     storage: {
                       buckets:
                       infra.settings.components.object_storage.components.each_with_object({}) do |(name, config), hash|
-                        config.services.each { |dir| hash[name] = "#{name}-#{bucket_base}" }
+                        hash[name] = Hash.new
+                        hash[name]['name'] = "#{name}-#{bucket_base}"
+                        config.to_hash.reject { |key| key.eql?(:services) }.each_pair { |key, value| hash[name][key] = value }
                       end,
                       services:
                       infra.settings.components.object_storage.components.each_with_object({}) do |(name, config), hash|
