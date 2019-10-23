@@ -1,0 +1,3224 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  Class: Ros::Be::Application::Kubernetes
+  
+    &mdash; Rails on Services
+  
+</title>
+
+  <link rel="stylesheet" href="../../../css/style.css" type="text/css" charset="utf-8" />
+
+  <link rel="stylesheet" href="../../../css/common.css" type="text/css" charset="utf-8" />
+
+<script type="text/javascript" charset="utf-8">
+  pathId = "Ros::Be::Application::Kubernetes";
+  relpath = '../../../';
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="../../../js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="../../../js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div class="nav_wrap">
+      <iframe id="nav" src="../../../class_list.html?1"></iframe>
+      <div id="resizer"></div>
+    </div>
+
+    <div id="main" tabindex="-1">
+      <div id="header">
+        <div id="menu">
+  
+    <a href="../../../_index.html">Index (K)</a> &raquo;
+    <span class='title'><span class='object_link'><a href="../../../Ros.html" title="Ros (module)">Ros</a></span></span> &raquo; <span class='title'><span class='object_link'><a href="../../Be.html" title="Ros::Be (module)">Be</a></span></span> &raquo; <span class='title'><span class='object_link'><a href="../Application.html" title="Ros::Be::Application (module)">Application</a></span></span>
+     &raquo; 
+    <span class="title">Kubernetes</span>
+  
+</div>
+
+        <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="../../../class_list.html">
+
+        <svg width="24" height="24">
+          <rect x="0" y="4" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="12" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="20" width="24" height="4" rx="1" ry="1"></rect>
+        </svg>
+    </a>
+  
+</div>
+        <div class="clear"></div>
+      </div>
+
+      <div id="content"><h1>Class: Ros::Be::Application::Kubernetes
+  
+  
+  
+</h1>
+<div class="box_info">
+  
+  <dl>
+    <dt>Inherits:</dt>
+    <dd>
+      <span class="inheritName">Object</span>
+      
+        <ul class="fullTree">
+          <li>Object</li>
+          
+            <li class="next">Ros::Be::Application::Kubernetes</li>
+          
+        </ul>
+        <a href="#" class="inheritanceTree">show all</a>
+      
+    </dd>
+  </dl>
+  
+
+  
+  
+  
+  
+  <dl>
+      <dt>Includes:</dt>
+      <dd><span class='object_link'><a href="CliBase.html" title="Ros::Be::Application::CliBase (module)">CliBase</a></span></dd>
+  </dl>
+  
+  
+
+  
+
+  
+  <dl>
+    <dt>Defined in:</dt>
+    <dd>lib/ros/be/application/cli/kubernetes.rb</dd>
+  </dl>
+  
+</div>
+
+
+
+
+
+  <h2>Instance Attribute Summary <small><a href="#" class="summary_toggle">collapse</a></small></h2>
+  <ul class="summary">
+    
+      <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#services-instance_method" title="#services (instance method)">#<strong>services</strong>  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+    
+    
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'>
+<p>Returns the value of attribute services.</p>
+</div></span>
+  
+</li>
+
+    
+  </ul>
+
+
+
+  
+  
+  <h3 class="inherited">Attributes included from <span class='object_link'><a href="CliBase.html" title="Ros::Be::Application::CliBase (module)">CliBase</a></span></h3>
+  <p class="inherited"><span class='object_link'><a href="CliBase.html#options-instance_method" title="Ros::Be::Application::CliBase#options (method)">#options</a></span></p>
+
+  
+  
+  <h3 class="inherited">Attributes included from <span class='object_link'><a href="../../CliBase.html" title="Ros::CliBase (module)">CliBase</a></span></h3>
+  <p class="inherited"><span class='object_link'><a href="../../CliBase.html#errors-instance_method" title="Ros::CliBase#errors (method)">#errors</a></span>, <span class='object_link'><a href="../../CliBase.html#exit_code-instance_method" title="Ros::CliBase#exit_code (method)">#exit_code</a></span>, <span class='object_link'><a href="../../CliBase.html#options-instance_method" title="Ros::CliBase#options (method)">#options</a></span>, <span class='object_link'><a href="../../CliBase.html#stderr-instance_method" title="Ros::CliBase#stderr (method)">#stderr</a></span>, <span class='object_link'><a href="../../CliBase.html#stdout-instance_method" title="Ros::CliBase#stdout (method)">#stdout</a></span></p>
+
+
+  
+    <h2>
+      Instance Method Summary
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#attach-instance_method" title="#attach (instance method)">#<strong>attach</strong>(service)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#build-instance_method" title="#build (instance method)">#<strong>build</strong>(services)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#check-instance_method" title="#check (instance method)">#<strong>check</strong>  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#clean_kubernetes_name-instance_method" title="#clean_kubernetes_name (instance method)">#<strong>clean_kubernetes_name</strong>(name)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#cmd-instance_method" title="#cmd (instance method)">#<strong>cmd</strong>(services)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#command-instance_method" title="#command (instance method)">#<strong>command</strong>(cmd)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'>
+<p>Supporting methods (1) NOTE: only goes with &#39;logs&#39; for now.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#config_files-instance_method" title="#config_files (instance method)">#<strong>config_files</strong>  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#console-instance_method" title="#console (instance method)">#<strong>console</strong>(service)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#copy-instance_method" title="#copy (instance method)">#<strong>copy</strong>(service, src, dest = nil)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#copy_service_file-instance_method" title="#copy_service_file (instance method)">#<strong>copy_service_file</strong>(service, src, dest)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#deploy_gcp_bigquery_secret-instance_method" title="#deploy_gcp_bigquery_secret (instance method)">#<strong>deploy_gcp_bigquery_secret</strong>  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#deploy_jobs-instance_method" title="#deploy_jobs (instance method)">#<strong>deploy_jobs</strong>(service)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#deploy_namespace-instance_method" title="#deploy_namespace (instance method)">#<strong>deploy_namespace</strong>  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#deploy_platform-instance_method" title="#deploy_platform (instance method)">#<strong>deploy_platform</strong>  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#deploy_platform_environment-instance_method" title="#deploy_platform_environment (instance method)">#<strong>deploy_platform_environment</strong>  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#deploy_services-instance_method" title="#deploy_services (instance method)">#<strong>deploy_services</strong>  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#down-instance_method" title="#down (instance method)">#<strong>down</strong>(services)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#exec-instance_method" title="#exec (instance method)">#<strong>exec</strong>(service, command)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#get_credentials-instance_method" title="#get_credentials (instance method)">#<strong>get_credentials</strong>  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#get_pods-instance_method" title="#get_pods (instance method)">#<strong>get_pods</strong>(labels = {}, return_one = false)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#get_vs-instance_method" title="#get_vs (instance method)">#<strong>get_vs</strong>(labels = {}, return_one = false)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'>
+<p>TODO: DRY up with get_pods above.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#initialize-instance_method" title="#initialize (instance method)">#<strong>initialize</strong>(options = {})  &#x21d2; Kubernetes </a>
+    
+
+    
+  </span>
+  
+  
+    <span class="note title constructor">constructor</span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'>
+<p>A new instance of Kubernetes.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#k8s_secrets_content-instance_method" title="#k8s_secrets_content (instance method)">#<strong>k8s_secrets_content</strong>(type = &#39;platform&#39;)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#kube_env-instance_method" title="#kube_env (instance method)">#<strong>kube_env</strong>  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#kubeconfig-instance_method" title="#kubeconfig (instance method)">#<strong>kubeconfig</strong>  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#kubectl-instance_method" title="#kubectl (instance method)">#<strong>kubectl</strong>(cmd, never_capture = false)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'>
+<p>Supporting methods (2).</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#kubectl_capture-instance_method" title="#kubectl_capture (instance method)">#<strong>kubectl_capture</strong>(cmd)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#local_secrets_content-instance_method" title="#local_secrets_content (instance method)">#<strong>local_secrets_content</strong>(file)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#logs-instance_method" title="#logs (instance method)">#<strong>logs</strong>(service)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#namespace-instance_method" title="#namespace (instance method)">#<strong>namespace</strong>  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#platform_root-instance_method" title="#platform_root (instance method)">#<strong>platform_root</strong>  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#pod-instance_method" title="#pod (instance method)">#<strong>pod</strong>(labels = {})  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#pods-instance_method" title="#pods (instance method)">#<strong>pods</strong>(labels = {})  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#ps-instance_method" title="#ps (instance method)">#<strong>ps</strong>  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#push-instance_method" title="#push (instance method)">#<strong>push</strong>(services)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#restart-instance_method" title="#restart (instance method)">#<strong>restart</strong>(services)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'>
+<p>TODO: This isn&#39;t working quite as expected NOTE: restart should not remove a service, just restart it This is the same behavior as with compose (at least it should be).</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#running_services-instance_method" title="#running_services (instance method)">#<strong>running_services</strong>  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#service_pod-instance_method" title="#service_pod (instance method)">#<strong>service_pod</strong>(service)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#services_root-instance_method" title="#services_root (instance method)">#<strong>services_root</strong>  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#skaffold-instance_method" title="#skaffold (instance method)">#<strong>skaffold</strong>(cmd, envs = {})  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#skaffold_env-instance_method" title="#skaffold_env (instance method)">#<strong>skaffold_env</strong>  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#stop-instance_method" title="#stop (instance method)">#<strong>stop</strong>(services)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#svpr-instance_method" title="#svpr (instance method)">#<strong>svpr</strong>(cmd)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#switch!-instance_method" title="#switch! (instance method)">#<strong>switch!</strong>  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#sync_secret-instance_method" title="#sync_secret (instance method)">#<strong>sync_secret</strong>(file)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#up-instance_method" title="#up (instance method)">#<strong>up</strong>(services)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'>
+<p>TODO: Add ability for fail fast.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#update_helm_repo-instance_method" title="#update_helm_repo (instance method)">#<strong>update_helm_repo</strong>  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#update_platform_env-instance_method" title="#update_platform_env (instance method)">#<strong>update_platform_env</strong>  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+    </ul>
+  
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+  <h3 class="inherited">Methods included from <span class='object_link'><a href="CliBase.html" title="Ros::Be::Application::CliBase (module)">CliBase</a></span></h3>
+  <p class="inherited"><span class='object_link'><a href="CliBase.html#application-instance_method" title="Ros::Be::Application::CliBase#application (method)">#application</a></span>, <span class='object_link'><a href="CliBase.html#cluster-instance_method" title="Ros::Be::Application::CliBase#cluster (method)">#cluster</a></span>, <span class='object_link'><a href="CliBase.html#convert-instance_method" title="Ros::Be::Application::CliBase#convert (method)">#convert</a></span>, <span class='object_link'><a href="CliBase.html#credentials-instance_method" title="Ros::Be::Application::CliBase#credentials (method)">#credentials</a></span>, <span class='object_link'><a href="CliBase.html#creds_file-instance_method" title="Ros::Be::Application::CliBase#creds_file (method)">#creds_file</a></span>, <span class='object_link'><a href="CliBase.html#documents_dir-instance_method" title="Ros::Be::Application::CliBase#documents_dir (method)">#documents_dir</a></span>, <span class='object_link'><a href="CliBase.html#enabled_application_services-instance_method" title="Ros::Be::Application::CliBase#enabled_application_services (method)">#enabled_application_services</a></span>, <span class='object_link'><a href="CliBase.html#enabled_services-instance_method" title="Ros::Be::Application::CliBase#enabled_services (method)">#enabled_services</a></span>, <span class='object_link'><a href="CliBase.html#generate_config-instance_method" title="Ros::Be::Application::CliBase#generate_config (method)">#generate_config</a></span>, <span class='object_link'><a href="CliBase.html#infra-instance_method" title="Ros::Be::Application::CliBase#infra (method)">#infra</a></span>, <span class='object_link'><a href="CliBase.html#json-instance_method" title="Ros::Be::Application::CliBase#json (method)">#json</a></span>, <span class='object_link'><a href="CliBase.html#modify_payload-instance_method" title="Ros::Be::Application::CliBase#modify_payload (method)">#modify_payload</a></span>, <span class='object_link'><a href="CliBase.html#platform-instance_method" title="Ros::Be::Application::CliBase#platform (method)">#platform</a></span>, <span class='object_link'><a href="CliBase.html#publish-instance_method" title="Ros::Be::Application::CliBase#publish (method)">#publish</a></span>, <span class='object_link'><a href="CliBase.html#publish_cli_credentials-instance_method" title="Ros::Be::Application::CliBase#publish_cli_credentials (method)">#publish_cli_credentials</a></span>, <span class='object_link'><a href="CliBase.html#publish_env_credentials-instance_method" title="Ros::Be::Application::CliBase#publish_env_credentials (method)">#publish_env_credentials</a></span>, <span class='object_link'><a href="CliBase.html#publish_erd-instance_method" title="Ros::Be::Application::CliBase#publish_erd (method)">#publish_erd</a></span>, <span class='object_link'><a href="CliBase.html#publish_to_postman-instance_method" title="Ros::Be::Application::CliBase#publish_to_postman (method)">#publish_to_postman</a></span>, <span class='object_link'><a href="CliBase.html#remove_cache-instance_method" title="Ros::Be::Application::CliBase#remove_cache (method)">#remove_cache</a></span>, <span class='object_link'><a href="CliBase.html#runtime_dir-instance_method" title="Ros::Be::Application::CliBase#runtime_dir (method)">#runtime_dir</a></span>, <span class='object_link'><a href="CliBase.html#show-instance_method" title="Ros::Be::Application::CliBase#show (method)">#show</a></span>, <span class='object_link'><a href="CliBase.html#show_endpoint-instance_method" title="Ros::Be::Application::CliBase#show_endpoint (method)">#show_endpoint</a></span>, <span class='object_link'><a href="CliBase.html#status-instance_method" title="Ros::Be::Application::CliBase#status (method)">#status</a></span>, <span class='object_link'><a href="CliBase.html#svc_config-instance_method" title="Ros::Be::Application::CliBase#svc_config (method)">#svc_config</a></span>, <span class='object_link'><a href="CliBase.html#test-instance_method" title="Ros::Be::Application::CliBase#test (method)">#test</a></span>, <span class='object_link'><a href="CliBase.html#test_commands-instance_method" title="Ros::Be::Application::CliBase#test_commands (method)">#test_commands</a></span></p>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  <h3 class="inherited">Methods included from <span class='object_link'><a href="../../CliBase.html" title="Ros::CliBase (module)">CliBase</a></span></h3>
+  <p class="inherited"><span class='object_link'><a href="../../CliBase.html#capture_cmd-instance_method" title="Ros::CliBase#capture_cmd (method)">#capture_cmd</a></span>, <span class='object_link'><a href="../../CliBase.html#exit-instance_method" title="Ros::CliBase#exit (method)">#exit</a></span>, <span class='object_link'><a href="../../CliBase.html#generate_config-instance_method" title="Ros::CliBase#generate_config (method)">#generate_config</a></span>, <span class='object_link'><a href="../../CliBase.html#setup_cmd-instance_method" title="Ros::CliBase#setup_cmd (method)">#setup_cmd</a></span>, <span class='object_link'><a href="../../CliBase.html#silence_output-instance_method" title="Ros::CliBase#silence_output (method)">#silence_output</a></span>, <span class='object_link'><a href="../../CliBase.html#stale_config-instance_method" title="Ros::CliBase#stale_config (method)">#stale_config</a></span>, <span class='object_link'><a href="../../CliBase.html#system_cmd-instance_method" title="Ros::CliBase#system_cmd (method)">#system_cmd</a></span>, <span class='object_link'><a href="../../CliBase.html#test_for_project-instance_method" title="Ros::CliBase#test_for_project (method)">#test_for_project</a></span></p>
+<div id="constructor_details" class="method_details_list">
+  <h2>Constructor Details</h2>
+  
+    <div class="method_details first">
+  <h3 class="signature first" id="initialize-instance_method">
+  
+    #<strong>initialize</strong>(options = {})  &#x21d2; <tt><span class='object_link'><a href="" title="Ros::Be::Application::Kubernetes (class)">Kubernetes</a></span></tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+<p>Returns a new instance of Kubernetes</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+13
+14
+15
+16</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 13</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_options'>options</span> <span class='op'>=</span> <span class='lbrace'>{</span><span class='rbrace'>}</span><span class='rparen'>)</span>
+  <span class='ivar'>@options</span> <span class='op'>=</span> <span class='id identifier rubyid_options'>options</span>
+  <span class='ivar'>@errors</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../../../Ros.html" title="Ros (module)">Ros</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../../Errors.html" title="Ros::Errors (class)">Errors</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="../../Errors.html#initialize-instance_method" title="Ros::Errors#initialize (method)">new</a></span></span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+  
+</div>
+
+  <div id="instance_attr_details" class="attr_details">
+    <h2>Instance Attribute Details</h2>
+    
+      
+      <span id="services=-instance_method"></span>
+      <div class="method_details first">
+  <h3 class="signature first" id="services-instance_method">
+  
+    #<strong>services</strong>  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+<p>Returns the value of attribute services</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+8
+9
+10</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 8</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_services'>services</span>
+  <span class='ivar'>@services</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+  </div>
+
+
+  <div id="instance_method_details" class="method_details_list">
+    <h2>Instance Method Details</h2>
+
+    
+      <div class="method_details first">
+  <h3 class="signature first" id="attach-instance_method">
+  
+    #<strong>attach</strong>(service)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+285
+286
+287</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 285</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_attach'>attach</span><span class='lparen'>(</span><span class='id identifier rubyid_service'>service</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_kubectl'>kubectl</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>attach -it </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_service_pod'>service_pod</span><span class='lparen'>(</span><span class='id identifier rubyid_service'>service</span><span class='rparen'>)</span><span class='embexpr_end'>}</span><span class='tstring_content'> -c </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_service'>service</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='kw'>true</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="build-instance_method">
+  
+    #<strong>build</strong>(services)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 22</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_build'>build</span><span class='lparen'>(</span><span class='id identifier rubyid_services'>services</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_generate_config'>generate_config</span> <span class='kw'>if</span> <span class='id identifier rubyid_stale_config'>stale_config</span>
+  <span class='id identifier rubyid_services'>services</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_service'>service</span><span class='op'>|</span>
+    <span class='kw'>next</span> <span class='kw'>true</span> <span class='kw'>unless</span> <span class='id identifier rubyid_platform'>platform</span><span class='period'>.</span><span class='id identifier rubyid_components'>components</span><span class='period'>.</span><span class='id identifier rubyid_keys'>keys</span><span class='period'>.</span><span class='id identifier rubyid_include?'>include?</span><span class='lparen'>(</span><span class='id identifier rubyid_service'>service</span><span class='period'>.</span><span class='id identifier rubyid_to_sym'>to_sym</span><span class='rparen'>)</span>
+
+    <span class='id identifier rubyid_service_file'>service_file</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_platform_root'>platform_root</span><span class='embexpr_end'>}</span><span class='tstring_content'>/</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_service'>service</span><span class='embexpr_end'>}</span><span class='tstring_content'>.yml</span><span class='tstring_end'>&quot;</span></span>
+    <span class='const'>Dir</span><span class='period'>.</span><span class='id identifier rubyid_chdir'>chdir</span><span class='lparen'>(</span><span class='id identifier rubyid_platform_root'>platform_root</span><span class='rparen'>)</span> <span class='kw'>do</span>
+      <span class='comment'># TODO: next unless check and gem_version_check
+</span>      <span class='id identifier rubyid_run_cmd'>run_cmd</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>build</span><span class='tstring_end'>&#39;</span></span>
+      <span class='id identifier rubyid_skaffold'>skaffold</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_run_cmd'>run_cmd</span><span class='embexpr_end'>}</span><span class='tstring_content'> -f </span><span class='embexpr_beg'>#{</span><span class='const'>File</span><span class='period'>.</span><span class='id identifier rubyid_basename'>basename</span><span class='lparen'>(</span><span class='id identifier rubyid_service_file'>service_file</span><span class='rparen'>)</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_errors'>errors</span><span class='period'>.</span><span class='id identifier rubyid_add'>add</span><span class='lparen'>(</span><span class='symbol'>:skaffold</span><span class='comma'>,</span> <span class='id identifier rubyid_stderr'>stderr</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_exit_code'>exit_code</span><span class='period'>.</span><span class='id identifier rubyid_positive?'>positive?</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="check-instance_method">
+  
+    #<strong>check</strong>  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+375</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 375</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_check'>check</span><span class='semicolon'>;</span> <span class='const'>File</span><span class='period'>.</span><span class='id identifier rubyid_file?'>file?</span><span class='lparen'>(</span><span class='id identifier rubyid_kubeconfig'>kubeconfig</span><span class='rparen'>)</span> <span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="clean_kubernetes_name-instance_method">
+  
+    #<strong>clean_kubernetes_name</strong>(name)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+10
+11
+12</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 10</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_clean_kubernetes_name'>clean_kubernetes_name</span><span class='lparen'>(</span><span class='id identifier rubyid_name'>name</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_gsub'>gsub</span><span class='lparen'>(</span><span class='tstring'><span class='regexp_beg'>/</span><span class='tstring_content'>[^a-zA-Z-]</span><span class='regexp_end'>/</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>-</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="cmd-instance_method">
+  
+    #<strong>cmd</strong>(services)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+18
+19
+20</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 18</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_cmd'>cmd</span><span class='lparen'>(</span><span class='id identifier rubyid_services'>services</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_binding'>binding</span><span class='period'>.</span><span class='id identifier rubyid_pry'>pry</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="command-instance_method">
+  
+    #<strong>command</strong>(cmd)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+<p>Supporting methods (1) NOTE: only goes with &#39;logs&#39; for now</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+291</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 291</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_command'>command</span><span class='lparen'>(</span><span class='id identifier rubyid_cmd'>cmd</span><span class='rparen'>)</span><span class='semicolon'>;</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_cmd'>cmd</span><span class='embexpr_end'>}</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_options'>options</span><span class='period'>.</span><span class='id identifier rubyid_tail'>tail</span> <span class='op'>?</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'> -f</span><span class='tstring_end'>&#39;</span></span> <span class='op'>:</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_end'>&#39;</span></span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="config_files-instance_method">
+  
+    #<strong>config_files</strong>  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+380
+381
+382</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 380</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_config_files'>config_files</span>
+  <span class='const'>Dir</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='const'><span class='object_link'><a href="../../../Ros.html" title="Ros (module)">Ros</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../../Be.html" title="Ros::Be (module)">Be</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Application.html" title="Ros::Be::Application (module)">Application</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Model.html" title="Ros::Be::Application::Model (module)">Model</a></span></span><span class='period'>.</span><span class='id identifier rubyid_deploy_path'><span class='object_link'><a href="Model.html#deploy_path-class_method" title="Ros::Be::Application::Model.deploy_path (method)">deploy_path</a></span></span><span class='embexpr_end'>}</span><span class='tstring_content'>/**/*</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="console-instance_method">
+  
+    #<strong>console</strong>(service)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+193
+194
+195</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 193</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_console'>console</span><span class='lparen'>(</span><span class='id identifier rubyid_service'>service</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_exec'>exec</span><span class='lparen'>(</span><span class='id identifier rubyid_service'>service</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>rails console</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="copy-instance_method">
+  
+    #<strong>copy</strong>(service, src, dest = nil)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+255
+256
+257
+258
+259</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 255</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_copy'>copy</span><span class='lparen'>(</span><span class='id identifier rubyid_service'>service</span><span class='comma'>,</span> <span class='id identifier rubyid_src'>src</span><span class='comma'>,</span> <span class='id identifier rubyid_dest'>dest</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_dest'>dest</span> <span class='op'>||=</span> <span class='id identifier rubyid_src'>src</span>
+  <span class='id identifier rubyid_pod'>pod</span> <span class='op'>=</span> <span class='id identifier rubyid_pod'>pod</span><span class='lparen'>(</span><span class='label'>name:</span> <span class='id identifier rubyid_service'>service</span><span class='comma'>,</span> <span class='label'>component:</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>server</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_kubectl'>kubectl</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>cp </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_src'>src</span><span class='embexpr_end'>}</span><span class='tstring_content'> </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_pod'>pod</span><span class='embexpr_end'>}</span><span class='tstring_content'>:</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_dest'>dest</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="copy_service_file-instance_method">
+  
+    #<strong>copy_service_file</strong>(service, src, dest)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+250
+251
+252
+253</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 250</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_copy_service_file'>copy_service_file</span><span class='lparen'>(</span><span class='id identifier rubyid_service'>service</span><span class='comma'>,</span> <span class='id identifier rubyid_src'>src</span><span class='comma'>,</span> <span class='id identifier rubyid_dest'>dest</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_pod'>pod</span> <span class='op'>=</span> <span class='id identifier rubyid_pod'>pod</span><span class='lparen'>(</span><span class='label'>name:</span> <span class='id identifier rubyid_service'>service</span><span class='comma'>,</span> <span class='label'>component:</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>server</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_kubectl'>kubectl</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>cp </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_pod'>pod</span><span class='embexpr_end'>}</span><span class='tstring_content'>:</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_src'>src</span><span class='embexpr_end'>}</span><span class='tstring_content'> </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_dest'>dest</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="deploy_gcp_bigquery_secret-instance_method">
+  
+    #<strong>deploy_gcp_bigquery_secret</strong>  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+133
+134
+135
+136
+137
+138</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 133</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_deploy_gcp_bigquery_secret'>deploy_gcp_bigquery_secret</span>
+  <span class='kw'>return</span> <span class='kw'>if</span> <span class='id identifier rubyid_kubectl'>kubectl</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>get secret gcp-jsonkey</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='id identifier rubyid_options'>options</span><span class='period'>.</span><span class='id identifier rubyid_force'>force</span>
+  <span class='id identifier rubyid_secret'>secret</span> <span class='op'>=</span> <span class='id identifier rubyid_application'>application</span><span class='period'>.</span><span class='id identifier rubyid_components'>components</span><span class='period'>.</span><span class='id identifier rubyid_services'>services</span><span class='period'>.</span><span class='id identifier rubyid_components'>components</span><span class='lbracket'>[</span><span class='symbol'>:&#39;kafka-connect&#39;</span><span class='rbracket'>]</span><span class='op'>&amp;.</span><span class='id identifier rubyid_config'>config</span><span class='op'>&amp;.</span><span class='id identifier rubyid_gcp_service_account_key'>gcp_service_account_key</span>
+  <span class='id identifier rubyid_kube_cmd'>kube_cmd</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>create secret generic gcp-jsonkey --from-literal=application_default_credentials.json=&#39;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_secret'>secret</span><span class='embexpr_end'>}</span><span class='tstring_content'>&#39;</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_kubectl'>kubectl</span><span class='lparen'>(</span><span class='id identifier rubyid_kube_cmd'>kube_cmd</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="deploy_jobs-instance_method">
+  
+    #<strong>deploy_jobs</strong>(service)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+124
+125
+126
+127
+128
+129
+130
+131</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 124</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_deploy_jobs'>deploy_jobs</span><span class='lparen'>(</span><span class='id identifier rubyid_service'>service</span><span class='rparen'>)</span>
+  <span class='kw'>if</span> <span class='const'>File</span><span class='period'>.</span><span class='id identifier rubyid_directory?'>directory?</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_services_root'>services_root</span><span class='embexpr_end'>}</span><span class='tstring_content'>/jobs/</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_service'>service</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+    <span class='const'>Dir</span><span class='period'>.</span><span class='id identifier rubyid_glob'>glob</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_services_root'>services_root</span><span class='embexpr_end'>}</span><span class='tstring_content'>/jobs/</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_service'>service</span><span class='embexpr_end'>}</span><span class='tstring_content'>/*.yml</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_job_file'>job_file</span><span class='op'>|</span>
+      <span class='id identifier rubyid_kube_cmd'>kube_cmd</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>apply -f </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_job_file'>job_file</span><span class='embexpr_end'>}</span><span class='tstring_content'> --force</span><span class='tstring_end'>&quot;</span></span>
+      <span class='id identifier rubyid_kubectl'>kubectl</span><span class='lparen'>(</span><span class='id identifier rubyid_kube_cmd'>kube_cmd</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="deploy_namespace-instance_method">
+  
+    #<strong>deploy_namespace</strong>  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 84</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_deploy_namespace'>deploy_namespace</span>
+  <span class='comment'># create namespace
+</span>  <span class='id identifier rubyid_system_cmd'>system_cmd</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>kubectl create ns </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_namespace'>namespace</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_kube_env'>kube_env</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_errors'>errors</span><span class='period'>.</span><span class='id identifier rubyid_add'>add</span><span class='lparen'>(</span><span class='symbol'>:kubectl_create_namespace</span><span class='comma'>,</span> <span class='id identifier rubyid_stderr'>stderr</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_exit_code'>exit_code</span><span class='period'>.</span><span class='id identifier rubyid_positive?'>positive?</span>
+  <span class='id identifier rubyid_system_cmd'>system_cmd</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>kubectl label namespace </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_namespace'>namespace</span><span class='embexpr_end'>}</span><span class='tstring_content'> istio-injection=enabled --overwrite</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_kube_env'>kube_env</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_errors'>errors</span><span class='period'>.</span><span class='id identifier rubyid_add'>add</span><span class='lparen'>(</span><span class='symbol'>:kubectl_label_namespace</span><span class='comma'>,</span> <span class='id identifier rubyid_stderr'>stderr</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_exit_code'>exit_code</span><span class='period'>.</span><span class='id identifier rubyid_positive?'>positive?</span> <span class='kw'>and</span> <span class='id identifier rubyid_stderr'>stderr</span><span class='period'>.</span><span class='id identifier rubyid_index'>index</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>AlreadyExists</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+
+  <span class='comment'># deploy helm into namespace
+</span>  <span class='id identifier rubyid_kubectl'>kubectl</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>apply -f </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_application'>application</span><span class='period'>.</span><span class='id identifier rubyid_deploy_path'>deploy_path</span><span class='embexpr_end'>}</span><span class='tstring_content'>/services/kubernetes/tiller-rbac</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_errors'>errors</span><span class='period'>.</span><span class='id identifier rubyid_add'>add</span><span class='lparen'>(</span><span class='symbol'>:deploy_tiller</span><span class='comma'>,</span> <span class='id identifier rubyid_stderr'>stderr</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_exit_code'>exit_code</span><span class='period'>.</span><span class='id identifier rubyid_positive?'>positive?</span>
+  <span class='id identifier rubyid_system_cmd'>system_cmd</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>helm init --upgrade --wait --service-account tiller</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_kube_env'>kube_env</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_errors'>errors</span><span class='period'>.</span><span class='id identifier rubyid_add'>add</span><span class='lparen'>(</span><span class='symbol'>:initialize_helm</span><span class='comma'>,</span> <span class='id identifier rubyid_stderr'>stderr</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_exit_code'>exit_code</span><span class='period'>.</span><span class='id identifier rubyid_positive?'>positive?</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="deploy_platform-instance_method">
+  
+    #<strong>deploy_platform</strong>  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 147</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_deploy_platform'>deploy_platform</span>
+  <span class='id identifier rubyid_update_platform_env'>update_platform_env</span>
+  <span class='id identifier rubyid_update_helm_repo'>update_helm_repo</span>
+  <span class='ivar'>@platform_services</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_service'>service</span><span class='op'>|</span>
+    <span class='comment'>#next unless platform.components.keys.include?(service.to_sym)
+</span>    <span class='id identifier rubyid_env_file'>env_file</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_platform_root'>platform_root</span><span class='embexpr_end'>}</span><span class='tstring_content'>/</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_service'>service</span><span class='embexpr_end'>}</span><span class='tstring_content'>.env</span><span class='tstring_end'>&quot;</span></span>
+    <span class='id identifier rubyid_sync_secret'>sync_secret</span><span class='lparen'>(</span><span class='id identifier rubyid_env_file'>env_file</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='const'>File</span><span class='period'>.</span><span class='id identifier rubyid_exist?'>exist?</span><span class='lparen'>(</span><span class='id identifier rubyid_env_file'>env_file</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_service_file'>service_file</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_platform_root'>platform_root</span><span class='embexpr_end'>}</span><span class='tstring_content'>/</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_service'>service</span><span class='embexpr_end'>}</span><span class='tstring_content'>.yml</span><span class='tstring_end'>&quot;</span></span>
+    <span class='const'>Dir</span><span class='period'>.</span><span class='id identifier rubyid_chdir'>chdir</span><span class='lparen'>(</span><span class='id identifier rubyid_platform_root'>platform_root</span><span class='rparen'>)</span> <span class='kw'>do</span>
+      <span class='comment'># skaffold cmds: build, deploy or run (build and deploy)
+</span>      <span class='id identifier rubyid_base_cmd'>base_cmd</span> <span class='op'>=</span> <span class='id identifier rubyid_options'>options</span><span class='period'>.</span><span class='id identifier rubyid_build'>build</span> <span class='op'>?</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>run</span><span class='tstring_end'>&#39;</span></span> <span class='op'>:</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>deploy</span><span class='tstring_end'>&#39;</span></span>
+      <span class='comment'># TODO: next unless check and gem_version_check
+</span>      <span class='id identifier rubyid_profiles'>profiles</span> <span class='op'>=</span> <span class='lbracket'>[</span><span class='id identifier rubyid_options'>options</span><span class='period'>.</span><span class='id identifier rubyid_profile'>profile</span><span class='rbracket'>]</span> <span class='kw'>if</span> <span class='id identifier rubyid_options'>options</span><span class='period'>.</span><span class='id identifier rubyid_profile'>profile</span>
+      <span class='id identifier rubyid_profiles'>profiles</span> <span class='op'>||=</span> <span class='id identifier rubyid_platform'>platform</span><span class='period'>.</span><span class='id identifier rubyid_components'>components</span><span class='lbracket'>[</span><span class='id identifier rubyid_service'>service</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_dig'>dig</span><span class='lparen'>(</span><span class='symbol'>:config</span><span class='comma'>,</span> <span class='symbol'>:profiles</span><span class='rparen'>)</span> <span class='op'>||</span> <span class='lbracket'>[</span><span class='symbol'>:none</span><span class='rbracket'>]</span>
+      <span class='id identifier rubyid_replica_count'>replica_count</span> <span class='op'>=</span> <span class='lparen'>(</span><span class='id identifier rubyid_options'>options</span><span class='period'>.</span><span class='id identifier rubyid_replicas'>replicas</span> <span class='op'>||</span> <span class='int'>1</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span>
+      <span class='id identifier rubyid_build_count'>build_count</span> <span class='op'>=</span> <span class='int'>0</span>
+      <span class='id identifier rubyid_profiles'>profiles</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_profile'>profile</span><span class='op'>|</span>
+        <span class='id identifier rubyid_run_cmd'>run_cmd</span> <span class='op'>=</span> <span class='id identifier rubyid_build_count'>build_count</span><span class='period'>.</span><span class='id identifier rubyid_zero?'>zero?</span> <span class='op'>?</span> <span class='id identifier rubyid_base_cmd'>base_cmd</span> <span class='op'>:</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>deploy</span><span class='tstring_end'>&#39;</span></span>
+        <span class='id identifier rubyid_profile_cmd'>profile_cmd</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> -p </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_profile'>profile</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_profile'>profile</span><span class='period'>.</span><span class='id identifier rubyid_eql?'>eql?</span><span class='lparen'>(</span><span class='symbol'>:none</span><span class='rparen'>)</span>
+        <span class='id identifier rubyid_extra_arg'>extra_arg</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>--images=${SKAFFOLD_DEFAULT_REPO}/</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_service'>service</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>if</span> <span class='id identifier rubyid_run_cmd'>run_cmd</span><span class='period'>.</span><span class='id identifier rubyid_eql?'>eql?</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>deploy</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span>
+        <span class='id identifier rubyid_skaffold'>skaffold</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_run_cmd'>run_cmd</span><span class='embexpr_end'>}</span><span class='tstring_content'> -f </span><span class='embexpr_beg'>#{</span><span class='const'>File</span><span class='period'>.</span><span class='id identifier rubyid_basename'>basename</span><span class='lparen'>(</span><span class='id identifier rubyid_service_file'>service_file</span><span class='rparen'>)</span><span class='embexpr_end'>}</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_profile_cmd'>profile_cmd</span><span class='embexpr_end'>}</span><span class='tstring_content'> </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_extra_arg'>extra_arg</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span>
+                 <span class='lbrace'>{</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>REPLICA_COUNT</span><span class='tstring_end'>&#39;</span></span> <span class='op'>=&gt;</span> <span class='id identifier rubyid_replica_count'>replica_count</span> <span class='rbrace'>}</span><span class='rparen'>)</span>
+        <span class='id identifier rubyid_errors'>errors</span><span class='period'>.</span><span class='id identifier rubyid_add'>add</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>skaffold_</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_run_cmd'>run_cmd</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_stderr'>stderr</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_exit_code'>exit_code</span><span class='period'>.</span><span class='id identifier rubyid_positive?'>positive?</span>
+        <span class='id identifier rubyid_kubectl'>kubectl</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>scale deploy </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_clean_kubernetes_name'>clean_kubernetes_name</span><span class='lparen'>(</span><span class='id identifier rubyid_service'>service</span><span class='rparen'>)</span><span class='embexpr_end'>}</span><span class='tstring_content'> --replicas=</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_replica_count'>replica_count</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+        <span class='id identifier rubyid_errors'>errors</span><span class='period'>.</span><span class='id identifier rubyid_add'>add</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>scale_</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_service'>service</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_stderr'>stderr</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_exit_code'>exit_code</span><span class='period'>.</span><span class='id identifier rubyid_positive?'>positive?</span>
+        <span class='id identifier rubyid_build_count'>build_count</span> <span class='op'>+=</span> <span class='int'>1</span>
+      <span class='kw'>end</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="deploy_platform_environment-instance_method">
+  
+    #<strong>deploy_platform_environment</strong>  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+140
+141
+142
+143
+144
+145</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 140</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_deploy_platform_environment'>deploy_platform_environment</span>
+  <span class='kw'>return</span> <span class='kw'>if</span> <span class='id identifier rubyid_kubectl'>kubectl</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>get secret </span><span class='embexpr_beg'>#{</span><span class='const'><span class='object_link'><a href="../../Stack.html" title="Ros::Stack (module)">Stack</a></span></span><span class='period'>.</span><span class='id identifier rubyid_registry_secret_name'><span class='object_link'><a href="../../Stack.html#registry_secret_name-class_method" title="Ros::Stack.registry_secret_name (method)">registry_secret_name</a></span></span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='id identifier rubyid_options'>options</span><span class='period'>.</span><span class='id identifier rubyid_force'>force</span>
+  <span class='id identifier rubyid_kube_cmd'>kube_cmd</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>create secret generic </span><span class='embexpr_beg'>#{</span><span class='const'><span class='object_link'><a href="../../Stack.html" title="Ros::Stack (module)">Stack</a></span></span><span class='period'>.</span><span class='id identifier rubyid_registry_secret_name'><span class='object_link'><a href="../../Stack.html#registry_secret_name-class_method" title="Ros::Stack.registry_secret_name (method)">registry_secret_name</a></span></span><span class='embexpr_end'>}</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span> \
+    <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>--from-file=.dockerconfigjson=</span><span class='embexpr_beg'>#{</span><span class='const'>Dir</span><span class='period'>.</span><span class='id identifier rubyid_home'>home</span><span class='embexpr_end'>}</span><span class='tstring_content'>/.docker/config.json --type=kubernetes.io/dockerconfigjson</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_kubectl'>kubectl</span><span class='lparen'>(</span><span class='id identifier rubyid_kube_cmd'>kube_cmd</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="deploy_services-instance_method">
+  
+    #<strong>deploy_services</strong>  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 98</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_deploy_services'>deploy_services</span>
+  <span class='id identifier rubyid_env_file'>env_file</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_services_root'>services_root</span><span class='embexpr_end'>}</span><span class='tstring_content'>/services.env</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_sync_secret'>sync_secret</span><span class='lparen'>(</span><span class='id identifier rubyid_env_file'>env_file</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='const'>File</span><span class='period'>.</span><span class='id identifier rubyid_exists?'>exists?</span><span class='lparen'>(</span><span class='id identifier rubyid_env_file'>env_file</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_update_helm_repo'>update_helm_repo</span>
+  <span class='ivar'>@infra_services</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_service'>service</span><span class='op'>|</span>
+    <span class='kw'>if</span> <span class='id identifier rubyid_service'>service</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_eql?'>eql?</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>kafka-connect</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_deploy_gcp_bigquery_secret'>deploy_gcp_bigquery_secret</span> <span class='kw'>unless</span> <span class='id identifier rubyid_application'>application</span><span class='period'>.</span><span class='id identifier rubyid_components'>components</span><span class='period'>.</span><span class='id identifier rubyid_services'>services</span><span class='period'>.</span><span class='id identifier rubyid_components'>components</span><span class='lbracket'>[</span><span class='symbol'>:&#39;kafka-connect&#39;</span><span class='rbracket'>]</span><span class='op'>&amp;.</span><span class='id identifier rubyid_config'>config</span><span class='op'>&amp;.</span><span class='id identifier rubyid_gcp_service_account_key'>gcp_service_account_key</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+    <span class='kw'>end</span>
+    <span class='kw'>if</span> <span class='id identifier rubyid_service'>service</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_eql?'>eql?</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>ingress</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span>
+      <span class='kw'>next</span> <span class='kw'>true</span> <span class='kw'>unless</span> <span class='id identifier rubyid_options'>options</span><span class='period'>.</span><span class='id identifier rubyid_n'>n</span> <span class='op'>||</span> <span class='id identifier rubyid_get_vs'>get_vs</span><span class='lparen'>(</span><span class='label'>name:</span> <span class='symbol'>:ingress</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_empty?'>empty?</span> <span class='op'>||</span> <span class='id identifier rubyid_options'>options</span><span class='period'>.</span><span class='id identifier rubyid_force'>force</span>
+    <span class='kw'>else</span>
+      <span class='kw'>next</span> <span class='kw'>if</span> <span class='id identifier rubyid_pod'>pod</span><span class='lparen'>(</span><span class='label'>name:</span> <span class='id identifier rubyid_service'>service</span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='ivar'>@force_infra_deploy</span>
+    <span class='kw'>end</span>
+    <span class='id identifier rubyid_env_file'>env_file</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_services_root'>services_root</span><span class='embexpr_end'>}</span><span class='tstring_content'>/</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_service'>service</span><span class='embexpr_end'>}</span><span class='tstring_content'>.env</span><span class='tstring_end'>&quot;</span></span>
+    <span class='id identifier rubyid_sync_secret'>sync_secret</span><span class='lparen'>(</span><span class='id identifier rubyid_env_file'>env_file</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='const'>File</span><span class='period'>.</span><span class='id identifier rubyid_exist?'>exist?</span><span class='lparen'>(</span><span class='id identifier rubyid_env_file'>env_file</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_service_file'>service_file</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_service'>service</span><span class='embexpr_end'>}</span><span class='tstring_content'>.yml</span><span class='tstring_end'>&quot;</span></span>
+    <span class='const'>Dir</span><span class='period'>.</span><span class='id identifier rubyid_chdir'>chdir</span><span class='lparen'>(</span><span class='id identifier rubyid_services_root'>services_root</span><span class='rparen'>)</span> <span class='kw'>do</span>
+      <span class='id identifier rubyid_base_cmd'>base_cmd</span> <span class='op'>=</span> <span class='id identifier rubyid_options'>options</span><span class='period'>.</span><span class='id identifier rubyid_build'>build</span> <span class='op'>?</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>run</span><span class='tstring_end'>&#39;</span></span> <span class='op'>:</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>deploy</span><span class='tstring_end'>&#39;</span></span>
+      <span class='id identifier rubyid_force'>force</span> <span class='op'>=</span> <span class='ivar'>@force_infra_deploy</span> <span class='op'>?</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>--force=true</span><span class='tstring_end'>&#39;</span></span> <span class='op'>:</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_end'>&#39;</span></span>
+      <span class='id identifier rubyid_skaffold'>skaffold</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_base_cmd'>base_cmd</span><span class='embexpr_end'>}</span><span class='tstring_content'> </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_force'>force</span><span class='embexpr_end'>}</span><span class='tstring_content'> -f </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_service_file'>service_file</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_errors'>errors</span><span class='period'>.</span><span class='id identifier rubyid_add'>add</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>skaffold_</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_base_cmd'>base_cmd</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_stderr'>stderr</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_exit_code'>exit_code</span><span class='period'>.</span><span class='id identifier rubyid_positive?'>positive?</span>
+    <span class='kw'>end</span>
+    <span class='id identifier rubyid_deploy_jobs'>deploy_jobs</span><span class='lparen'>(</span><span class='id identifier rubyid_service'>service</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="down-instance_method">
+  
+    #<strong>down</strong>(services)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+261
+262
+263
+264
+265
+266
+267
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 261</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_down'>down</span><span class='lparen'>(</span><span class='id identifier rubyid_services'>services</span><span class='rparen'>)</span>
+  <span class='kw'>if</span> <span class='id identifier rubyid_services'>services</span><span class='period'>.</span><span class='id identifier rubyid_empty?'>empty?</span>
+    <span class='comment'># TODO: Are you sure?
+</span>    <span class='id identifier rubyid_cmd'>cmd</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>kubectl delete ns </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_namespace'>namespace</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span>
+    <span class='id identifier rubyid_system_cmd'>system_cmd</span><span class='lparen'>(</span><span class='id identifier rubyid_cmd'>cmd</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_remove_cache'>remove_cache</span>
+  <span class='kw'>else</span>
+    <span class='id identifier rubyid_base_cmd'>base_cmd</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>delete</span><span class='tstring_end'>&#39;</span></span>
+    <span class='id identifier rubyid_services'>services</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_service'>service</span><span class='op'>|</span>
+      <span class='kw'>next</span> <span class='kw'>unless</span> <span class='id identifier rubyid_platform'>platform</span><span class='period'>.</span><span class='id identifier rubyid_components'>components</span><span class='period'>.</span><span class='id identifier rubyid_keys'>keys</span><span class='period'>.</span><span class='id identifier rubyid_include?'>include?</span><span class='lparen'>(</span><span class='id identifier rubyid_service'>service</span><span class='period'>.</span><span class='id identifier rubyid_to_sym'>to_sym</span><span class='rparen'>)</span>
+      <span class='comment'># kubectl(&quot;delete secret #{service}&quot;) if kubectl(&quot;get secret #{service}&quot;)
+</span>      <span class='id identifier rubyid_service_file'>service_file</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_platform_root'>platform_root</span><span class='embexpr_end'>}</span><span class='tstring_content'>/</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_service'>service</span><span class='embexpr_end'>}</span><span class='tstring_content'>.yml</span><span class='tstring_end'>&quot;</span></span>
+      <span class='id identifier rubyid_profiles'>profiles</span> <span class='op'>=</span> <span class='lparen'>(</span><span class='id identifier rubyid_options'>options</span><span class='period'>.</span><span class='id identifier rubyid_profile'>profile</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span> <span class='kw'>or</span> <span class='id identifier rubyid_options'>options</span><span class='period'>.</span><span class='id identifier rubyid_profile'>profile</span><span class='period'>.</span><span class='id identifier rubyid_eql?'>eql?</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>all</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span><span class='rparen'>)</span> <span class='op'>?</span> <span class='id identifier rubyid_platform'>platform</span><span class='period'>.</span><span class='id identifier rubyid_components'>components</span><span class='lbracket'>[</span><span class='id identifier rubyid_service'>service</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_config'>config</span><span class='period'>.</span><span class='id identifier rubyid_profiles'>profiles</span> <span class='op'>:</span> <span class='lbracket'>[</span><span class='id identifier rubyid_options'>options</span><span class='period'>.</span><span class='id identifier rubyid_profile'>profile</span><span class='rbracket'>]</span>
+      <span class='comment'># binding.pry
+</span>      <span class='const'>Dir</span><span class='period'>.</span><span class='id identifier rubyid_chdir'>chdir</span><span class='lparen'>(</span><span class='id identifier rubyid_platform_root'>platform_root</span><span class='rparen'>)</span> <span class='kw'>do</span>
+        <span class='id identifier rubyid_profiles'>profiles</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_profile'>profile</span><span class='op'>|</span>
+          <span class='id identifier rubyid_skaffold'>skaffold</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_base_cmd'>base_cmd</span><span class='embexpr_end'>}</span><span class='tstring_content'> -f </span><span class='embexpr_beg'>#{</span><span class='const'>File</span><span class='period'>.</span><span class='id identifier rubyid_basename'>basename</span><span class='lparen'>(</span><span class='id identifier rubyid_service_file'>service_file</span><span class='rparen'>)</span><span class='embexpr_end'>}</span><span class='tstring_content'> -p </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_profile'>profile</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+        <span class='kw'>end</span>
+      <span class='kw'>end</span>
+      <span class='id identifier rubyid_remove_cache'>remove_cache</span> <span class='kw'>if</span> <span class='id identifier rubyid_service'>service</span><span class='period'>.</span><span class='id identifier rubyid_eql?'>eql?</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>iam</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="exec-instance_method">
+  
+    #<strong>exec</strong>(service, command)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+197
+198
+199
+200</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 197</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_exec'>exec</span><span class='lparen'>(</span><span class='id identifier rubyid_service'>service</span><span class='comma'>,</span> <span class='id identifier rubyid_command'>command</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_generate_config'>generate_config</span> <span class='kw'>if</span> <span class='id identifier rubyid_stale_config'>stale_config</span>
+  <span class='id identifier rubyid_kubectl'>kubectl</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>exec -it </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_service_pod'>service_pod</span><span class='lparen'>(</span><span class='id identifier rubyid_service'>service</span><span class='rparen'>)</span><span class='embexpr_end'>}</span><span class='tstring_content'> -c </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_service'>service</span><span class='embexpr_end'>}</span><span class='tstring_content'> </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_command'>command</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='kw'>true</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="get_credentials-instance_method">
+  
+    #<strong>get_credentials</strong>  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 238</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_get_credentials'>get_credentials</span>
+  <span class='id identifier rubyid_bootstrap_pod'>bootstrap_pod</span> <span class='op'>=</span> <span class='id identifier rubyid_pod'>pod</span><span class='lparen'>(</span><span class='label'>name:</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>iam</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='label'>component:</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>bootstrap</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_kubectl_capture'>kubectl_capture</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>logs </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_bootstrap_pod'>bootstrap_pod</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+  <span class='kw'>if</span> <span class='id identifier rubyid_index_of_json'>index_of_json</span> <span class='op'>=</span> <span class='id identifier rubyid_stdout'>stdout</span><span class='period'>.</span><span class='id identifier rubyid_index'>index</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>[{&quot;type&quot;:</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_json'>json</span> <span class='op'>=</span> <span class='id identifier rubyid_stdout'>stdout</span><span class='lbracket'>[</span><span class='id identifier rubyid_index_of_json'>index_of_json</span><span class='op'>..</span><span class='op'>-</span><span class='int'>1</span><span class='rbracket'>]</span>
+    <span class='const'>FileUtils</span><span class='period'>.</span><span class='id identifier rubyid_mkdir_p'>mkdir_p</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_runtime_dir'>runtime_dir</span><span class='embexpr_end'>}</span><span class='tstring_content'>/platform</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+    <span class='const'>File</span><span class='period'>.</span><span class='id identifier rubyid_write'>write</span><span class='lparen'>(</span><span class='id identifier rubyid_creds_file'>creds_file</span><span class='comma'>,</span> <span class='id identifier rubyid_json'>json</span><span class='rparen'>)</span>
+  <span class='kw'>else</span>
+    <span class='const'>STDOUT</span><span class='period'>.</span><span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>NOTICE: Credentials not found in bootstrap pod&#39;s file system</span><span class='tstring_end'>&quot;</span></span>
+  <span class='kw'>end</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="get_pods-instance_method">
+  
+    #<strong>get_pods</strong>(labels = {}, return_one = false)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+296
+297
+298
+299
+300
+301
+302
+303</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 296</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_get_pods'>get_pods</span><span class='lparen'>(</span><span class='id identifier rubyid_labels'>labels</span> <span class='op'>=</span> <span class='lbrace'>{</span><span class='rbrace'>}</span><span class='comma'>,</span> <span class='id identifier rubyid_return_one'>return_one</span> <span class='op'>=</span> <span class='kw'>false</span><span class='rparen'>)</span>
+  <span class='comment'># cmd = &quot;get pod -l app=#{service} -l app.kubernetes.io/instance=#{service} #{labels.map{ |k, v| &quot;-l #{k}=#{v}&quot; }.join(&#39; &#39;)} -o yaml&quot;
+</span>  <span class='comment'># cmd = &quot;get pod #{labels.map{ |k, v| &quot;-l app.kubernetes.io/#{k}=#{v}&quot; }.join(&#39; &#39;)} -o yaml&quot;
+</span>  <span class='id identifier rubyid_cmd'>cmd</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>get pod -l </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_labels'>labels</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span><span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_k'>k</span><span class='comma'>,</span> <span class='id identifier rubyid_v'>v</span><span class='op'>|</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>app.kubernetes.io/</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_k'>k</span><span class='embexpr_end'>}</span><span class='tstring_content'>=</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_v'>v</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span> <span class='rbrace'>}</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>,</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span><span class='embexpr_end'>}</span><span class='tstring_content'> -o yaml</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_result'>result</span> <span class='op'>=</span> <span class='id identifier rubyid_svpr'>svpr</span><span class='lparen'>(</span><span class='id identifier rubyid_cmd'>cmd</span><span class='rparen'>)</span>
+  <span class='kw'>return</span> <span class='id identifier rubyid_result'>result</span><span class='period'>.</span><span class='id identifier rubyid_first'>first</span> <span class='kw'>if</span> <span class='id identifier rubyid_return_one'>return_one</span>
+  <span class='id identifier rubyid_result'>result</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="get_vs-instance_method">
+  
+    #<strong>get_vs</strong>(labels = {}, return_one = false)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+<p>TODO: DRY up with get_pods above</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+306
+307
+308
+309
+310
+311</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 306</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_get_vs'>get_vs</span><span class='lparen'>(</span><span class='id identifier rubyid_labels'>labels</span> <span class='op'>=</span> <span class='lbrace'>{</span><span class='rbrace'>}</span><span class='comma'>,</span> <span class='id identifier rubyid_return_one'>return_one</span> <span class='op'>=</span> <span class='kw'>false</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_cmd'>cmd</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>get virtualservice -l </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_labels'>labels</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span><span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_k'>k</span><span class='comma'>,</span> <span class='id identifier rubyid_v'>v</span><span class='op'>|</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>app.kubernetes.io/</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_k'>k</span><span class='embexpr_end'>}</span><span class='tstring_content'>=</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_v'>v</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span> <span class='rbrace'>}</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>,</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span><span class='embexpr_end'>}</span><span class='tstring_content'> -o yaml</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_result'>result</span> <span class='op'>=</span> <span class='id identifier rubyid_svpr'>svpr</span><span class='lparen'>(</span><span class='id identifier rubyid_cmd'>cmd</span><span class='rparen'>)</span>
+  <span class='kw'>return</span> <span class='id identifier rubyid_result'>result</span><span class='period'>.</span><span class='id identifier rubyid_first'>first</span> <span class='kw'>if</span> <span class='id identifier rubyid_return_one'>return_one</span>
+  <span class='id identifier rubyid_result'>result</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="k8s_secrets_content-instance_method">
+  
+    #<strong>k8s_secrets_content</strong>(type = &#39;platform&#39;)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+367
+368
+369
+370
+371
+372
+373</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 367</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_k8s_secrets_content'>k8s_secrets_content</span><span class='lparen'>(</span><span class='id identifier rubyid_type'>type</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>platform</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_require'>require</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>base64</span><span class='tstring_end'>&#39;</span></span>
+  <span class='id identifier rubyid_kubectl_capture'>kubectl_capture</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>get secret </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_type'>type</span><span class='embexpr_end'>}</span><span class='tstring_content'> -o yaml</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+  <span class='kw'>return</span> <span class='lbrace'>{</span><span class='rbrace'>}</span> <span class='kw'>if</span> <span class='id identifier rubyid_exit_code'>exit_code</span><span class='period'>.</span><span class='id identifier rubyid_positive?'>positive?</span> <span class='op'>||</span> <span class='id identifier rubyid_options'>options</span><span class='period'>.</span><span class='id identifier rubyid_n'>n</span>
+  <span class='id identifier rubyid_yml'>yml</span> <span class='op'>=</span> <span class='const'>YAML</span><span class='period'>.</span><span class='id identifier rubyid_load'>load</span><span class='lparen'>(</span><span class='id identifier rubyid_stdout'>stdout</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_yml'>yml</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>data</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_each_with_object'>each_with_object</span><span class='lparen'>(</span><span class='lbrace'>{</span><span class='rbrace'>}</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_a'>a</span><span class='comma'>,</span> <span class='id identifier rubyid_h'>h</span><span class='op'>|</span> <span class='id identifier rubyid_h'>h</span><span class='lbracket'>[</span><span class='id identifier rubyid_a'>a</span><span class='lbracket'>[</span><span class='int'>0</span><span class='rbracket'>]</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='const'>Base64</span><span class='period'>.</span><span class='id identifier rubyid_decode64'>decode64</span><span class='lparen'>(</span><span class='id identifier rubyid_a'>a</span><span class='lbracket'>[</span><span class='int'>1</span><span class='rbracket'>]</span><span class='rparen'>)</span> <span class='rbrace'>}</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="kube_env-instance_method">
+  
+    #<strong>kube_env</strong>  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+346</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 346</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_kube_env'>kube_env</span><span class='semicolon'>;</span> <span class='ivar'>@kube_env</span> <span class='op'>||=</span> <span class='lbrace'>{</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>KUBECONFIG</span><span class='tstring_end'>&#39;</span></span> <span class='op'>=&gt;</span> <span class='id identifier rubyid_kubeconfig'>kubeconfig</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>TILLER_NAMESPACE</span><span class='tstring_end'>&#39;</span></span> <span class='op'>=&gt;</span> <span class='id identifier rubyid_namespace'>namespace</span> <span class='rbrace'>}</span> <span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="kubeconfig-instance_method">
+  
+    #<strong>kubeconfig</strong>  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+348</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 348</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_kubeconfig'>kubeconfig</span><span class='semicolon'>;</span> <span class='ivar'>@kubeconfig</span> <span class='op'>||=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='const'>Dir</span><span class='period'>.</span><span class='id identifier rubyid_home'>home</span><span class='embexpr_end'>}</span><span class='tstring_content'>/.kube/config</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="kubectl-instance_method">
+  
+    #<strong>kubectl</strong>(cmd, never_capture = false)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+<p>Supporting methods (2)</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Raises:</p>
+<ul class="raise">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>StandardError</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+324
+325
+326
+327</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 324</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_kubectl'>kubectl</span><span class='lparen'>(</span><span class='id identifier rubyid_cmd'>cmd</span><span class='comma'>,</span> <span class='id identifier rubyid_never_capture'>never_capture</span> <span class='op'>=</span> <span class='kw'>false</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_raise'>raise</span> <span class='const'>StandardError</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>kubeconfig not found at </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_kubeconfig'>kubeconfig</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='const'>File</span><span class='period'>.</span><span class='id identifier rubyid_exist?'>exist?</span><span class='lparen'>(</span><span class='id identifier rubyid_kubeconfig'>kubeconfig</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_system_cmd'>system_cmd</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>kubectl -n </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_namespace'>namespace</span><span class='embexpr_end'>}</span><span class='tstring_content'> </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_cmd'>cmd</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_kube_env'>kube_env</span><span class='comma'>,</span> <span class='id identifier rubyid_never_capture'>never_capture</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="kubectl_capture-instance_method">
+  
+    #<strong>kubectl_capture</strong>(cmd)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Raises:</p>
+<ul class="raise">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>StandardError</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+329
+330
+331
+332</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 329</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_kubectl_capture'>kubectl_capture</span><span class='lparen'>(</span><span class='id identifier rubyid_cmd'>cmd</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_raise'>raise</span> <span class='const'>StandardError</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>kubeconfig not found at </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_kubeconfig'>kubeconfig</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='const'>File</span><span class='period'>.</span><span class='id identifier rubyid_exist?'>exist?</span><span class='lparen'>(</span><span class='id identifier rubyid_kubeconfig'>kubeconfig</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_capture_cmd'>capture_cmd</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>kubectl -n </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_namespace'>namespace</span><span class='embexpr_end'>}</span><span class='tstring_content'> </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_cmd'>cmd</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="local_secrets_content-instance_method">
+  
+    #<strong>local_secrets_content</strong>(file)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+363
+364
+365</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 363</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_local_secrets_content'>local_secrets_content</span><span class='lparen'>(</span><span class='id identifier rubyid_file'>file</span><span class='rparen'>)</span>
+  <span class='const'>File</span><span class='period'>.</span><span class='id identifier rubyid_read'>read</span><span class='lparen'>(</span><span class='id identifier rubyid_file'>file</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_split'>split</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>\n</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_each_with_object'>each_with_object</span><span class='lparen'>(</span><span class='lbrace'>{</span><span class='rbrace'>}</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_a'>a</span><span class='comma'>,</span> <span class='id identifier rubyid_h'>h</span><span class='op'>|</span> <span class='id identifier rubyid_b'>b</span> <span class='op'>=</span> <span class='id identifier rubyid_a'>a</span><span class='period'>.</span><span class='id identifier rubyid_split'>split</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>=</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span><span class='semicolon'>;</span> <span class='id identifier rubyid_h'>h</span><span class='lbracket'>[</span><span class='id identifier rubyid_b'>b</span><span class='lbracket'>[</span><span class='int'>0</span><span class='rbracket'>]</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_b'>b</span><span class='lbracket'>[</span><span class='int'>1</span><span class='rbracket'>]</span> <span class='op'>||</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_end'>&#39;</span></span> <span class='rbrace'>}</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="logs-instance_method">
+  
+    #<strong>logs</strong>(service)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+204
+205
+206
+207
+208
+209
+210</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 204</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_logs'>logs</span><span class='lparen'>(</span><span class='id identifier rubyid_service'>service</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_generate_config'>generate_config</span> <span class='kw'>if</span> <span class='id identifier rubyid_stale_config'>stale_config</span>
+  <span class='id identifier rubyid_trap'>trap</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>SIGINT</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_throw'>throw</span> <span class='const'>StandardError</span> <span class='rbrace'>}</span> <span class='kw'>if</span> <span class='id identifier rubyid_options'>options</span><span class='period'>.</span><span class='id identifier rubyid_tail'>tail</span>
+  <span class='id identifier rubyid_k8s_selector'>k8s_selector</span> <span class='op'>=</span> <span class='lbrace'>{</span><span class='label'>name:</span> <span class='id identifier rubyid_service'>service</span><span class='comma'>,</span> <span class='label'>component:</span> <span class='symbol'>:server</span><span class='rbrace'>}</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span><span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_k'>k</span><span class='comma'>,</span> <span class='id identifier rubyid_v'>v</span><span class='op'>|</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>app.kubernetes.io/</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_k'>k</span><span class='embexpr_end'>}</span><span class='tstring_content'>=</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_v'>v</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='rbrace'>}</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>,</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_kubectl'>kubectl</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_command'>command</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>logs</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span><span class='embexpr_end'>}</span><span class='tstring_content'> -l </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_k8s_selector'>k8s_selector</span><span class='embexpr_end'>}</span><span class='tstring_content'> -c </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_clean_kubernetes_name'>clean_kubernetes_name</span><span class='lparen'>(</span><span class='id identifier rubyid_service'>service</span><span class='rparen'>)</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='kw'>true</span><span class='rparen'>)</span>
+<span class='kw'>rescue</span> <span class='const'>StandardError</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="namespace-instance_method">
+  
+    #<strong>namespace</strong>  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+350</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 350</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_namespace'>namespace</span><span class='semicolon'>;</span> <span class='ivar'>@namespace</span> <span class='op'>||=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_application'>application</span><span class='period'>.</span><span class='id identifier rubyid_current_feature_set'>current_feature_set</span><span class='embexpr_end'>}</span><span class='tstring_content'>-</span><span class='embexpr_beg'>#{</span><span class='const'><span class='object_link'><a href="../../Stack.html" title="Ros::Stack (module)">Stack</a></span></span><span class='period'>.</span><span class='id identifier rubyid_config'><span class='object_link'><a href="../../Stack.html#config-class_method" title="Ros::Stack.config (method)">config</a></span></span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="platform_root-instance_method">
+  
+    #<strong>platform_root</strong>  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+377</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 377</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_platform_root'>platform_root</span><span class='semicolon'>;</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='const'><span class='object_link'><a href="../../../Ros.html" title="Ros (module)">Ros</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../../Be.html" title="Ros::Be (module)">Be</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Application.html" title="Ros::Be::Application (module)">Application</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Model.html" title="Ros::Be::Application::Model (module)">Model</a></span></span><span class='period'>.</span><span class='id identifier rubyid_deploy_path'><span class='object_link'><a href="Model.html#deploy_path-class_method" title="Ros::Be::Application::Model.deploy_path (method)">deploy_path</a></span></span><span class='embexpr_end'>}</span><span class='tstring_content'>/platform</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="pod-instance_method">
+  
+    #<strong>pod</strong>(labels = {})  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+293</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 293</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_pod'>pod</span><span class='lparen'>(</span><span class='id identifier rubyid_labels'>labels</span> <span class='op'>=</span> <span class='lbrace'>{</span><span class='rbrace'>}</span><span class='rparen'>)</span><span class='semicolon'>;</span> <span class='id identifier rubyid_get_pods'>get_pods</span><span class='lparen'>(</span><span class='id identifier rubyid_labels'>labels</span><span class='comma'>,</span> <span class='kw'>true</span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='id identifier rubyid_options'>options</span><span class='period'>.</span><span class='id identifier rubyid_n'>n</span> <span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="pods-instance_method">
+  
+    #<strong>pods</strong>(labels = {})  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+294</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 294</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_pods'>pods</span><span class='lparen'>(</span><span class='id identifier rubyid_labels'>labels</span> <span class='op'>=</span> <span class='lbrace'>{</span><span class='rbrace'>}</span><span class='rparen'>)</span><span class='semicolon'>;</span> <span class='id identifier rubyid_get_pods'>get_pods</span><span class='lparen'>(</span><span class='id identifier rubyid_labels'>labels</span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='id identifier rubyid_options'>options</span><span class='period'>.</span><span class='id identifier rubyid_n'>n</span> <span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="ps-instance_method">
+  
+    #<strong>ps</strong>  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+188
+189
+190
+191</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 188</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_ps'>ps</span>
+  <span class='id identifier rubyid_generate_config'>generate_config</span> <span class='kw'>if</span> <span class='id identifier rubyid_stale_config'>stale_config</span>
+  <span class='id identifier rubyid_kubectl'>kubectl</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>get pods</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='kw'>true</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="push-instance_method">
+  
+    #<strong>push</strong>(services)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+37
+38
+39</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 37</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span><span class='id identifier rubyid_services'>services</span><span class='rparen'>)</span>
+  <span class='const'>STDOUT</span><span class='period'>.</span><span class='id identifier rubyid_puts'>puts</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>build command already pushed the image, skipping.</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="restart-instance_method">
+  
+    #<strong>restart</strong>(services)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+<p>TODO: This isn&#39;t working quite as expected NOTE: restart should not remove a service, just restart it This is the same behavior as with compose (at least it should be)</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 217</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_restart'>restart</span><span class='lparen'>(</span><span class='id identifier rubyid_services'>services</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_generate_config'>generate_config</span> <span class='kw'>if</span> <span class='id identifier rubyid_stale_config'>stale_config</span>
+  <span class='id identifier rubyid_update_platform_env'>update_platform_env</span>
+  <span class='id identifier rubyid_services'>services</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_service'>service</span><span class='op'>|</span>
+    <span class='id identifier rubyid_kubectl'>kubectl</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>rollout restart deploy </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_clean_kubernetes_name'>clean_kubernetes_name</span><span class='lparen'>(</span><span class='id identifier rubyid_service'>service</span><span class='rparen'>)</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+  <span class='comment'># down(services)
+</span>  <span class='comment'># up(services)
+</span>  <span class='comment'># status
+</span><span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="running_services-instance_method">
+  
+    #<strong>running_services</strong>  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+212</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 212</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_running_services'>running_services</span><span class='semicolon'>;</span> <span class='ivar'>@running_services</span> <span class='op'>||=</span> <span class='id identifier rubyid_pods'>pods</span><span class='lparen'>(</span><span class='label'>component:</span> <span class='symbol'>:server</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span><span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_svc'>svc</span><span class='op'>|</span> <span class='id identifier rubyid_svc'>svc</span><span class='period'>.</span><span class='id identifier rubyid_split'>split</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>-</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_first'>first</span> <span class='rbrace'>}</span><span class='period'>.</span><span class='id identifier rubyid_uniq'>uniq</span> <span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="service_pod-instance_method">
+  
+    #<strong>service_pod</strong>(service)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+202</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 202</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_service_pod'>service_pod</span><span class='lparen'>(</span><span class='id identifier rubyid_service'>service</span><span class='rparen'>)</span><span class='semicolon'>;</span> <span class='id identifier rubyid_pod'>pod</span><span class='lparen'>(</span><span class='label'>name:</span> <span class='id identifier rubyid_service'>service</span><span class='comma'>,</span> <span class='label'>component:</span> <span class='symbol'>:server</span><span class='rparen'>)</span> <span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="services_root-instance_method">
+  
+    #<strong>services_root</strong>  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+378</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 378</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_services_root'>services_root</span><span class='semicolon'>;</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='const'><span class='object_link'><a href="../../../Ros.html" title="Ros (module)">Ros</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../../Be.html" title="Ros::Be (module)">Be</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Application.html" title="Ros::Be::Application (module)">Application</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Model.html" title="Ros::Be::Application::Model (module)">Model</a></span></span><span class='period'>.</span><span class='id identifier rubyid_deploy_path'><span class='object_link'><a href="Model.html#deploy_path-class_method" title="Ros::Be::Application::Model.deploy_path (method)">deploy_path</a></span></span><span class='embexpr_end'>}</span><span class='tstring_content'>/services</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="skaffold-instance_method">
+  
+    #<strong>skaffold</strong>(cmd, envs = {})  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+334
+335
+336
+337</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 334</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_skaffold'>skaffold</span><span class='lparen'>(</span><span class='id identifier rubyid_cmd'>cmd</span><span class='comma'>,</span> <span class='id identifier rubyid_envs'>envs</span> <span class='op'>=</span> <span class='lbrace'>{</span><span class='rbrace'>}</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>run skaffold with environment: </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_skaffold_env'>skaffold_env</span><span class='period'>.</span><span class='id identifier rubyid_merge'>merge</span><span class='lparen'>(</span><span class='id identifier rubyid_envs'>envs</span><span class='rparen'>)</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>if</span> <span class='id identifier rubyid_options'>options</span><span class='period'>.</span><span class='id identifier rubyid_v'>v</span>
+  <span class='id identifier rubyid_system_cmd'>system_cmd</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>skaffold -n </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_namespace'>namespace</span><span class='embexpr_end'>}</span><span class='tstring_content'> </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_cmd'>cmd</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_skaffold_env'>skaffold_env</span><span class='period'>.</span><span class='id identifier rubyid_merge'>merge</span><span class='lparen'>(</span><span class='id identifier rubyid_envs'>envs</span><span class='rparen'>)</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="skaffold_env-instance_method">
+  
+    #<strong>skaffold_env</strong>  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+339
+340
+341
+342
+343
+344</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 339</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_skaffold_env'>skaffold_env</span>
+  <span class='ivar'>@skaffold_env</span> <span class='op'>||=</span> <span class='lbrace'>{</span>
+    <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>SKAFFOLD_DEFAULT_REPO</span><span class='tstring_end'>&#39;</span></span> <span class='op'>=&gt;</span> <span class='const'><span class='object_link'><a href="../../Stack.html" title="Ros::Stack (module)">Stack</a></span></span><span class='period'>.</span><span class='id identifier rubyid_config'><span class='object_link'><a href="../../Stack.html#config-class_method" title="Ros::Stack.config (method)">config</a></span></span><span class='period'>.</span><span class='id identifier rubyid_platform'>platform</span><span class='period'>.</span><span class='id identifier rubyid_config'>config</span><span class='period'>.</span><span class='id identifier rubyid_image_registry'>image_registry</span><span class='comma'>,</span>
+    <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>IMAGE_TAG</span><span class='tstring_end'>&#39;</span></span> <span class='op'>=&gt;</span> <span class='const'><span class='object_link'><a href="../../Stack.html" title="Ros::Stack (module)">Stack</a></span></span><span class='period'>.</span><span class='id identifier rubyid_image_tag'><span class='object_link'><a href="../../Stack.html#image_tag-class_method" title="Ros::Stack.image_tag (method)">image_tag</a></span></span>
+  <span class='rbrace'>}</span><span class='period'>.</span><span class='id identifier rubyid_merge'>merge</span><span class='lparen'>(</span><span class='id identifier rubyid_kube_env'>kube_env</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="stop-instance_method">
+  
+    #<strong>stop</strong>(services)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+228
+229
+230
+231
+232
+233
+234
+235
+236</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 228</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_stop'>stop</span><span class='lparen'>(</span><span class='id identifier rubyid_services'>services</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_generate_config'>generate_config</span> <span class='kw'>if</span> <span class='id identifier rubyid_stale_config'>stale_config</span>
+  <span class='id identifier rubyid_services'>services</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_service'>service</span><span class='op'>|</span>
+    <span class='id identifier rubyid_kubectl'>kubectl</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>scale deploy </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_clean_kubernetes_name'>clean_kubernetes_name</span><span class='lparen'>(</span><span class='id identifier rubyid_service'>service</span><span class='rparen'>)</span><span class='embexpr_end'>}</span><span class='tstring_content'> --replicas=0</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_pods'>pods</span><span class='lparen'>(</span><span class='label'>name:</span> <span class='id identifier rubyid_service'>service</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_pod'>pod</span><span class='op'>|</span>
+      <span class='id identifier rubyid_kubectl'>kubectl</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>delete pod </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_pod'>pod</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="svpr-instance_method">
+  
+    #<strong>svpr</strong>(cmd)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+313
+314
+315
+316
+317
+318
+319
+320
+321</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 313</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_svpr'>svpr</span><span class='lparen'>(</span><span class='id identifier rubyid_cmd'>cmd</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_kubectl_capture'>kubectl_capture</span><span class='lparen'>(</span><span class='id identifier rubyid_cmd'>cmd</span><span class='rparen'>)</span>
+  <span class='kw'>if</span> <span class='id identifier rubyid_exit_code'>exit_code</span><span class='period'>.</span><span class='id identifier rubyid_positive?'>positive?</span>
+    <span class='const'>STDOUT</span><span class='period'>.</span><span class='id identifier rubyid_puts'>puts</span><span class='lparen'>(</span><span class='id identifier rubyid_stderr'>stderr</span><span class='rparen'>)</span>
+    <span class='const'>Kernel</span><span class='period'>.</span><span class='id identifier rubyid_exit'>exit</span><span class='lparen'>(</span><span class='int'>1</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+  <span class='comment'># TODO: Does this effectively handle &gt; 1 pod running
+</span>  <span class='const'>YAML</span><span class='period'>.</span><span class='id identifier rubyid_safe_load'>safe_load</span><span class='lparen'>(</span><span class='id identifier rubyid_stdout'>stdout</span><span class='rparen'>)</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>items</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_i'>i</span><span class='op'>|</span> <span class='id identifier rubyid_i'>i</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>metadata</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>name</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span> <span class='rbrace'>}</span> <span class='kw'>unless</span> <span class='id identifier rubyid_options'>options</span><span class='period'>.</span><span class='id identifier rubyid_n'>n</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="switch!-instance_method">
+  
+    #<strong>switch!</strong>  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+352</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 352</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_switch!'>switch!</span><span class='semicolon'>;</span> <span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="sync_secret-instance_method">
+  
+    #<strong>sync_secret</strong>(file)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+354
+355
+356
+357
+358
+359
+360
+361</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 354</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_sync_secret'>sync_secret</span><span class='lparen'>(</span><span class='id identifier rubyid_file'>file</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_name'>name</span> <span class='op'>=</span> <span class='const'>File</span><span class='period'>.</span><span class='id identifier rubyid_basename'>basename</span><span class='lparen'>(</span><span class='id identifier rubyid_file'>file</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_chomp'>chomp</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>.env</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span>
+  <span class='kw'>return</span> <span class='kw'>if</span> <span class='id identifier rubyid_local_secrets_content'>local_secrets_content</span><span class='lparen'>(</span><span class='id identifier rubyid_file'>file</span><span class='rparen'>)</span> <span class='op'>==</span> <span class='id identifier rubyid_k8s_secrets_content'>k8s_secrets_content</span><span class='lparen'>(</span><span class='id identifier rubyid_name'>name</span><span class='rparen'>)</span>
+  <span class='const'>STDOUT</span><span class='period'>.</span><span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>NOTICE: Updating cluster with new contents for secret </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_kubectl'>kubectl</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>delete secret </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='comment'># if kubectl(&quot;get secret #{name}&quot;)
+</span>  <span class='id identifier rubyid_kubectl'>kubectl</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>create secret generic </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> --from-env-file </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_file'>file</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_errors'>errors</span><span class='period'>.</span><span class='id identifier rubyid_add'>add</span><span class='lparen'>(</span><span class='symbol'>:create_secret</span><span class='comma'>,</span> <span class='id identifier rubyid_stderr'>stderr</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_exit_code'>exit_code</span><span class='period'>.</span><span class='id identifier rubyid_positive?'>positive?</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="up-instance_method">
+  
+    #<strong>up</strong>(services)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+<p>TODO: Add ability for fail fast</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 42</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_up'>up</span><span class='lparen'>(</span><span class='id identifier rubyid_services'>services</span><span class='rparen'>)</span>
+  <span class='comment'>#@services = services.empty? ? enabled_services : services
+</span>  <span class='ivar'>@platform_services</span> <span class='op'>=</span> <span class='lbracket'>[</span><span class='rbracket'>]</span>
+  <span class='ivar'>@infra_services</span> <span class='op'>=</span> <span class='lbracket'>[</span><span class='rbracket'>]</span>
+
+  <span class='id identifier rubyid_services'>services</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_service'>service</span><span class='op'>|</span>
+    <span class='kw'>if</span> <span class='id identifier rubyid_enabled_services'>enabled_services</span><span class='period'>.</span><span class='id identifier rubyid_include?'>include?</span><span class='lparen'>(</span><span class='id identifier rubyid_service'>service</span><span class='period'>.</span><span class='id identifier rubyid_to_sym'>to_sym</span><span class='rparen'>)</span>
+      <span class='ivar'>@platform_services</span><span class='period'>.</span><span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span><span class='id identifier rubyid_service'>service</span><span class='rparen'>)</span>
+    <span class='kw'>elsif</span> <span class='id identifier rubyid_enabled_application_services'>enabled_application_services</span><span class='period'>.</span><span class='id identifier rubyid_include?'>include?</span><span class='lparen'>(</span><span class='id identifier rubyid_service'>service</span><span class='period'>.</span><span class='id identifier rubyid_to_sym'>to_sym</span><span class='rparen'>)</span>
+      <span class='ivar'>@infra_services</span><span class='period'>.</span><span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span><span class='id identifier rubyid_service'>service</span><span class='rparen'>)</span>
+    <span class='kw'>else</span>
+      <span class='const'>STDERR</span><span class='period'>.</span><span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Services specified not found or enabled: </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_service'>service</span><span class='embexpr_end'>}</span><span class='tstring_content'>, exit</span><span class='tstring_end'>&quot;</span></span>
+      <span class='kw'>return</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># No services specified - launch whole app stack
+</span>  <span class='kw'>if</span> <span class='ivar'>@platform_services</span><span class='period'>.</span><span class='id identifier rubyid_empty?'>empty?</span> <span class='kw'>and</span> <span class='ivar'>@infra_services</span><span class='period'>.</span><span class='id identifier rubyid_empty?'>empty?</span>
+    <span class='const'>STDOUT</span><span class='period'>.</span><span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>No specific service specified, deploy all enabled services</span><span class='tstring_end'>&quot;</span></span>
+    <span class='ivar'>@platform_services</span> <span class='op'>=</span> <span class='id identifier rubyid_enabled_services'>enabled_services</span>
+    <span class='ivar'>@infra_services</span> <span class='op'>=</span> <span class='id identifier rubyid_enabled_application_services'>enabled_application_services</span>
+  <span class='comment'># app service(s) specified - launch app and ensure required infra services are up and running
+</span>  <span class='kw'>elsif</span> <span class='kw'>not</span> <span class='ivar'>@platform_services</span><span class='period'>.</span><span class='id identifier rubyid_empty?'>empty?</span> <span class='kw'>and</span> <span class='ivar'>@infra_services</span><span class='period'>.</span><span class='id identifier rubyid_empty?'>empty?</span>
+    <span class='ivar'>@infra_services</span> <span class='op'>=</span> <span class='id identifier rubyid_enabled_application_services'>enabled_application_services</span>
+  <span class='comment'># infra service(s) specified - force update
+</span>  <span class='kw'>elsif</span> <span class='ivar'>@platform_services</span><span class='period'>.</span><span class='id identifier rubyid_empty?'>empty?</span> <span class='kw'>and</span> <span class='kw'>not</span> <span class='ivar'>@infra_services</span><span class='period'>.</span><span class='id identifier rubyid_empty?'>empty?</span>
+    <span class='ivar'>@force_infra_deploy</span> <span class='op'>=</span> <span class='kw'>true</span>
+  <span class='kw'>end</span>
+  <span class='id identifier rubyid_generate_config'>generate_config</span> <span class='kw'>if</span> <span class='id identifier rubyid_stale_config'>stale_config</span>
+  <span class='kw'>if</span> <span class='id identifier rubyid_options'>options</span><span class='period'>.</span><span class='id identifier rubyid_force'>force</span> <span class='kw'>or</span> <span class='kw'>not</span> <span class='id identifier rubyid_system_cmd'>system_cmd</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>kubectl get ns </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_namespace'>namespace</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_kube_env'>kube_env</span><span class='rparen'>)</span>
+    <span class='const'>STDOUT</span><span class='period'>.</span><span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>Forcing namespace create</span><span class='tstring_end'>&#39;</span></span> <span class='kw'>if</span> <span class='id identifier rubyid_options'>options</span><span class='period'>.</span><span class='id identifier rubyid_force'>force</span>
+    <span class='id identifier rubyid_deploy_namespace'>deploy_namespace</span>
+  <span class='kw'>else</span>
+    <span class='const'>STDOUT</span><span class='period'>.</span><span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>Namespace exists. skipping create. Use -f to force</span><span class='tstring_end'>&#39;</span></span>
+  <span class='kw'>end</span>
+  <span class='kw'>return</span> <span class='kw'>if</span> <span class='id identifier rubyid_options'>options</span><span class='period'>.</span><span class='id identifier rubyid_skip'>skip</span>
+  <span class='id identifier rubyid_deploy_services'>deploy_services</span> <span class='kw'>unless</span> <span class='id identifier rubyid_options'>options</span><span class='period'>.</span><span class='id identifier rubyid_skip_infra'>skip_infra</span>
+  <span class='id identifier rubyid_deploy_platform_environment'>deploy_platform_environment</span>
+  <span class='id identifier rubyid_deploy_platform'>deploy_platform</span>
+  <span class='id identifier rubyid_show_endpoint'>show_endpoint</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="update_helm_repo-instance_method">
+  
+    #<strong>update_helm_repo</strong>  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+183
+184
+185
+186</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 183</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_update_helm_repo'>update_helm_repo</span>
+  <span class='id identifier rubyid_system_cmd'>system_cmd</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>helm repo add ros https://rails-on-services.github.io/helm-charts</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_system_cmd'>system_cmd</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>helm repo update</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="update_platform_env-instance_method">
+  
+    #<strong>update_platform_env</strong>  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+178
+179
+180
+181</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ros/be/application/cli/kubernetes.rb', line 178</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_update_platform_env'>update_platform_env</span>
+  <span class='id identifier rubyid_env_file'>env_file</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_platform_root'>platform_root</span><span class='embexpr_end'>}</span><span class='tstring_content'>/platform.env</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_sync_secret'>sync_secret</span><span class='lparen'>(</span><span class='id identifier rubyid_env_file'>env_file</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='const'>File</span><span class='period'>.</span><span class='id identifier rubyid_exist?'>exist?</span><span class='lparen'>(</span><span class='id identifier rubyid_env_file'>env_file</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+  </div>
+
+</div>
+
+      <div id="footer">
+  Generated on Wed Oct 23 05:35:57 2019 by
+  <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.9.20 (ruby-2.6.3).
+</div>
+
+    </div>
+  </body>
+</html>
