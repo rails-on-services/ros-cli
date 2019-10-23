@@ -65,22 +65,31 @@ module Ros
             }
           end
 
+          # @return [String] Example: https://api
           def api_uri
             URI("#{infra.dns.endpoints.api.scheme}://#{api_hostname}").to_s
           end
 
+          # @return [String] Example: api-feature_set.development.demo.cnfs.io
           def api_hostname
             @api_hostname ||= "#{infra.dns.endpoints.api.host}#{base_hostname}"
           end
 
+          # Example: sftp-feature_set.development.demo.cnfs.io
           def sftp_hostname
             @sftp_hostname ||= "#{infra.dns.endpoints.sftp.host}#{base_hostname}"
           end
 
+          # Appends the feature set if supplied.
+          #
+          # Examples:
+          #   -feature_set.development.demo.cnfs.io
+          #  development.demo.cnfs.io
           def base_hostname
             @base_hostname ||= (infra.dns ? "#{override_feature_set ? '-' + current_feature_set : ''}.#{dns_domain}" : 'localhost')
           end
 
+          # Example: demo.cnfs.io
           def dns_domain
             @dns_domain ||= "#{infra.dns.sub_domain}.#{infra.dns.root_domain}"
           end
