@@ -125,6 +125,8 @@ components:
                     host: fluentd
                 event_logging:
                   enabled: no
+                smtp:
+                  username: replace-with-valid-credentials
             components:
               account:
                 config:
