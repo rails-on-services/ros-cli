@@ -60,7 +60,7 @@ profiles:
               <%- elsif profile.eql?('worker') and not @service.is_ros_service -%>
               command: ["bundle", "exec", "sidekiq", "-C", "config/sidekiq.yml"]
               <%- elsif profile.eql?('sqs_worker') -%>
-              command: ["bundle", "exec", "shoryuken", "-r", "./app/workers", "-C", "config/shoryuken.yml"]
+              command: ["bundle", "exec", "shoryuken", "-r", "./app/workers/aws", "-C", "config/shoryuken.yml"]
               <%- end -%>
               envFromSecrets:
                 <%- @service.secrets_files.each do |name| -%>

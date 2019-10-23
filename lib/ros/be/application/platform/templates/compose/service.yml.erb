@@ -13,17 +13,17 @@ services:<% @service.profiles.each do |profile| %><% xname = profile.eql?('serve
     image: "${IMAGE_REPOSITORY}/<%= @service.name %>:${IMAGE_TAG}"<% if profile.eql?('server') %>
     command: ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "-P", "/tmp/server.pid"]<% elsif profile.eql?('worker') %>
     command: ["bundle", "exec", "sidekiq",<% if @service.is_ros_service %> "-r", "spec/dummy",<% end %> "-C", "config/sidekiq.yml"]<% elsif profile.eql?('sqs_worker') %>
-    command: ["bundle", "exec", "shoryuken", "-r", "./app/workers", "-C", "config/shoryuken.yml"]<% end %>
+    command: ["bundle", "exec", "shoryuken", "-r", "./app/workers/aws", "-C", "config/shoryuken.yml"]<% end %>
     env_file:<% @service.env_files.each do |env_file| %>
       - <%= env_file %><% end %>
     depends_on:
       - wait
     tty: true
-    stdin_open: true
+    stdin_open: true<% if profile.eql?('server') %>
     ports:
       # - "1234:1234"
       # - "9876" # druby for pry-remote
-      - "3000"<% if @service.config.mount %>
+      - "3000"<% end %><% if @service.config.mount %>
     volumes:
       - type: bind
         source: "${<%= @service.context_dir %>}/services/<%= @service.name %>"
