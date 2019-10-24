@@ -12,33 +12,59 @@
       keepalive_timeout 10s
     </source>
     <%- end -%>
-    <filter **.rack-traffic-log>
-      @type record_modifier
-      # write a temporary field _unix_time
-      <record>
-        _unix_time ${Time.parse(record['request']['time']).to_i}
-      </record>
-    </filter>
 
+    # Exclude health checks from logging
     <filter **.rack-traffic-log>
-      @type record_transformer
-      enable_ruby true
-      renew_time_key _unix_time
-      remove_keys _unix_time
+      @type grep
+      <exclude>
+        key $.request_path
+        pattern /\/healthz/
+      </exclude>
     </filter>
 
     <match **.rack-traffic-log>
-      @type kafka_buffered
-      brokers <%= @service.kafka.bootstrap_servers %>
-      <%- if @service.kafka.security_protocol == "SASL_SSL" -%>
-      ssl_ca_certs_from_system true
-      sasl_over_ssl true
-      <%- end -%>
-      <%- if @service.kafka.sasl_mechanism == "PLAIN" -%>
-      username <%= @service.kafka.username %>
-      password <%= @service.kafka.password %>
-      <%- end -%>
-      default_topic <%= @service.fluentd.http_log_kafka_topic %>
+      @type copy
+      <store>
+        @type bigquery_insert
+        auth_method json_key
+        json_key <%= application.components.services.components[:'kafka-connect'].config.gcp_service_account_key %>
+        project <%= @service.kafka_connect.connectors[:'bigquery-cloudevents'].project %>
+        dataset <%= @service.bigquery_dataset %>
+        table http_request_log
+        auto_create_table true
+        time_partitioning_type day
+        time_partitioning_field request_time
+        clustering_fields request_method,response_status_code
+        ignore_unknown_values true
+        schema [
+          {"type":"TIMESTAMP","name":"request_time","mode":"NULLABLE"},
+          {"type":"STRING","name":"request_method","mode":"NULLABLE"},
+          {"type":"STRING","name":"request_path","mode":"NULLABLE"},
+          {"type":"STRING","name":"request_query_string","mode":"NULLABLE"},
+          {"type":"STRING","name":"request_host","mode":"NULLABLE"},
+          {"type":"STRING","name":"request_remote_addr","mode":"NULLABLE"},
+          {"type":"RECORD","name":"request_headers","mode":"REPEATED","fields":[
+            {"type":"STRING","name":"key","mode":"NULLABLE"},
+            {"type":"STRING","name":"value","mode":"NULLABLE"}
+            ]},
+          {"type":"STRING","name":"request_body","mode":"NULLABLE"},
+          {"type":"INTEGER","name":"response_status_code","mode":"NULLABLE"},
+          {"type":"RECORD","name":"response_headers","mode":"REPEATED","fields":[
+            {"type":"STRING","name":"key","mode":"NULLABLE"},
+            {"type":"STRING","name":"value","mode":"NULLABLE"}
+          ]},
+          {"type":"STRING","name":"response_body","mode":"NULLABLE"},
+          {"type":"RECORD","name":"meta","mode":"REPEATED","fields":[
+            {"type":"STRING","name":"key","mode":"NULLABLE"},
+            {"type":"STRING","name":"value","mode":"NULLABLE"}
+          ]},
+          {"type":"FLOAT","name":"latency","mode":"NULLABLE"}
+        ]
+        </store>
+      <store>
+        #@type stdout
+        @type null
+      </store>
     </match>
 
     <filter events-log.**>
@@ -47,39 +73,47 @@
     </filter>
 
     <match events-log.**>
-      @type kafka2
-      topic_key type
-      message_key_key id
-      brokers <%= @service.kafka.bootstrap_servers %>
-      <%- if @service.kafka.security_protocol == "SASL_SSL" -%>
-      ssl_ca_certs_from_system true
-      sasl_over_ssl true
-      <%- end -%>
-      <%- if @service.kafka.sasl_mechanism == "PLAIN" -%>
-      username <%= @service.kafka.username %>
-      password <%= @service.kafka.password %>
-      <%- end -%>
-      headers_from_record { "ce_specversion":"$.specversion",
-                            "ce_type":"$.type",
-                            "ce_source":"$.source",
-                            "ce_id":"$.id",
-                            "ce_time":"$.time",
-                            "ce_datacontenttype":"$.datacontenttype",
-                            "ce_schemaurl":"$.schemaurl",
-                            "ce_subject":"$.subject"
-                          }
+      @type copy
+      <store>
+        @type kafka2
+        max_send_limit_bytes 1000000
+        topic_key type
+        message_key_key id
+        brokers <%= @service.kafka.bootstrap_servers %>
+        <%- if @service.kafka.security_protocol == "SASL_SSL" -%>
+        ssl_ca_certs_from_system true
+        sasl_over_ssl true
+        <%- end -%>
+        <%- if @service.kafka.sasl_mechanism == "PLAIN" -%>
+        username <%= @service.kafka.username %>
+        password <%= @service.kafka.password %>
+        <%- end -%>
+        headers_from_record { "ce_specversion":"$.specversion",
+                              "ce_type":"$.type",
+                              "ce_source":"$.source",
+                              "ce_id":"$.id",
+                              "ce_time":"$.time",
+                              "ce_datacontenttype":"$.datacontenttype",
+                              "ce_schemaurl":"$.schemaurl",
+                              "ce_subject":"$.subject"
+                            }
 
-      <format>
-        @type single_value
-        add_newline false
-        message_key data
-      </format>
+        <format>
+          @type single_value
+          add_newline false
+          message_key data
+        </format>
 
-      <buffer type>
-        @type file
-        path /fluentd/log/buffer
-        flush_interval 3s
-      </buffer>
+        <buffer type>
+          @type file
+          path /fluentd/log/buffer
+          flush_interval 3s
+        </buffer>
+      </store>
+      <store>
+        #@type stdout
+        @type null
+      </store>
     </match>
 
     <label @ERROR>
