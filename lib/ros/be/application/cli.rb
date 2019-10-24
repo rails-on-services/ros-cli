@@ -57,6 +57,7 @@ module Ros
         option :fail_all, type: :boolean, aliases: '--fa', desc: 'Skip any remaining services after a test fails'
         option :fail_fast, type: :boolean, aliases: '--ff', desc: 'Skip any remaining tests for a service after a test fails'
         option :push, type: :boolean, aliases: '-p', desc: 'Push image after successful testing'
+        option :rspec_options, type: :string, aliases: '--rspec-options', desc: 'Extra rspec options'
         def test(*services)
           command = context(options)
           command.test(services)
@@ -91,6 +92,15 @@ module Ros
         def copy(service, src, dest = nil)
           command = context(options)
           command.copy(service, src, dest)
+          command.exit
+        end
+
+        desc 'copy', 'Copy file from service to local'
+        option :environment, type: :string, aliases: '-e', desc: 'Environment'
+        option :profile, type: :string, aliases: '-p', desc: 'profile'
+        def copy_service_file(service, src, dest = nil)
+          command = context(options)
+          command.copy_service_file(service, src, dest)
           command.exit
         end
 

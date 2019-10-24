@@ -50,7 +50,7 @@ module Ros
             # if the service name is without a profile extension, e.g. 'iam' then load config and check db migration
             # If the database check is ok then bring up the service and trigger a reload of nginx
             if options.build
-              compose("build #{service}")
+              compose("build --parallel #{service}")
               if exit_code.positive?
                 errors.add(:build, 'see terminal output')
                 next
