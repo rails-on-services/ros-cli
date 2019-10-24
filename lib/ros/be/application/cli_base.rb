@@ -36,7 +36,7 @@ module Ros
           generate_config if stale_config
           build(services) if options.build
           services.each do |service|
-            test_commands(service).each do |test_command|
+            test_commands(service, options.rspec_options).each do |test_command|
               exec(service, test_command)
               next if exit_code.zero?
               errors.add("#{service} #{test_command}", "#{service} failed on #{test_command}")
@@ -47,11 +47,11 @@ module Ros
           end
         end
 
-        def test_commands(service)
+        def test_commands(service, rspec_options=nil)
           is_ros = svc_config(service)&.config&.ros
           prefix = is_ros ? 'app:' : ''
           exec_dir = is_ros ? 'spec/dummy/' : ''
-          ['bundle exec rubocop', "rails #{prefix}db:test:prepare", "#{exec_dir}bin/spring rspec"]
+          ['bundle exec rubocop', "rails #{prefix}db:test:prepare", "#{exec_dir}bin/spring rspec #{rspec_options}"]
         end
 
 
