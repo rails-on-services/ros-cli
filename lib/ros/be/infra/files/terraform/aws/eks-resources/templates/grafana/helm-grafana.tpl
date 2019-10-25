@@ -26,3 +26,5 @@ sidecar:
   datasources:
     enabled: true
     label: grafana_datasource
+plugins:
+  - grafana-piechart-panel
