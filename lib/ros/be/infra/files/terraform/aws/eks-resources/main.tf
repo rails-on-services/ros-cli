@@ -44,6 +44,15 @@ resource "helm_release" "metrics-server" {
   values = [file("${path.module}/files/helm-metrics-server.yaml")]
 }
 
+resource "helm_release" "kube-state-metrics" {
+  name      = "kube-state-metrics"
+  chart     = "stable/kube-state-metrics"
+  namespace = "kube-system"
+  wait      = true
+
+  values = [file("${path.module}/files/kube-state-metrics.yaml")]
+}
+
 resource "kubernetes_secret" "fluentd-gcp-google-service-account" {
   count = var.enable_fluentd_gcp_logging && var.fluentd_gcp_logging_service_account_json_key != "" ? 1 : 0
 
@@ -72,6 +81,7 @@ resource "helm_release" "cluster-logging-fluentd" {
     cluster_name               = var.cluster_name,
     cluster_location           = var.region
     gcp_service_account_secret = var.fluentd_gcp_logging_service_account_json_key != "" ? "fluentd-gcp-google-service-account" : ""
+    pull_policy                = "Always"
     }
     )
   ]
