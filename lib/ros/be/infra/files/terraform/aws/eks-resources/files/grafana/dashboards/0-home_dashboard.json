@@ -17,33 +17,21 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "links": [
-    {
-      "asDropdown": false,
-      "icon": "external link",
-      "includeVars": true,
-      "keepTime": true,
-      "tags": [],
-      "type": "dashboards"
-    }
-  ],
+  "links": [],
   "panels": [
     {
-      "content": "<div class=\"text-center dashboard-header\">\n  <span>Home Dashboard</span>\n</div>\n<button class=\"btn navbar-button gf-timepicker-nav-btn\" onClick=\"location.href='insert url here'\">B Button</button>",
+      "content": "<div class=\"text-center dashboard-header\">\n  <span>Perx Whistler</span>\n</div>\n\n<button class=\"btn navbar-button gf-timepicker-nav-btn\" onClick=\"location.href='/d/ig-bCk0Zz/rails-app-overview'\">Rails App Overview</button>\n<button class=\"btn navbar-button gf-timepicker-nav-btn\" onClick=\"location.href='d/MEaDmzAWk/worker-jobs'\">  Worker Jobs  </button>\n<button class=\"btn navbar-button gf-timepicker-nav-btn\" onClick=\"location.href='d/dpVwGIAZz/resource-utilisation'\">  Resource Utilisation  </button> \n",
+      "datasource": null,
+      "description": "",
       "editable": true,
       "gridPos": {
-        "h": 3,
+        "h": 7,
         "w": 24,
         "x": 0,
         "y": 0
       },
       "id": 1,
-      "links": [
-        {
-          "title": "",
-          "url": ""
-        }
-      ],
+      "links": [],
       "mode": "html",
       "options": {},
       "style": {},
@@ -52,7 +40,7 @@
       "type": "text"
     }
   ],
-  "schemaVersion": 19,
+  "schemaVersion": 20,
   "style": "dark",
   "tags": [],
   "templating": {
@@ -92,5 +80,5 @@
   "timezone": "browser",
   "title": "Home",
   "uid": "0O2qWV0Wk",
-  "version": 1
+  "version": 4
 }
