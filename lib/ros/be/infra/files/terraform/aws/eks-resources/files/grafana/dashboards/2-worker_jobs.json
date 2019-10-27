@@ -18,7 +18,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1571999519630,
+  "iteration": 1572103829187,
   "links": [],
   "panels": [
     {
@@ -148,7 +148,7 @@
       },
       "lines": true,
       "linewidth": 1,
-      "nullPointMode": "null",
+      "nullPointMode": "null as zero",
       "options": {
         "dataLinks": []
       },
@@ -162,7 +162,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(ruby_sidekiq_failed_jobs_total{namespace=~\"$namespace\",app=~\"$app\"}[1m])) by (app) / sum(rate(ruby_sidekiq_jobs_total{namespace=~\"$namespace\",app=~\"$app\"}[1m])) by (app)",
+          "expr": "sum(rate(ruby_sidekiq_failed_jobs_total{namespace=~\"$namespace\",app=~\"$app\"}[1m])) by (app) / sum(rate(ruby_sidekiq_jobs_total{namespace=~\"$namespace\",app=~\"$app\"}[1m])) by (app) ",
           "intervalFactor": 1,
           "legendFormat": "{{app}}",
           "refId": "A"
@@ -190,7 +190,7 @@
       "yaxes": [
         {
           "format": "percentunit",
-          "label": "Jobs Failure  Rate",
+          "label": "Jobs Failure Rate",
           "logBase": 1,
           "max": "1",
           "min": "0",
@@ -318,7 +318,7 @@
     }
   ],
   "refresh": "5s",
-  "schemaVersion": 19,
+  "schemaVersion": 20,
   "style": "dark",
   "tags": [],
   "templating": {
@@ -326,8 +326,9 @@
       {
         "allValue": null,
         "current": {
-          "text": "uat-whistler",
-          "value": "uat-whistler"
+          "tags": [],
+          "text": "dev1-whistler",
+          "value": "dev1-whistler"
         },
         "datasource": "Prometheus",
         "definition": "label_values(ruby_sidekiq_jobs_total,namespace)",
@@ -398,5 +399,5 @@
   "timezone": "",
   "title": "Worker Jobs",
   "uid": "MEaDmzAWk",
-  "version": 2
+  "version": 1
 }

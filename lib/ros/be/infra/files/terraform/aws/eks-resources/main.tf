@@ -300,6 +300,34 @@ resource "helm_release" "grafana" {
     jsonencode(lookup(var.helm_configuration_overrides, "grafana", {}))
   ]
 }
+/*
+resource "kubernetes_job" "set-grafana-home-dashboard" {
+  depends_on = [helm_release.grafana]
+  metadata {
+    name = "set-grafana-home-dashboard"
+    namespace   = var.grafana_namespace
+  }
+  spec {
+    template {
+      metadata {
+        name        = "set-grafana-home-dashboard"
+        annotations = {
+          "sidecar.istio.io/inject" = false
+        }
+      }
+      spec {
+        container {
+          name    = "curl"
+          image   = "gcr.io/cloud-builders/curl"
+          command = ["curl", "-X", "PUT", "-d", "{\"homeDashboardId\":1}", "-H", "Accept: application/json", "-H", "Content-Type: application/json", "http://${var.grafana_user}:${var.grafana_password}@grafana/api/org/preferences"]
+        }
+        restart_policy = "OnFailure"
+      }
+    }
+    backoff_limit = 6
+  }
+}
+*/
 
 # This is to create an extra kubernetes clusterrole for developers
 resource "kubernetes_cluster_role" "developer" {
