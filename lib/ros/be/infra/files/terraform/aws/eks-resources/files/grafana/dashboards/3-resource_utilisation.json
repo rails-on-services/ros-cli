@@ -17,7 +17,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1572153078345,
+  "iteration": 1572156893978,
   "links": [],
   "panels": [
     {
@@ -30,8 +30,8 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 9,
-        "w": 12,
+        "h": 6,
+        "w": 24,
         "x": 0,
         "y": 0
       },
@@ -45,6 +45,7 @@
         "min": true,
         "rightSide": true,
         "show": true,
+        "sideWidth": 400,
         "total": false,
         "values": true
       },
@@ -115,8 +116,201 @@
         "align": false,
         "alignLevel": null
       }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "Prometheus",
+      "decimals": 1,
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 6
+      },
+      "id": 4,
+      "legend": {
+        "alignAsTable": true,
+        "avg": true,
+        "current": true,
+        "max": true,
+        "min": true,
+        "rightSide": true,
+        "show": true,
+        "sideWidth": 400,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "sum(kube_pod_container_resource_requests_cpu_cores{namespace=~\"$namespace\",container=~\"$deployment\"}) by (container)",
+          "legendFormat": "Request:{{container}}",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(kube_pod_container_resource_limits_cpu_cores{namespace=~\"$namespace\",container=~\"$deployment\"}) by (container)",
+          "legendFormat": "Limit: {{container}}",
+          "refId": "B"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "CPU Requests/Limits",
+      "tooltip": {
+        "shared": true,
+        "sort": 2,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "decimals": 1,
+          "format": "short",
+          "label": "CPU",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "Prometheus",
+      "decimals": 1,
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 12
+      },
+      "id": 6,
+      "legend": {
+        "alignAsTable": true,
+        "avg": true,
+        "current": true,
+        "max": true,
+        "min": true,
+        "rightSide": true,
+        "show": true,
+        "sideWidth": 400,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "sum(kube_pod_container_resource_requests_memory_bytes{namespace=~\"$namespace\",container=~\"$deployment\"}) by (container)",
+          "legendFormat": "Request:{{container}}",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(kube_pod_container_resource_limits_memory_bytes{namespace=~\"$namespace\",container=~\"$deployment\"}) by (container)",
+          "legendFormat": "Limit: {{container}}",
+          "refId": "B"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Memory Requests/Limits",
+      "tooltip": {
+        "shared": true,
+        "sort": 2,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "decimals": 1,
+          "format": "bytes",
+          "label": "RAM",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     }
   ],
+  "refresh": "5s",
   "schemaVersion": 20,
   "style": "dark",
   "tags": [],
@@ -125,8 +319,8 @@
       {
         "allValue": null,
         "current": {
-          "text": "data-whistler",
-          "value": "data-whistler"
+          "text": "uat-whistler",
+          "value": "uat-whistler"
         },
         "datasource": "Prometheus",
         "definition": "label_values(kube_deployment_status_replicas,namespace)",
@@ -150,7 +344,6 @@
       {
         "allValue": null,
         "current": {
-          "tags": [],
           "text": "All",
           "value": [
             "$__all"
@@ -166,7 +359,7 @@
         "options": [],
         "query": "label_values(kube_deployment_status_replicas,deployment)",
         "refresh": 1,
-        "regex": "",
+        "regex": "/^(?!aws-*|cluster-*|istio-*|coredns|kafka-*)/",
         "skipUrlSync": false,
         "sort": 0,
         "tagValuesQuery": "",
@@ -198,5 +391,5 @@
   "timezone": "",
   "title": "Resource Utilisation",
   "uid": "dpVwGIAZz",
-  "version": 1
+  "version": 2
 }
