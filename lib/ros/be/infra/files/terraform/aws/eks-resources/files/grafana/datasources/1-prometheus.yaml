@@ -16,7 +16,8 @@ datasources:
   # <int> org id. will default to orgId 1 if not specified
   orgId: 1
   # <string> url
-  url: http://prometheus.istio-system.svc.cluster.local:9090
+  #url: http://prometheus.istio-system.svc.cluster.local:9090
+  url: http://prometheus-server.monitor.svc.cluster.local:80
   # <string> database password, if used
   # password:
   # <string> database user, if used
@@ -45,4 +46,18 @@ datasources:
   #   tlsClientKey: "..."
   # version: 1
   # <bool> allow users to edit datasources from the UI.
+  editable: false
+- name: VictoriaMetrics
+  type: prometheus
+  access: proxy
+  orgId: 1
+  url: http://vmselect.monitor.svc.cluster.local:8481/select/1/prometheus
+  isDefault: false
+  editable: false
+- name: Loki
+  type: loki
+  access: proxy
+  orgId: 1
+  url: http://loki.monitor.svc.cluster.local:3100
+  isDefault: false
   editable: false

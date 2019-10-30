@@ -2,3 +2,6 @@ gateways:
   istio-ingressgateway:
     type: NodePort
     autoscaleMin: 2
+kiali:
+  enabled: true
+  createDemoSecret: true
