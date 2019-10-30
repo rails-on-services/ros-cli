@@ -310,34 +310,45 @@ resource "helm_release" "grafana" {
     jsonencode(lookup(var.helm_configuration_overrides, "grafana", {}))
   ]
 }
-/*
-resource "kubernetes_job" "set-grafana-home-dashboard" {
-  depends_on = [helm_release.grafana]
-  metadata {
-    name = "set-grafana-home-dashboard"
-    namespace   = var.grafana_namespace
-  }
-  spec {
-    template {
-      metadata {
-        name        = "set-grafana-home-dashboard"
-        annotations = {
-          "sidecar.istio.io/inject" = false
-        }
-      }
-      spec {
-        container {
-          name    = "curl"
-          image   = "gcr.io/cloud-builders/curl"
-          command = ["curl", "-X", "PUT", "-d", "{\"homeDashboardId\":1}", "-H", "Accept: application/json", "-H", "Content-Type: application/json", "http://${var.grafana_user}:${var.grafana_password}@grafana/api/org/preferences"]
-        }
-        restart_policy = "OnFailure"
-      }
-    }
-    backoff_limit = 6
-  }
+
+resource "helm_release" "prometheus" {
+  depends_on = [kubernetes_namespace.extra_namespaces]
+
+  name         = "prometheus"
+  chart        = "prometheus"
+  repository   = "stable"
+  namespace    = var.grafana_namespace
+  wait         = true
+  force_update = true
+
+  values = [
+    templatefile("${path.module}/templates/helm-prometheus.tpl", {}),
+    jsonencode(lookup(var.helm_configuration_overrides, "prometheus", {}))
+  ]
 }
-*/
+
+resource "helm_release" "loki" {
+  depends_on = [kubernetes_namespace.extra_namespaces]
+  name         = "loki"
+  chart        = "loki"
+  repository   = data.helm_repository.loki.metadata.0.name
+  namespace    = var.grafana_namespace
+  wait         = true
+  force_update = true
+}
+
+resource "helm_release" "victoria-metrics" {
+  depends_on = [kubernetes_namespace.extra_namespaces]
+  name         = "victoria-metrics"
+  chart        = "victoria-metrics-cluster"
+  repository   = data.helm_repository.vm.metadata.0.name
+  namespace    = var.grafana_namespace
+  wait         = true
+  force_update = true
+
+  values = [templatefile("${path.module}/templates/helm-victoria-metrics.tpl", {})]
+
+}
 
 resource "helm_release" "prometheus" {
   depends_on = [kubernetes_namespace.extra_namespaces]

@@ -88,7 +88,11 @@ serverFiles:
         target_label: __metrics_path__
         replacement: /api/v1/nodes/${1}/proxy/metrics
         action: replace
+<<<<<<< HEAD
     - job_name: kubernetes-cadvisor-test
+=======
+    - job_name: kubernetes-cadvisor
+>>>>>>> Working prototipe of Fluentd-Loki-Prometheus-VictoriaMetrics-Grafana stack
       honor_timestamps: true
       scrape_interval: 15s
       scrape_timeout: 10s
@@ -114,7 +118,11 @@ serverFiles:
         separator: ;
         regex: (.+)
         target_label: __metrics_path__
+<<<<<<< HEAD
         replacement: '/api/v1/nodes/$1/proxy/metrics/cadvisor'
+=======
+        replacement: /api/v1/nodes/${1}/proxy/metrics/cadvisor
+>>>>>>> Working prototipe of Fluentd-Loki-Prometheus-VictoriaMetrics-Grafana stack
         action: replace
     - job_name: kubernetes-service-endpoints
       honor_timestamps: true
