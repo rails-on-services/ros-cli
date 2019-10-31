@@ -18,7 +18,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1572425057932,
+  "iteration": 1572433323768,
   "links": [],
   "panels": [
     {
@@ -155,6 +155,11 @@
             "targetBlank": true,
             "title": "Explore Logs",
             "url": "explore?orgId=1&left=[\"${__from}\",\"${__value.time}\",\"Loki\",{\"expr\":\"{namespace=\\\"${namespace}\\\",app=\\\"${__series.labels.app}\\\"}\"},{\"mode\":\"Logs\"},{\"ui\":[true,true,true,\"none\"]}]"
+          },
+          {
+            "targetBlank": true,
+            "title": "Logs Dashboard",
+            "url": "d/oBLTuAAWk/application-logs?orgId=1&from=${__from}&to=${__value.time}&var-namespace=${namespace}&var-app=${__series.labels.app}"
           }
         ]
       },
@@ -335,7 +340,7 @@
           "text": "dev1-whistler",
           "value": "dev1-whistler"
         },
-        "datasource": "Prometheus",
+        "datasource": "VictoriaMetrics",
         "definition": "label_values(ruby_sidekiq_jobs_total,namespace)",
         "hide": 0,
         "includeAll": false,
@@ -362,7 +367,7 @@
             "$__all"
           ]
         },
-        "datasource": "Prometheus",
+        "datasource": "VictoriaMetrics",
         "definition": "label_values(ruby_sidekiq_jobs_total,app_kubernetes_io_name)",
         "hide": 0,
         "includeAll": true,
@@ -404,5 +409,5 @@
   "timezone": "",
   "title": "Worker Jobs Victoria Metrics",
   "uid": "1-syPt0Zz",
-  "version": 1
+  "version": 3
 }

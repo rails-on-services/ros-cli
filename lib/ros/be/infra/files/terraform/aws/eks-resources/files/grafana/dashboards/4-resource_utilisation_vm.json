@@ -17,8 +17,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 5,
-  "iteration": 1572321480519,
+  "iteration": 1572431823365,
   "links": [],
   "panels": [
     {
@@ -311,8 +310,8 @@
       }
     }
   ],
-  "refresh": "5s",
-  "schemaVersion": 19,
+  "refresh": "",
+  "schemaVersion": 20,
   "style": "dark",
   "tags": [],
   "templating": {
@@ -323,7 +322,7 @@
           "text": "dev1-whistler",
           "value": "dev1-whistler"
         },
-        "datasource": "Prometheus",
+        "datasource": "VictoriaMetrics",
         "definition": "label_values(kube_deployment_status_replicas,namespace)",
         "hide": 0,
         "includeAll": false,
@@ -350,7 +349,7 @@
             "$__all"
           ]
         },
-        "datasource": "Prometheus",
+        "datasource": "VictoriaMetrics",
         "definition": "label_values(kube_deployment_status_replicas,deployment)",
         "hide": 0,
         "includeAll": true,
@@ -372,7 +371,7 @@
     ]
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-30m",
     "to": "now"
   },
   "timepicker": {
@@ -392,5 +391,5 @@
   "timezone": "",
   "title": "Resource Utilisation Victoria Metrics",
   "uid": "BfzLxpAWz",
-  "version": 3
+  "version": 1
 }
