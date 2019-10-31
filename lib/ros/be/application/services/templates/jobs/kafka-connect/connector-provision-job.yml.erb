@@ -28,7 +28,7 @@ spec:
               <%- if config.type == 'bigquery' -%>
               {
                 "connector.class": "com.wepay.kafka.connect.bigquery.BigQuerySinkConnector",
-                "autoUpdateSchemas": "false",
+                "autoUpdateSchemas": "true",
                 "bigQueryMessageTimePartitioning": "false",
                 "autoCreateTables": "true",
                 "sanitizeTopics": "true",
