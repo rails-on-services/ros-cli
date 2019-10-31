@@ -73,7 +73,7 @@ profiles:
             hook:
               upgradeMigration:
                 enabled: true
-                command: ["bundle", "exec", "rails", "<% if @service.is_ros_service %>app:<% end %>db:migrate"]
+                command: ["bundle", "exec", "rails", "<% if @service.is_ros_service %>app:<% end %>db:migrate"<% if services_components[:"kafka-schema-registry"]&.config&.enabled%>, "<% if @service.is_ros_service %>app:<% end %>ros:avro:register"<% end %>]
             <%- elsif profile.eql?('worker') -%>
             service:
               enabled: false
