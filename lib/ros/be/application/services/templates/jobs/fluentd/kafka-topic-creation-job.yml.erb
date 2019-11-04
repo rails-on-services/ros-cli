@@ -32,9 +32,10 @@ spec:
 
               topics=(<%= @service.kafka_topics.join(" ") %>)
               for topic in ${topics[@]}; do
-                if kafka-topics --bootstrap-server <%= @service.kafka.bootstrap_servers %> --command-config ./config --list | grep "${topic}" ; then
-                  echo "Topic already exist, nothing to do"
+                if kafka-topics --bootstrap-server <%= @service.kafka.bootstrap_servers %> --command-config ./config --list | grep -w "${topic}" ; then
+                  echo "Topic ${topic} already exist, nothing to do"
                 else
+                  echo "Creating topic ${topic}"
                   kafka-topics --bootstrap-server <%= @service.kafka.bootstrap_servers %> \
                   --command-config ./config --create --topic "${topic}" \
                   --config cleanup.policy=compact --config segment.ms=600000 \
