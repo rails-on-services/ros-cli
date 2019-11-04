@@ -6,3 +6,5 @@ gcpServiceAccountSecret:
   name: ${gcp_service_account_secret}
   key: application_default_credentials.json
 %{ endif ~}
+image:
+  pullPolicy: ${pull_policy}

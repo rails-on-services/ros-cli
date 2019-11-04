@@ -1,5 +1,5 @@
 image:
-  tag: 6.3.5
+  tag: 6.4.3
 persistence:
   enabled: true
   size: 20Gi
@@ -26,3 +26,8 @@ sidecar:
   datasources:
     enabled: true
     label: grafana_datasource
+plugins:
+  - grafana-piechart-panel
+env:
+  GODEBUG: netdns=go
+

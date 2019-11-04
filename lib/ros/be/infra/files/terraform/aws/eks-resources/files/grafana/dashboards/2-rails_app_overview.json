@@ -1,16 +1,15 @@
 {
-  "timezone": "",
-  "title": "Rails App Overview",
-  "version": 1,
   "annotations": {
     "list": [
       {
         "builtIn": 1,
-        "datasource": "Prometheus",
+        "datasource": "VictoriaMetrics",
         "enable": true,
         "hide": true,
         "iconColor": "rgba(0, 211, 255, 1)",
+        "limit": 100,
         "name": "Annotations & Alerts",
+        "showIn": 0,
         "type": "dashboard"
       }
     ]
@@ -19,7 +18,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1559207679379,
+  "iteration": 1572840064260,
   "links": [],
   "panels": [
     {
@@ -27,7 +26,9 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
+      "datasource": "VictoriaMetrics",
       "fill": 1,
+      "fillGradient": 0,
       "gridPos": {
         "h": 7,
         "w": 12,
@@ -42,7 +43,7 @@
         "current": false,
         "max": false,
         "min": false,
-        "show": true,
+        "show": false,
         "total": false,
         "values": false
       },
@@ -50,7 +51,9 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
-      "options": {},
+      "options": {
+        "dataLinks": []
+      },
       "paceLength": 10,
       "percentage": false,
       "pointradius": 5,
@@ -119,7 +122,9 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
+      "datasource": "VictoriaMetrics",
       "fill": 1,
+      "fillGradient": 0,
       "gridPos": {
         "h": 7,
         "w": 12,
@@ -133,7 +138,7 @@
         "current": false,
         "max": false,
         "min": false,
-        "show": true,
+        "show": false,
         "total": false,
         "values": false
       },
@@ -141,7 +146,9 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
-      "options": {},
+      "options": {
+        "dataLinks": []
+      },
       "paceLength": 10,
       "percentage": false,
       "pointradius": 5,
@@ -209,7 +216,9 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
+      "datasource": "VictoriaMetrics",
       "fill": 1,
+      "fillGradient": 0,
       "gridPos": {
         "h": 5,
         "w": 24,
@@ -227,6 +236,7 @@
         "min": true,
         "rightSide": true,
         "show": true,
+        "sideWidth": 520,
         "sort": "avg",
         "sortDesc": true,
         "total": false,
@@ -236,7 +246,9 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
-      "options": {},
+      "options": {
+        "dataLinks": []
+      },
       "paceLength": 10,
       "percentage": false,
       "pointradius": 5,
@@ -282,7 +294,7 @@
           "label": null,
           "logBase": 1,
           "max": null,
-          "min": null,
+          "min": "0",
           "show": true
         },
         {
@@ -304,7 +316,9 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
+      "datasource": "VictoriaMetrics",
       "fill": 1,
+      "fillGradient": 0,
       "gridPos": {
         "h": 5,
         "w": 24,
@@ -322,6 +336,7 @@
         "min": true,
         "rightSide": true,
         "show": true,
+        "sideWidth": 520,
         "sort": "max",
         "sortDesc": true,
         "total": false,
@@ -330,8 +345,10 @@
       "lines": true,
       "linewidth": 1,
       "links": [],
-      "nullPointMode": "null",
-      "options": {},
+      "nullPointMode": "null as zero",
+      "options": {
+        "dataLinks": []
+      },
       "paceLength": 10,
       "percentage": false,
       "pointradius": 5,
@@ -375,7 +392,7 @@
           "label": null,
           "logBase": 1,
           "max": null,
-          "min": null,
+          "min": "0",
           "show": true
         },
         {
@@ -397,7 +414,9 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
+      "datasource": "VictoriaMetrics",
       "fill": 1,
+      "fillGradient": 0,
       "gridPos": {
         "h": 6,
         "w": 24,
@@ -409,18 +428,23 @@
         "alignAsTable": true,
         "avg": true,
         "current": true,
+        "hideEmpty": true,
+        "hideZero": true,
         "max": true,
         "min": true,
         "rightSide": true,
         "show": true,
+        "sideWidth": 450,
         "total": false,
         "values": true
       },
       "lines": true,
       "linewidth": 1,
       "links": [],
-      "nullPointMode": "null",
-      "options": {},
+      "nullPointMode": "null as zero",
+      "options": {
+        "dataLinks": []
+      },
       "paceLength": 10,
       "percentage": false,
       "pointradius": 5,
@@ -464,7 +488,7 @@
           "label": null,
           "logBase": 1,
           "max": null,
-          "min": null,
+          "min": "0",
           "show": true
         },
         {
@@ -480,10 +504,222 @@
         "align": false,
         "alignLevel": null
       }
+    },
+    {
+      "aliasColors": {},
+      "bars": true,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "VictoriaMetrics",
+      "description": "HTTP Error Rates as % Of Requests by Application",
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 23
+      },
+      "id": 206,
+      "legend": {
+        "alignAsTable": true,
+        "avg": true,
+        "current": true,
+        "hideEmpty": true,
+        "hideZero": true,
+        "max": true,
+        "min": true,
+        "rightSide": true,
+        "show": true,
+        "sideWidth": 450,
+        "total": false,
+        "values": true
+      },
+      "lines": false,
+      "linewidth": 1,
+      "nullPointMode": "null as zero",
+      "options": {
+        "dataLinks": [
+          {
+            "targetBlank": true,
+            "title": "Explore Logs",
+            "url": "explore?orgId=1&left=[\"${__from}\",\"${__value.time}\",\"Loki\",{\"expr\":\"{namespace=\\\"${namespace}\\\",app=\\\"${__series.labels.app}\\\"}\"},{\"mode\":\"Logs\"},{\"ui\":[true,true,true,\"none\"]}]"
+          },
+          {
+            "targetBlank": true,
+            "title": "Logs Dashboard",
+            "url": "d/oBLTuAAWk/application-logs?orgId=1&from=${__from}&to=${__value.time}&var-namespace=${namespace}&var-app=${__series.labels.app}"
+          }
+        ]
+      },
+      "percentage": false,
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "sum(rate(ruby_http_requests_total{namespace=~\"$namespace\",app=~\"$app\",status=~\"4.*|5.*\"})) by (app) / sum(rate(ruby_http_requests_total{namespace=~\"$namespace\",app=~\"$app\"})) by (app)",
+          "hide": false,
+          "legendFormat": "{{app}}",
+          "refId": "C"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "HTTP Error Rates as % Of Requests by Application",
+      "tooltip": {
+        "shared": true,
+        "sort": 2,
+        "value_type": "individual"
+      },
+      "transparent": true,
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "decimals": 1,
+          "format": "percentunit",
+          "label": "",
+          "logBase": 1,
+          "max": "1",
+          "min": "0",
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": true,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "VictoriaMetrics",
+      "description": "HTTP Error Rates by Application",
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 28
+      },
+      "id": 207,
+      "legend": {
+        "alignAsTable": true,
+        "avg": true,
+        "current": true,
+        "hideEmpty": true,
+        "hideZero": true,
+        "max": true,
+        "min": true,
+        "rightSide": true,
+        "show": true,
+        "sideWidth": 450,
+        "total": false,
+        "values": true
+      },
+      "lines": false,
+      "linewidth": 1,
+      "nullPointMode": "null as zero",
+      "options": {
+        "dataLinks": [
+          {
+            "targetBlank": true,
+            "title": "Explore Logs",
+            "url": "explore?orgId=1&left=[\"${__from}\",\"${__value.time}\",\"Loki\",{\"expr\":\"{namespace=\\\"${namespace}\\\",app=\\\"${__series.labels.app}\\\"}\"},{\"mode\":\"Logs\"},{\"ui\":[true,true,true,\"none\"]}]"
+          },
+          {
+            "targetBlank": true,
+            "title": "Logs Dashboard",
+            "url": "d/oBLTuAAWk/application-logs?orgId=1&from=${__from}&to=${__value.time}&var-namespace=${namespace}&var-app=${__series.labels.app}"
+          }
+        ]
+      },
+      "percentage": false,
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "sum(rate(ruby_http_requests_total{namespace=~\"$namespace\",app=~\"$app\",status=~\"4.*|5.*\"})) by (app,status) ",
+          "hide": false,
+          "legendFormat": "{{app}} : {{status}}",
+          "refId": "C"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "HTTP Error Rates by Application",
+      "tooltip": {
+        "shared": true,
+        "sort": 2,
+        "value_type": "individual"
+      },
+      "transparent": true,
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "decimals": 1,
+          "format": "short",
+          "label": "",
+          "logBase": 1,
+          "max": "1",
+          "min": "0",
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     }
   ],
-  "refresh": "5m",
-  "schemaVersion": 18,
+  "refresh": false,
+  "schemaVersion": 20,
   "style": "dark",
   "tags": [],
   "templating": {
@@ -491,15 +727,14 @@
       {
         "allValue": null,
         "current": {
-          "isNone": true,
-          "text": "None",
-          "value": ""
+          "text": "dev1-whistler",
+          "value": "dev1-whistler"
         },
-        "datasource": "Prometheus",
+        "datasource": "VictoriaMetrics",
         "definition": "label_values(ruby_http_requests_total,namespace)",
         "hide": 0,
         "includeAll": false,
-        "label": null,
+        "label": "Namespace",
         "multi": false,
         "name": "namespace",
         "options": [],
@@ -507,7 +742,7 @@
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
-        "sort": 0,
+        "sort": 5,
         "tagValuesQuery": "",
         "tags": [],
         "tagsQuery": "",
@@ -522,7 +757,7 @@
             "$__all"
           ]
         },
-        "datasource": "Prometheus",
+        "datasource": "VictoriaMetrics",
         "definition": "label_values(ruby_http_requests_total,app_kubernetes_io_name)",
         "hide": 0,
         "includeAll": true,
@@ -531,7 +766,7 @@
         "name": "app",
         "options": [],
         "query": "label_values(ruby_http_requests_total,app_kubernetes_io_name)",
-        "refresh": 2,
+        "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
         "sort": 1,
@@ -544,7 +779,7 @@
     ]
   },
   "time": {
-    "from": "now-3h",
+    "from": "now-12h",
     "to": "now"
   },
   "timepicker": {
@@ -571,5 +806,9 @@
       "7d",
       "30d"
     ]
-  }
+  },
+  "timezone": "",
+  "title": "Rails App Overview",
+  "uid": "ZFkkPt0Wz",
+  "version": 1
 }
