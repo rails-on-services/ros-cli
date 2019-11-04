@@ -322,7 +322,8 @@ resource "helm_release" "prometheus" {
   force_update = true
 
   values = [
-    templatefile("${path.module}/templates/helm-prometheus.tpl", {}),
+    #templatefile("${path.module}/templates/helm-prometheus.tpl", {}),
+    file("${path.module}/files/helm-prometheus.yaml"),
     jsonencode(lookup(var.helm_configuration_overrides, "prometheus", {}))
   ]
 }
@@ -335,6 +336,8 @@ resource "helm_release" "loki" {
   namespace    = var.grafana_namespace
   wait         = true
   force_update = true
+
+  values = [file("${path.module}/files/helm-loki.yaml")]
 }
 
 resource "helm_release" "victoria-metrics" {

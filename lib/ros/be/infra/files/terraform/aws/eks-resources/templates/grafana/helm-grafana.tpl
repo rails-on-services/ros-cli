@@ -1,6 +1,5 @@
 image:
   tag: 6.4.3
-  #tag: 6.3.6
 persistence:
   enabled: true
   size: 20Gi
