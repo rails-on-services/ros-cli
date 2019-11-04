@@ -17,7 +17,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1572431823365,
+  "iteration": 1572840203402,
   "links": [],
   "panels": [
     {
@@ -389,7 +389,7 @@
     ]
   },
   "timezone": "",
-  "title": "Resource Utilisation Victoria Metrics",
+  "title": "Resource Utilisation",
   "uid": "BfzLxpAWz",
   "version": 1
 }

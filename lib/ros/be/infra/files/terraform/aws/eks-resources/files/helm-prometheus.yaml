@@ -19,10 +19,12 @@ serviceAccounts:
   pushgateway:
     create: false
 server:
+  persistentVolume:
+    size: 50Gi
   resources:
     limits:
       cpu: 1000m
-      memory: 4Gi
+      memory: 6Gi
     requests:
       cpu: 500m
       memory: 3Gi
@@ -88,7 +90,7 @@ serverFiles:
         target_label: __metrics_path__
         replacement: /api/v1/nodes/${1}/proxy/metrics
         action: replace
-    - job_name: kubernetes-cadvisor-test
+    - job_name: kubernetes-cadvisor
       honor_timestamps: true
       scrape_interval: 15s
       scrape_timeout: 10s
@@ -114,7 +116,7 @@ serverFiles:
         separator: ;
         regex: (.+)
         target_label: __metrics_path__
-        replacement: '/api/v1/nodes/$1/proxy/metrics/cadvisor'
+        replacement: '/api/v1/nodes/${1}/proxy/metrics/cadvisor'
         action: replace
     - job_name: kubernetes-service-endpoints
       honor_timestamps: true
