@@ -17,8 +17,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 10,
-  "iteration": 1572536467195,
+  "iteration": 1572840689858,
   "links": [],
   "panels": [
     {
@@ -218,9 +217,9 @@
         "allValue": null,
         "current": {
           "tags": [],
-          "text": "dev1-whistler",
+          "text": "monitor",
           "value": [
-            "dev1-whistler"
+            "monitor"
           ]
         },
         "datasource": "VictoriaMetrics",
@@ -245,21 +244,19 @@
       {
         "allValue": null,
         "current": {
-          "tags": [],
-          "text": "game",
-          "value": [
-            "game"
-          ]
+          "selected": false,
+          "text": "All",
+          "value": "$__all"
         },
         "datasource": "VictoriaMetrics",
-        "definition": "label_values(container)",
+        "definition": "label_values(container_cpu_system_seconds_total{namespace=~\"$namespace\"},container)",
         "hide": 0,
         "includeAll": true,
         "label": "Container",
         "multi": true,
         "name": "container",
         "options": [],
-        "query": "label_values(container)",
+        "query": "label_values(container_cpu_system_seconds_total{namespace=~\"$namespace\"},container)",
         "refresh": 1,
         "regex": "/^(?!POD)/",
         "skipUrlSync": false,
@@ -293,5 +290,5 @@
   "timezone": "",
   "title": "Container Resource Usage",
   "uid": "HfUgCa0Wk",
-  "version": 6
+  "version": 1
 }
