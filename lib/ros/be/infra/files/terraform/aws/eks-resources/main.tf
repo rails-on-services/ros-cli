@@ -1,26 +1,31 @@
 data "helm_repository" "incubator" {
-    name = "incubator"
-    url  = "https://kubernetes-charts-incubator.storage.googleapis.com"
+  name = "incubator"
+  url  = "https://kubernetes-charts-incubator.storage.googleapis.com"
 }
 
 data "helm_repository" "ros" {
-    name = "ros"
-    url  = "https://rails-on-services.github.io/helm-charts"
+  name = "ros"
+  url  = "https://rails-on-services.github.io/helm-charts"
 }
 
 data "helm_repository" "istio" {
-    name = "istio"
-    url  = "https://gcsweb.istio.io/gcs/istio-release/releases/${var.istio_version}/charts/"
+  name = "istio"
+  url  = "https://gcsweb.istio.io/gcs/istio-release/releases/${var.istio_version}/charts/"
 }
 
 data "helm_repository" "vm" {
-    name = "vm"
-    url  = "https://victoriametrics.github.io/helm-charts/"
+  name = "vm"
+  url  = "https://victoriametrics.github.io/helm-charts/"
 }
 
 data "helm_repository" "loki" {
-    name = "loki"
-    url  = "https://grafana.github.io/loki/charts"
+  name = "loki"
+  url  = "https://grafana.github.io/loki/charts"
+}
+
+data "helm_repository" "kube-eagle" {
+  name = "kube-eagle"
+  url  = "https://raw.githubusercontent.com/cloudworkz/kube-eagle-helm-chart/master"
 }
 
 resource "kubernetes_namespace" "extra_namespaces" {
@@ -61,6 +66,15 @@ resource "helm_release" "kube-state-metrics" {
   wait      = true
 
   values = [file("${path.module}/files/kube-state-metrics.yaml")]
+}
+
+resource "helm_release" "kube-eagle" {
+  depends_on = [kubernetes_namespace.extra_namespaces]
+  name       = "kube-eagle"
+  repository = data.helm_repository.kube-eagle.metadata.0.name
+  chart      = "kube-eagle"
+  namespace  = var.grafana_namespace
+  wait       = true
 }
 
 resource "kubernetes_secret" "fluentd-gcp-google-service-account" {

@@ -19,6 +19,8 @@ serviceAccounts:
   pushgateway:
     create: false
 server:
+  labels:
+    app.kubernetes.io/part-of: monitoring
   persistentVolume:
     size: 50Gi
   resources:

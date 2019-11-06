@@ -13,6 +13,7 @@ deploy:
           fullnameOverride: kafka-zookeeper
           podLabels:
             app.kubernetes.io/name: kafka-zookeeper
+            app.kubernetes.io/part-of: application-services
           resources:
             limits:
               cpu: 1

@@ -17,6 +17,7 @@ deploy:
             SCHEMA_REGISTRY_SCHEMA_REGISTRY_GROUP_ID: schema-registry-<%= @service.current_feature_set %>
           podLabels:
             app.kubernetes.io/name: kafka-schema-registry
+            app.kubernetes.io/part-of: application-services
           kafka:
             <%- if @service.kafka.security_protocol == "SASL_SSL" -%>
             bootstrapServers: "SASL_SSL://<%= @service.kafka.bootstrap_servers %>"
