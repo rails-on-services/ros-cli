@@ -51,7 +51,7 @@ module "eks" {
   # using launch configuration
   worker_groups = var.eks_worker_groups
   workers_group_defaults = {
-    instance_type                 = "m5.xlarge"
+    instance_type                 = "r5.xlarge"
     name                          = "eks_workers_a"
     asg_max_size                  = 10
     asg_min_size                  = 2

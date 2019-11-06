@@ -16,6 +16,7 @@ deploy:
           overrideGroupId: kafka-connect-<%= @service.current_feature_set %>
           podLabels:
             app.kubernetes.io/name: kafka-connect
+            app.kubernetes.io/part-of: application-services
           ## Kafka Connect JVM Heap Option
           heapOptions: "-Xms1024M -Xmx1024M"
           resources:

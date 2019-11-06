@@ -13,6 +13,7 @@ deploy:
           fullnameOverride: kafka
           podLabels:
             app.kubernetes.io/name: kafka
+            app.kubernetes.io/part-of: application-services
           resources:
             limits:
               cpu: 200m
