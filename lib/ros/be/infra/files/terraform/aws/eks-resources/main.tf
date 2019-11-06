@@ -367,48 +367,6 @@ resource "helm_release" "victoria-metrics" {
 
 }
 
-resource "helm_release" "prometheus" {
-  depends_on = [kubernetes_namespace.extra_namespaces]
-
-  name         = "prometheus"
-  chart        = "prometheus"
-  repository   = "stable"
-  namespace    = var.grafana_namespace
-  wait         = true
-  force_update = true
-
-  values = [
-    #templatefile("${path.module}/templates/helm-prometheus.tpl", {}),
-    file("${path.module}/files/helm-prometheus.yaml"),
-    jsonencode(lookup(var.helm_configuration_overrides, "prometheus", {}))
-  ]
-}
-
-resource "helm_release" "loki" {
-  depends_on = [kubernetes_namespace.extra_namespaces]
-  name         = "loki"
-  chart        = "loki"
-  repository   = data.helm_repository.loki.metadata.0.name
-  namespace    = var.grafana_namespace
-  wait         = true
-  force_update = true
-
-  values = [file("${path.module}/files/helm-loki.yaml")]
-}
-
-resource "helm_release" "victoria-metrics" {
-  depends_on = [kubernetes_namespace.extra_namespaces]
-  name         = "victoria-metrics"
-  chart        = "victoria-metrics-cluster"
-  repository   = data.helm_repository.vm.metadata.0.name
-  namespace    = var.grafana_namespace
-  wait         = true
-  force_update = true
-
-  values = [templatefile("${path.module}/templates/helm-victoria-metrics.tpl", {})]
-
-}
-
 # This is to create an extra kubernetes clusterrole for developers
 resource "kubernetes_cluster_role" "developer" {
   metadata {
