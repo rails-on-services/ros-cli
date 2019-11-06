@@ -78,7 +78,7 @@ module Ros
           end
 
           def base_hostname
-            @base_hostname ||= (infra.dns ? "#{!override_feature_set.empty? ? '-' + current_feature_set : ''}.#{dns_domain}" : 'localhost')
+            @base_hostname ||= (infra.dns ? "#{override_feature_set.empty? || current_feature_set == 'master' ? '' : '-' + current_feature_set }.#{dns_domain}" : 'localhost')
           end
 
           def dns_domain
