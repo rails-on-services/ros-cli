@@ -77,6 +77,7 @@ module Ros
           return if options.skip
           update_helm_repo
           deploy_services unless options.skip_infra
+          deploy_infra_migration_jobs
           deploy_platform_environment
           deploy_platform
           show_endpoint
@@ -117,15 +118,18 @@ module Ros
               skaffold("#{base_cmd} #{force} -f #{service_file}")
               errors.add("skaffold_#{base_cmd}", stderr) if exit_code.positive?
             end
-            deploy_jobs(service)
           end
         end
 
-        def deploy_jobs(service)
-          if File.directory?("#{services_root}/jobs/#{service}")
-            Dir.glob("#{services_root}/jobs/#{service}/*.yml") do |job_file|
-              kube_cmd = "apply -f #{job_file} --force"
-              kubectl(kube_cmd)
+        def deploy_infra_migration_jobs
+          enabled_application_services.each do |service|
+            if File.directory?("#{services_root}/jobs/#{service}")
+              Dir.glob("#{services_root}/jobs/#{service}/*.yml") do |job_file|
+                job_name = YAML.load_file(job_file)['metadata']['name']
+                kubectl("delete job #{job_name}") if kubectl("get job #{job_name}")
+                kube_cmd = "apply -f #{job_file} --force"
+                kubectl(kube_cmd)
+              end
             end
           end
         end
