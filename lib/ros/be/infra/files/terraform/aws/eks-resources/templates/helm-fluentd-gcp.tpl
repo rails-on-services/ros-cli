@@ -8,3 +8,10 @@ gcpServiceAccountSecret:
 %{ endif ~}
 image:
   pullPolicy: ${pull_policy}
+resources:
+  limits:
+    cpu: 300m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 256Mi
