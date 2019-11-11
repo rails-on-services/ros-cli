@@ -1,10 +1,10 @@
 resources:
   limits:
     cpu: 200m
-    memory: 256Mi
+    memory: 0.5Gi
   requests:
     cpu: 100m
-    memory: 128Mi
+    memory: 256Mi
 config:
   table_manager:
     retention_deletes_enabled: true

@@ -11,10 +11,11 @@ service:
   type: ClusterIP
 resources:
   limits:
-    memory: 2.5Gi
+    cpu: 200m
+    memory: 1.5Gi
   requests:
-    cpu: 0.5
-    memory: 2Gi
+    cpu: 100m
+    memory: 1Gi
 admin:
   existingSecret: grafana-credentials
   userKey: username

@@ -23,10 +23,10 @@ data "helm_repository" "loki" {
   url  = "https://grafana.github.io/loki/charts"
 }
 
-data "helm_repository" "kube-eagle" {
-  name = "kube-eagle"
-  url  = "https://raw.githubusercontent.com/cloudworkz/kube-eagle-helm-chart/master"
-}
+# data "helm_repository" "kube-eagle" {
+#   name = "kube-eagle"
+#   url  = "https://raw.githubusercontent.com/cloudworkz/kube-eagle-helm-chart/master"
+# }
 
 resource "kubernetes_namespace" "extra_namespaces" {
   count = length(var.extra_namespaces)
@@ -68,14 +68,14 @@ resource "helm_release" "kube-state-metrics" {
   values = [file("${path.module}/files/kube-state-metrics.yaml")]
 }
 
-resource "helm_release" "kube-eagle" {
-  depends_on = [kubernetes_namespace.extra_namespaces]
-  name       = "kube-eagle"
-  repository = data.helm_repository.kube-eagle.metadata.0.name
-  chart      = "kube-eagle"
-  namespace  = var.grafana_namespace
-  wait       = true
-}
+# resource "helm_release" "kube-eagle" {
+#   depends_on = [kubernetes_namespace.extra_namespaces]
+#   name       = "kube-eagle"
+#   repository = data.helm_repository.kube-eagle.metadata.0.name
+#   chart      = "kube-eagle"
+#   namespace  = var.grafana_namespace
+#   wait       = true
+# }
 
 resource "kubernetes_secret" "fluentd-gcp-google-service-account" {
   count = var.enable_fluentd_gcp_logging && var.fluentd_gcp_logging_service_account_json_key != "" ? 1 : 0

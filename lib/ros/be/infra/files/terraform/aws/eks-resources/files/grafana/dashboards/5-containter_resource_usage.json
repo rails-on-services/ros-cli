@@ -17,7 +17,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1573011715434,
+  "iteration": 1573223353410,
   "links": [],
   "panels": [
     {
@@ -83,7 +83,7 @@
           "refId": "D"
         },
         {
-          "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=~\"$namespace\",container_name=~\"$container\"}[1m]))",
+          "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=~\"$namespace\",container_name=~\"$container\"}))",
           "hide": false,
           "legendFormat": "Usage CPU Cores",
           "refId": "C"
@@ -182,12 +182,12 @@
           "refId": "D"
         },
         {
-          "expr": "sum(kube_pod_container_resource_limits_memory_bytes{namespace=~\"$namespace\",container=~\"$container\"})",
+          "expr": "sum(kube_pod_container_resource_limits{namespace=~\"$namespace\",container=~\"$container\",resource=\"memory\"})",
           "legendFormat": "Limit RAM",
           "refId": "B"
         },
         {
-          "expr": "sum(kube_pod_container_resource_requests_memory_bytes{namespace=~\"$namespace\",container=~\"$container\"})",
+          "expr": "sum(kube_pod_container_resource_requests{namespace=~\"$namespace\",container=~\"$container\",resource=\"memory\"})",
           "legendFormat": "Requested RAM",
           "refId": "C"
         },
@@ -285,7 +285,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(container_cpu_usage_seconds_total{container_name=~\"$container\", namespace=~\"$namespace\"}[1m])) by (container_name)",
+          "expr": "sum(rate(container_cpu_usage_seconds_total{container_name=~\"$container\", namespace=~\"$namespace\"})) by (container_name)",
           "hide": false,
           "legendFormat": "{{container_name}}",
           "refId": "C"
@@ -559,7 +559,7 @@
       },
       "lines": true,
       "linewidth": 1,
-      "nullPointMode": "null",
+      "nullPointMode": "connected",
       "options": {
         "dataLinks": []
       },
@@ -659,7 +659,6 @@
       {
         "allValue": null,
         "current": {
-          "tags": [],
           "text": "All",
           "value": [
             "$__all"
@@ -690,7 +689,7 @@
     ]
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-30m",
     "to": "now"
   },
   "timepicker": {
@@ -710,5 +709,5 @@
   "timezone": "",
   "title": "Container Resource Usage",
   "uid": "HfUgCa0Wk",
-  "version": 10
+  "version": 12
 }
