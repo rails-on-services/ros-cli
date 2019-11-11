@@ -37,7 +37,7 @@ profiles:
             image.tag: "{{.IMAGE_TAG}}"
             image.repository: "{{.SKAFFOLD_DEFAULT_REPO}}/<%= @service.name %>"
           overrides:
-            podDisruptionBudget: |
+            podDisruptionBudget:
               minAvailable: 1
             labels:
               # app.kubernetes.io/name: <%= @service.name %>
