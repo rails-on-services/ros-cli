@@ -77,7 +77,7 @@ module Ros
           return if options.skip
           update_helm_repo
           deploy_services unless options.skip_infra
-          deploy_infra_migration_jobs
+          deploy_infra_migration_jobs unless options.skip_infra
           deploy_platform_environment
           deploy_platform
           show_endpoint
