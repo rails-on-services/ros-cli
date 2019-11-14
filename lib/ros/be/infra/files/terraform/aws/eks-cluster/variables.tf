@@ -52,6 +52,11 @@ variable "eks_worker_groups" {
   default = []
 }
 
+variable "eks_worker_groups_launch_template" {
+  type    = any
+  default = []
+}
+
 variable "eks_map_users" {
   type = list(object({
     userarn  = string

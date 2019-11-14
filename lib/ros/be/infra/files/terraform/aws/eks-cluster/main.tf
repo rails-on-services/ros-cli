@@ -61,12 +61,12 @@ module "eks" {
     protect_from_scale_in         = true
     asg_force_delete              = true # This is to address a case when terraform cannot delete autoscaler group if protect_from_scale_in = true
     enable_monitoring             = false
-    kubelet_extra_args            = "--node-labels=beta.kubernetes.io/fluentd-ds-ready=true"
+    kubelet_extra_args            = "--node-labels=beta.kubernetes.io/fluentd-ds-ready=true --node-labels=kubernetes.io/lifecycle=on-demand"
     subnets                       = var.private_subnets
     additional_security_group_ids = var.default_security_group_id
   }
   # not using launch template
-  worker_groups_launch_template = []
+  worker_groups_launch_template = var.eks_worker_groups_launch_template
 
   map_users = var.eks_map_users
   map_roles = var.eks_map_roles
