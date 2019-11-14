@@ -18,7 +18,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1572840064260,
+  "iteration": 1573573133939,
   "links": [],
   "panels": [
     {
@@ -65,7 +65,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(ruby_http_requests_total{namespace=~\"$namespace\",app_kubernetes_io_name=~\"$app\"}[2m]))",
+          "expr": "sum(rate(ruby_http_requests_total{namespace=~\"$namespace\",app_kubernetes_io_name=~\"$app\"}))",
           "format": "time_series",
           "hide": false,
           "instant": false,
@@ -160,7 +160,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(ruby_http_duration_seconds_sum{namespace=~\"$namespace\",app_kubernetes_io_name=~\"$app\"}[2m])) / sum(rate(ruby_http_duration_seconds_count{namespace=~\"$namespace\",app_kubernetes_io_name=~\"$app\"}[2m]))",
+          "expr": "sum(rate(ruby_http_duration_seconds_sum{namespace=~\"$namespace\",app_kubernetes_io_name=~\"$app\"})) / sum(rate(ruby_http_duration_seconds_count{namespace=~\"$namespace\",app_kubernetes_io_name=~\"$app\"}))",
           "format": "time_series",
           "instant": false,
           "interval": "",
@@ -260,7 +260,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(ruby_http_duration_seconds_count{namespace=~\"$namespace\",app_kubernetes_io_name=~\"$app\"}[2m])) by (controller, action)",
+          "expr": "sum(rate(ruby_http_duration_seconds_count{namespace=~\"$namespace\",app_kubernetes_io_name=~\"$app\"})) by (controller, action)",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -360,7 +360,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(ruby_http_duration_seconds_sum{namespace=~\"$namespace\",app_kubernetes_io_name=~\"$app\"}[2m])) by (controller, action) / sum(rate(ruby_http_duration_seconds_count{namespace=~\"$namespace\",app_kubernetes_io_name=~\"$app\"}[2m])) by (controller, action)",
+          "expr": "sum(rate(ruby_http_duration_seconds_sum{namespace=~\"$namespace\",app_kubernetes_io_name=~\"$app\"})) by (controller, action) / sum(rate(ruby_http_duration_seconds_count{namespace=~\"$namespace\",app_kubernetes_io_name=~\"$app\"})) by (controller, action)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{controller}}: {{action}}",
@@ -456,7 +456,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(ruby_http_requests_total{namespace=~\"$namespace\",app_kubernetes_io_name=~\"$app\"}[2m])) by (status)",
+          "expr": "sum(rate(ruby_http_requests_total{namespace=~\"$namespace\",app_kubernetes_io_name=~\"$app\"})) by (status)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{status}}",
@@ -648,11 +648,6 @@
         "dataLinks": [
           {
             "targetBlank": true,
-            "title": "Explore Logs",
-            "url": "explore?orgId=1&left=[\"${__from}\",\"${__value.time}\",\"Loki\",{\"expr\":\"{namespace=\\\"${namespace}\\\",app=\\\"${__series.labels.app}\\\"}\"},{\"mode\":\"Logs\"},{\"ui\":[true,true,true,\"none\"]}]"
-          },
-          {
-            "targetBlank": true,
             "title": "Logs Dashboard",
             "url": "d/oBLTuAAWk/application-logs?orgId=1&from=${__from}&to=${__value.time}&var-namespace=${namespace}&var-app=${__series.labels.app}"
           }
@@ -779,7 +774,7 @@
     ]
   },
   "time": {
-    "from": "now-12h",
+    "from": "now-1h",
     "to": "now"
   },
   "timepicker": {
@@ -810,5 +805,5 @@
   "timezone": "",
   "title": "Rails App Overview",
   "uid": "ZFkkPt0Wz",
-  "version": 1
+  "version": 3
 }

@@ -3,7 +3,7 @@
     "list": [
       {
         "builtIn": 1,
-        "datasource": "Prometheus",
+        "datasource": "VictoriaMetrics",
         "enable": true,
         "hide": true,
         "iconColor": "rgba(0, 211, 255, 1)",
@@ -18,7 +18,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1572433323768,
+  "iteration": 1573523728936,
   "links": [],
   "panels": [
     {
@@ -153,11 +153,6 @@
         "dataLinks": [
           {
             "targetBlank": true,
-            "title": "Explore Logs",
-            "url": "explore?orgId=1&left=[\"${__from}\",\"${__value.time}\",\"Loki\",{\"expr\":\"{namespace=\\\"${namespace}\\\",app=\\\"${__series.labels.app}\\\"}\"},{\"mode\":\"Logs\"},{\"ui\":[true,true,true,\"none\"]}]"
-          },
-          {
-            "targetBlank": true,
             "title": "Logs Dashboard",
             "url": "d/oBLTuAAWk/application-logs?orgId=1&from=${__from}&to=${__value.time}&var-namespace=${namespace}&var-app=${__series.labels.app}"
           }
@@ -183,7 +178,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Failed Jobs Rate As A % Of Total Jobs By Worker",
+      "title": "Failed Jobs Rate As % Of Total Jobs By Worker",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -331,7 +326,10 @@
   "refresh": "",
   "schemaVersion": 20,
   "style": "dark",
-  "tags": [],
+  "tags": [
+    "ruby",
+    "worker"
+  ],
   "templating": {
     "list": [
       {
@@ -407,7 +405,7 @@
     ]
   },
   "timezone": "",
-  "title": "Worker Jobs Victoria Metrics",
+  "title": "Worker Jobs Overview",
   "uid": "1-syPt0Zz",
-  "version": 3
+  "version": 2
 }

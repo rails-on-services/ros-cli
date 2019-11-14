@@ -1,5 +1,5 @@
 image:
-  tag: 6.4.3
+  tag: 6.4.4
 persistence:
   enabled: true
   size: 20Gi
@@ -12,10 +12,10 @@ service:
 resources:
   limits:
     cpu: 200m
-    memory: 1.5Gi
+    memory: 512Mi
   requests:
     cpu: 100m
-    memory: 1Gi
+    memory: 256Mi
 admin:
   existingSecret: grafana-credentials
   userKey: username
