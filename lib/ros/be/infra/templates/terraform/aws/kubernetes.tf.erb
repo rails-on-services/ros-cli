@@ -29,6 +29,10 @@ variable "eks_worker_groups" {
   default = []
 }
 
+variable "eks_worker_groups_launch_template" {
+  default = []
+}
+
 variable "fluentd_gcp_logging_service_account_json_key" {
   default = ""
 }
@@ -111,6 +115,7 @@ module "eks-cluster" {
   aws_profile               = local.aws_profile
 
   eks_worker_groups = var.eks_worker_groups
+  eks_worker_groups_launch_template = var.eks_worker_groups_launch_template
 
   eks_map_users = [
     <%- infra.components.kubernetes.config.admins&.each do |user| -%>

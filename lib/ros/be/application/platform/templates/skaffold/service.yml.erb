@@ -105,4 +105,18 @@ profiles:
               requests:
                 cpu: 0.5
                 memory: 2Gi
+            affinity:
+              nodeAffinity:
+                preferredDuringSchedulingIgnoredDuringExecution:
+                - weight: 1
+                  preference:
+                    matchExpressions:
+                    - key: kubernetes.io/lifecycle
+                      operator: In
+                      values:
+                      - spot
+            tolerations:
+            - key: spotInstance
+              operator: Exists
+              effect: NoSchedule
 <%- end -%>

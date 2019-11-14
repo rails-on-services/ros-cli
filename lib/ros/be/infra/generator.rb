@@ -109,6 +109,7 @@ module Ros
             }
             if infra.cluster_type.eql?('kubernetes')
               vars["eks_worker_groups"] = infra.components.kubernetes.config.worker_groups
+              vars["eks_worker_groups_launch_template"] = infra.components.kubernetes.config.worker_groups_launch_template
               vars["fluentd_gcp_logging_service_account_json_key"] = \
                 infra.components.kubernetes.components&.services&.components&.cluster_logging&.config&.gcp_service_account_key || ""
 
