@@ -13,7 +13,8 @@ services:<% @service.profiles.each do |profile| %><% xname = profile.eql?('serve
     image: "${IMAGE_REPOSITORY}/<%= @service.name %>:${IMAGE_TAG}"<% if profile.eql?('server') %>
     command: ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "-P", "/tmp/server.pid"]<% elsif profile.eql?('worker') %>
     command: ["bundle", "exec", "sidekiq",<% if @service.is_ros_service %> "-r", "spec/dummy",<% end %> "-C", "config/sidekiq.yml"]<% elsif profile.eql?('sqs_worker') %>
-    command: ["bundle", "exec", "shoryuken", "-r", "./app/workers/aws", "-C", "config/shoryuken.yml"]<% end %>
+    command: ["bundle", "exec", "shoryuken", "-r", "./app/workers/aws", "-C", "config/shoryuken.yml"]<% elsif profile.eql?('scheduler') %>
+    command: ["bundle", "exec", "rails", "runner", "./lib/scheduler.rb"]<% end %>
     env_file:<% @service.env_files.each do |env_file| %>
       - <%= env_file %><% end %>
     depends_on:
