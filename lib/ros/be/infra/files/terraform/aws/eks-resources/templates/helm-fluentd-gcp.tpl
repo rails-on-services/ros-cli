@@ -15,3 +15,6 @@ resources:
   requests:
     cpu: 100m
     memory: 256Mi
+tolerations:
+- operator: Exists
+  effect: NoSchedule
