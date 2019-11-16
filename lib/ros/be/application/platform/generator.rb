@@ -57,6 +57,8 @@ module Ros
           def secrets_files; environment ? [:platform, name.to_sym] : %i(platform) end
           def skaffold_version; Settings.components.be.config.skaffold_version end
           def compose_version; Settings.components.be.config.compose_version || '3.2' end
+          def ros_env; Ros.env end
+          def ros_profile; Ros.profile end
         end
 
         class Generator < Thor::Group
