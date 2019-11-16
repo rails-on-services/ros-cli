@@ -36,6 +36,7 @@ profiles:
             replicaCount: <% if profile.eql?('scheduler') %>1<% else %>"{{.REPLICA_COUNT}}"<% end %>
             image.tag: "{{.IMAGE_TAG}}"
             image.repository: "{{.SKAFFOLD_DEFAULT_REPO}}/<%= @service.name %>"
+            app.env.SENTRY_RELEASE: "{{.IMAGE_TAG}}"
           overrides:
             podDisruptionBudget:
               minAvailable: 1
@@ -55,6 +56,8 @@ profiles:
             imagePullSecrets:
               - name: <%= @service.pull_secret %>
             app:
+              env:
+                SENTRY_ENVIRONMENT: <%= @service.ros_env %><%= @service.ros_profile.empty? ? '' : '-' + @service.ros_profile %><%= @service.current_feature_set == 'master' ? '' : '-' + @service.current_feature_set %>
               <%- if profile.eql?('server') -%>
               command: ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "-P", "/tmp/server.pid"]
               <%- elsif profile.eql?('worker') and @service.is_ros_service -%>
