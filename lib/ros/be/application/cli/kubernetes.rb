@@ -152,7 +152,7 @@ module Ros
         end
 
         def deploy_platform
-          update_platform_env
+          update_platform_env unless options.skip_infra
           @platform_services.each do |service|
             #next unless platform.components.keys.include?(service.to_sym)
             env_file = "#{platform_root}/#{service}.env"
