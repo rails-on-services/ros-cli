@@ -17,7 +17,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1573223353410,
+  "iteration": 1574064460154,
   "links": [],
   "panels": [
     {
@@ -67,6 +67,7 @@
       "targets": [
         {
           "expr": "sum(kube_node_status_allocatable{resource=\"cpu\"})",
+          "hide": true,
           "legendFormat": "Allocatable CPU Core",
           "refId": "A"
         },
@@ -178,6 +179,7 @@
       "targets": [
         {
           "expr": "sum(kube_node_status_allocatable{resource=\"memory\"})",
+          "hide": true,
           "legendFormat": "Allocatable RAM",
           "refId": "D"
         },
@@ -632,6 +634,7 @@
       {
         "allValue": null,
         "current": {
+          "tags": [],
           "text": "All",
           "value": [
             "$__all"
@@ -709,5 +712,5 @@
   "timezone": "",
   "title": "Container Resource Usage",
   "uid": "HfUgCa0Wk",
-  "version": 12
+  "version": 13
 }

@@ -15,8 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 8,
-  "iteration": 1572432273196,
+  "iteration": 1574065339357,
   "links": [],
   "panels": [
     {
@@ -52,8 +51,8 @@
       {
         "allValue": null,
         "current": {
-          "text": "data-whistler",
-          "value": "data-whistler"
+          "text": "new-voucher-whistler",
+          "value": "new-voucher-whistler"
         },
         "datasource": "VictoriaMetrics",
         "definition": "label_values(namespace)",
@@ -62,75 +61,9 @@
         "label": "Namespace",
         "multi": false,
         "name": "namespace",
-        "options": [
-          {
-            "selected": true,
-            "text": "data-whistler",
-            "value": "data-whistler"
-          },
-          {
-            "selected": false,
-            "text": "default",
-            "value": "default"
-          },
-          {
-            "selected": false,
-            "text": "dev1-whistler",
-            "value": "dev1-whistler"
-          },
-          {
-            "selected": false,
-            "text": "istio-system",
-            "value": "istio-system"
-          },
-          {
-            "selected": false,
-            "text": "kube-node-lease",
-            "value": "kube-node-lease"
-          },
-          {
-            "selected": false,
-            "text": "kube-public",
-            "value": "kube-public"
-          },
-          {
-            "selected": false,
-            "text": "kube-system",
-            "value": "kube-system"
-          },
-          {
-            "selected": false,
-            "text": "master-whistler",
-            "value": "master-whistler"
-          },
-          {
-            "selected": false,
-            "text": "monitor",
-            "value": "monitor"
-          },
-          {
-            "selected": false,
-            "text": "new-voucher-whistler",
-            "value": "new-voucher-whistler"
-          },
-          {
-            "selected": false,
-            "text": "pru1-whistler",
-            "value": "pru1-whistler"
-          },
-          {
-            "selected": false,
-            "text": "sales-whistler",
-            "value": "sales-whistler"
-          },
-          {
-            "selected": false,
-            "text": "uat-whistler",
-            "value": "uat-whistler"
-          }
-        ],
+        "options": [],
         "query": "label_values(namespace)",
-        "refresh": 0,
+        "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
@@ -143,7 +76,6 @@
       {
         "allValue": null,
         "current": {
-          "tags": [],
           "text": "campaign-worker",
           "value": "campaign-worker"
         },
@@ -154,155 +86,9 @@
         "label": "App",
         "multi": false,
         "name": "app",
-        "options": [
-          {
-            "selected": false,
-            "text": "campaign",
-            "value": "campaign"
-          },
-          {
-            "selected": true,
-            "text": "campaign-worker",
-            "value": "campaign-worker"
-          },
-          {
-            "selected": false,
-            "text": "cognito",
-            "value": "cognito"
-          },
-          {
-            "selected": false,
-            "text": "cognito-worker",
-            "value": "cognito-worker"
-          },
-          {
-            "selected": false,
-            "text": "comm",
-            "value": "comm"
-          },
-          {
-            "selected": false,
-            "text": "comm-worker",
-            "value": "comm-worker"
-          },
-          {
-            "selected": false,
-            "text": "game",
-            "value": "game"
-          },
-          {
-            "selected": false,
-            "text": "game-worker",
-            "value": "game-worker"
-          },
-          {
-            "selected": false,
-            "text": "iam",
-            "value": "iam"
-          },
-          {
-            "selected": false,
-            "text": "iam-worker",
-            "value": "iam-worker"
-          },
-          {
-            "selected": false,
-            "text": "instant-outcome",
-            "value": "instant-outcome"
-          },
-          {
-            "selected": false,
-            "text": "instant-outcome-worker",
-            "value": "instant-outcome-worker"
-          },
-          {
-            "selected": false,
-            "text": "kiali",
-            "value": "kiali"
-          },
-          {
-            "selected": false,
-            "text": "loki",
-            "value": "loki"
-          },
-          {
-            "selected": false,
-            "text": "loyalty",
-            "value": "loyalty"
-          },
-          {
-            "selected": false,
-            "text": "loyalty-worker",
-            "value": "loyalty-worker"
-          },
-          {
-            "selected": false,
-            "text": "organization",
-            "value": "organization"
-          },
-          {
-            "selected": false,
-            "text": "organization-worker",
-            "value": "organization-worker"
-          },
-          {
-            "selected": false,
-            "text": "outcome",
-            "value": "outcome"
-          },
-          {
-            "selected": false,
-            "text": "outcome-worker",
-            "value": "outcome-worker"
-          },
-          {
-            "selected": false,
-            "text": "prometheus",
-            "value": "prometheus"
-          },
-          {
-            "selected": false,
-            "text": "redis",
-            "value": "redis"
-          },
-          {
-            "selected": false,
-            "text": "reward",
-            "value": "reward"
-          },
-          {
-            "selected": false,
-            "text": "reward-worker",
-            "value": "reward-worker"
-          },
-          {
-            "selected": false,
-            "text": "storage",
-            "value": "storage"
-          },
-          {
-            "selected": false,
-            "text": "survey",
-            "value": "survey"
-          },
-          {
-            "selected": false,
-            "text": "survey-worker",
-            "value": "survey-worker"
-          },
-          {
-            "selected": false,
-            "text": "voucher-service",
-            "value": "voucher-service"
-          },
-          {
-            "selected": false,
-            "text": "voucher-service-worker",
-            "value": "voucher-service-worker"
-          }
-        ],
+        "options": [],
         "query": "label_values(app)",
-        "refresh": 0,
+        "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
@@ -315,7 +101,7 @@
     ]
   },
   "time": {
-    "from": "now-5m",
+    "from": "now-1h",
     "to": "now"
   },
   "timepicker": {
@@ -335,5 +121,5 @@
   "timezone": "",
   "title": "Application Logs",
   "uid": "oBLTuAAWk",
-  "version": 3
+  "version": 2
 }
