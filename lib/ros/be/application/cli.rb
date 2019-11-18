@@ -104,11 +104,10 @@ module Ros
           command.exit
         end
 
-        desc 'deploy API', 'deploy to UAT at an endpoint'
+        desc 'deploy API', 'deploy to UAT, staging or production at an endpoint'
         def deploy(tag_name)
-          # prefix = Settings.components.be.components.application.config.deploy_tag
           prefix = 'enable-api.'
-          api_tag_name = "#{prefix}#{tag_name}"
+          tag_name.match?(/staging|production/) ? api_tag_name = "#{tag_name}" : api_tag_name = "#{prefix}#{tag_name}"
           existing_local_tags = %x(git tag).split
           existing_remote_tags = %x(git ls-remote --tags).split("\n").map { |tag_string| tag_string.split("\t").last.gsub('refs/tags/', '') }
           versions = []
