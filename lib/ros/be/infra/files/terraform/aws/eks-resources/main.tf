@@ -395,7 +395,7 @@ resource "kubernetes_cluster_role" "developer" {
 }
 
 data "external" "alb_arn" {
-  depends_on = ["helm_release.istio-alb-ingressgateway"]
+  depends_on = [helm_release.istio-alb-ingressgateway]
   program    = ["python", "${path.module}/files/get_alb_arn.py"]
 
   query = {
