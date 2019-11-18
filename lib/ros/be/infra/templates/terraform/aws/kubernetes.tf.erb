@@ -2,7 +2,7 @@
 provider "aws" {
   region  = "<%= infra.components.kubernetes.config.region.nil? ? 'ap-southeast-1' : infra.components.kubernetes.config.region %>"
   profile = local.aws_profile
-  version = "~> 2.27"
+  version = ">= 2.31.0"
 }
 
 provider "local" {
@@ -140,6 +140,8 @@ data "aws_eks_cluster" "cluster" {
   name = local.cluster_name
 }
 
+# Below depends_on `module.eks-cluster` might cause circular dependancy under certain circumstances
+# May need to temporary disable dependancy if issue faced
 data "aws_eks_cluster_auth" "cluster-auth" {
   depends_on = [module.eks-cluster]
   name       = local.cluster_name
