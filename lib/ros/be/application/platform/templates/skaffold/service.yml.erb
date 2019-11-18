@@ -38,8 +38,10 @@ profiles:
             image.repository: "{{.SKAFFOLD_DEFAULT_REPO}}/<%= @service.name %>"
             app.env.SENTRY_RELEASE: "{{.IMAGE_TAG}}"
           overrides:
+            <%- unless profile.eql?('scheduler') %>
             podDisruptionBudget:
               minAvailable: 1
+            <%- end %>
             labels:
               # app.kubernetes.io/name: <%= @service.name %>
               app.kubernetes.io/component: <%= profile %>
