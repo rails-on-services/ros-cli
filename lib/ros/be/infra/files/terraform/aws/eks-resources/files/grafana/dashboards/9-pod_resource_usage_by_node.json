@@ -15,7 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1573451648961,
+  "iteration": 1573705189268,
   "links": [],
   "panels": [
     {
@@ -363,20 +363,18 @@
       {
         "allValue": null,
         "current": {
-          "selected": false,
-          "tags": [],
           "text": "All",
           "value": "$__all"
         },
         "datasource": "VictoriaMetrics",
-        "definition": "label_values(eagle_node_resource_allocatable_cpu_cores{}, node)",
+        "definition": "label_values(kube_pod_container_resource_requests, node)",
         "hide": 0,
         "includeAll": true,
         "label": "Node",
         "multi": false,
         "name": "node",
         "options": [],
-        "query": "label_values(eagle_node_resource_allocatable_cpu_cores{}, node)",
+        "query": "label_values(kube_pod_container_resource_requests, node)",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
@@ -410,5 +408,5 @@
   "timezone": "",
   "title": "Container Resources by Node",
   "uid": "oE0nGTJZk",
-  "version": 4
+  "version": 5
 }

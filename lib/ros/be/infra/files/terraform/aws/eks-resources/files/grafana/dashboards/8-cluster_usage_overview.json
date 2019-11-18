@@ -16,7 +16,7 @@
   "editable": true,
   "gnetId": 9871,
   "graphTooltip": 0,
-  "iteration": 1573451295219,
+  "iteration": 1573788184944,
   "links": [],
   "panels": [
     {
@@ -198,7 +198,7 @@
         "showThresholdLabels": false,
         "showThresholdMarkers": true
       },
-      "pluginVersion": "6.4.3",
+      "pluginVersion": "6.4.4",
       "targets": [
         {
           "expr": "sum(rate(container_cpu_usage_seconds_total{instance=~\"$node\", id=\"/\"})) / sum(kube_node_status_allocatable{node=~\"$node\", resource=\"cpu\"})",
@@ -265,7 +265,7 @@
         "showThresholdLabels": false,
         "showThresholdMarkers": true
       },
-      "pluginVersion": "6.4.3",
+      "pluginVersion": "6.4.4",
       "targets": [
         {
           "expr": "sum(container_memory_working_set_bytes{instance=~\"$node\",id=\"/\"})/sum(kube_node_status_allocatable{node=~\"$node\",resource=\"memory\"})",
@@ -565,6 +565,54 @@
           ],
           "type": "number",
           "unit": "percentunit"
+        },
+        {
+          "alias": "Spot/On Demand",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "label_kubernetes_io_lifecycle",
+          "thresholds": [],
+          "type": "string",
+          "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "Value #H",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
+        },
+        {
+          "alias": "Instance Type",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "label_beta_kubernetes_io_instance_type",
+          "thresholds": [],
+          "type": "string",
+          "unit": "short"
         }
       ],
       "targets": [
@@ -614,6 +662,14 @@
           "instant": true,
           "intervalFactor": 1,
           "refId": "F"
+        },
+        {
+          "expr": "label_keep(kube_node_labels{node=~\"$node\"}, \"node\", \"label_kubernetes_io_lifecycle\", \"label_beta_kubernetes_io_instance_type\")",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "{{label_kubernetes_io_lifecycle}}",
+          "refId": "H"
         }
       ],
       "title": "Node CPU",
@@ -789,6 +845,22 @@
           "unit": "percentunit"
         },
         {
+          "alias": "Spot/On Demand",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "label_kubernetes_io_lifecycle",
+          "thresholds": [],
+          "type": "string",
+          "unit": "short"
+        },
+        {
           "alias": "",
           "colorMode": null,
           "colors": [
@@ -796,10 +868,28 @@
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
           ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 2,
-          "pattern": "/.*/",
+          "mappingType": 1,
+          "pattern": "Value #G",
           "thresholds": [],
-          "type": "number",
+          "type": "hidden",
+          "unit": "short"
+        },
+        {
+          "alias": "Instance Type",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "label_beta_kubernetes_io_instance_type",
+          "thresholds": [],
+          "type": "string",
           "unit": "short"
         }
       ],
@@ -849,6 +939,13 @@
           "instant": true,
           "intervalFactor": 1,
           "refId": "F"
+        },
+        {
+          "expr": "label_keep(kube_node_labels{node=~\"$node\"}, \"node\", \"label_kubernetes_io_lifecycle\", \"label_beta_kubernetes_io_instance_type\")",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "{{label_kubernetes_io_lifecycle}}",
+          "refId": "G"
         }
       ],
       "title": "Node RAM",
@@ -874,14 +971,14 @@
           "value": "$__all"
         },
         "datasource": "VictoriaMetrics",
-        "definition": "label_values(eagle_node_resource_allocatable_cpu_cores{}, node)",
+        "definition": "label_values(kube_pod_container_resource_requests, node)",
         "hide": 0,
         "includeAll": true,
         "label": "Node",
         "multi": false,
         "name": "node",
         "options": [],
-        "query": "label_values(eagle_node_resource_allocatable_cpu_cores{}, node)",
+        "query": "label_values(kube_pod_container_resource_requests, node)",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
@@ -895,7 +992,7 @@
     ]
   },
   "time": {
-    "from": "now-3h",
+    "from": "now-5m",
     "to": "now"
   },
   "timepicker": {
@@ -925,5 +1022,5 @@
   "timezone": "",
   "title": "Cluster Overview",
   "uid": "_eioEq-ik",
-  "version": 34373
+  "version": 34681
 }
