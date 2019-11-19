@@ -12,7 +12,9 @@ module Ros
 
       def registry_secret_name; "registry-#{Settings.config.platform.config.image_registry}" end
 
-      def deploy_path; "tmp/deployments/#{Ros.env}" end
+      def deploy_path
+        Ros.profile.empty? ? "tmp/deployments/#{Ros.env}" : "tmp/deployments/#{Ros.env}/#{Ros.profile}"
+      end
 
       def image_tag
         "#{version}-#{image_prefix}#{sha}"

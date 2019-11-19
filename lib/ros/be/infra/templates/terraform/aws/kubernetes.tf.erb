@@ -2,7 +2,7 @@
 provider "aws" {
   region  = "<%= infra.components.kubernetes.config.region.nil? ? 'ap-southeast-1' : infra.components.kubernetes.config.region %>"
   profile = local.aws_profile
-  version = ">= 2.31.0"
+  version = ">= 2.38.0"
 }
 
 provider "local" {
@@ -19,6 +19,12 @@ provider "random" {
 
 provider "template" {
   version = "~> 2.1"
+}
+
+# This is for managing Kubernetes CRDs that currently aren't supported by terraform
+# https://github.com/terraform-providers/terraform-provider-kubernetes/issues/215
+provider "k8sraw" {
+  create_retry_count = 15
 }
 
 variable "tags" {
@@ -137,6 +143,7 @@ output "eks" {
 }
 
 data "aws_eks_cluster" "cluster" {
+  depends_on = [module.eks-cluster]
   name = local.cluster_name
 }
 
@@ -210,10 +217,10 @@ module "eks-resources" {
   istio_version              = "<%= infra.components.kubernetes.components.services.components.istio&.config&.version.nil? ? '1.2.5' : infra.components.kubernetes.components.services.components.istio.config.version %>"
   extra_namespaces           = [
     <%- infra.components.kubernetes.components.infra.config.extra_namespaces&.each do |v| -%>
-    "<%= v %>" ,
+    "<%= v %>",
     <%- end -%>
-    "<%= infra.components.kubernetes.components.services.components.grafana.config.namespace %>"
    ]
+
   istio_ingressgateway_alb_cert_arn = module.acm.this.arn
   kubeconfig                        = module.eks-cluster.this.kubeconfig
   vpc_id                            = module.vpc.this.vpc_id
@@ -226,6 +233,8 @@ module "eks-resources" {
   grafana_user                                 = "<%= infra.components.kubernetes.components.services.components.grafana&.config&.username.nil? ? "" : infra.components.kubernetes.components.services.components.grafana.config.username %>"
   grafana_password                             = "<%= infra.components.kubernetes.components.services.components.grafana&.config&.password.nil? ? "" : infra.components.kubernetes.components.services.components.grafana.config.password %>"
   helm_configuration_overrides                 = var.helm_configuration_overrides
+  cert_manager_namespace                       = "<%= infra.components.kubernetes.components.services.components.cert_manager&.config&.namespace %>"
+
 }
 
 output "istio_ingressgateway_alb_arn" {
