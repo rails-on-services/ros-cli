@@ -63,4 +63,18 @@ deploy:
             requests:
               cpu: 50m
               memory: 100Mi
+          tolerations:
+            - key: spotInstance
+              operator: Exists
+              effect: NoSchedule
+          affinity:
+              nodeAffinity:
+                preferredDuringSchedulingIgnoredDuringExecution:
+                - weight: 1
+                  preference:
+                    matchExpressions:
+                    - key: kubernetes.io/lifecycle
+                      operator: In
+                      values:
+                      - spot
       <%- end -%>
