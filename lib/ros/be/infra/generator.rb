@@ -48,6 +48,9 @@ module Ros
           end
 
           create_file("#{infra.deploy_path}/terraform.tfvars.json", "#{JSON.pretty_generate(tf_vars)}")
+
+          # Copy over 3rd party terraform plugins
+          directory('../files/terraform/plugins', "#{infra.deploy_path}", :mode => :preserve)
         end
 
         def execute
@@ -108,8 +111,8 @@ module Ros
               tags: infra.config.cluster.tags,
             }
             if infra.cluster_type.eql?('kubernetes')
-              vars["eks_worker_groups"] = infra.components.kubernetes.config.worker_groups
-              vars["eks_worker_groups_launch_template"] = infra.components.kubernetes.config.worker_groups_launch_template
+              vars["eks_worker_groups"] = infra.components.kubernetes.config.worker_groups || []
+              vars["eks_worker_groups_launch_template"] = infra.components.kubernetes.config.worker_groups_launch_template || []
               vars["fluentd_gcp_logging_service_account_json_key"] = \
                 infra.components.kubernetes.components&.services&.components&.cluster_logging&.config&.gcp_service_account_key || ""
 

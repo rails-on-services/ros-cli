@@ -23,10 +23,10 @@ data "helm_repository" "loki" {
   url  = "https://grafana.github.io/loki/charts"
 }
 
-# data "helm_repository" "kube-eagle" {
-#   name = "kube-eagle"
-#   url  = "https://raw.githubusercontent.com/cloudworkz/kube-eagle-helm-chart/master"
-# }
+data "helm_repository" "jetstack" {
+  name = "jetstack"
+  url  = "https://charts.jetstack.io"
+}
 
 resource "kubernetes_namespace" "extra_namespaces" {
   count = length(var.extra_namespaces)
@@ -34,6 +34,59 @@ resource "kubernetes_namespace" "extra_namespaces" {
   metadata {
     name = var.extra_namespaces[count.index]
   }
+}
+
+/*
+data "http" "cert-manager-crd" {
+  url = "https://raw.githubusercontent.com/jetstack/cert-manager/release-0.11/deploy/manifests/00-crds.yaml"
+}
+
+resource "k8sraw_yaml" "cert-manager-crd" {
+  yaml_body = data.http.cert-manager-crd.body
+}
+*/
+
+# List of CRDs required for cert-manager
+resource "k8sraw_yaml" "certificaterequests" {
+  yaml_body = file("${path.module}/files/cert-manager/certificaterequests.yaml")
+}
+
+resource "k8sraw_yaml" "certificates" {
+  yaml_body = file("${path.module}/files/cert-manager/certificates.yaml")
+}
+
+resource "k8sraw_yaml" "challenges" {
+  yaml_body = file("${path.module}/files/cert-manager/challenges.yaml")
+}
+
+resource "k8sraw_yaml" "clusterissuers" {
+  yaml_body = file("${path.module}/files/cert-manager/clusterissuers.yaml")
+}
+
+resource "k8sraw_yaml" "issuers" {
+  yaml_body = file("${path.module}/files/cert-manager/issuers.yaml")
+}
+
+resource "k8sraw_yaml" "orders" {
+  yaml_body = file("${path.module}/files/cert-manager/orders.yaml")
+}
+
+resource "helm_release" "cert-manager" {
+  depends_on = [
+    kubernetes_namespace.extra_namespaces,
+    k8sraw_yaml.certificaterequests,
+    k8sraw_yaml.certificates,
+    k8sraw_yaml.challenges,
+    k8sraw_yaml.clusterissuers,
+    k8sraw_yaml.issuers,
+    k8sraw_yaml.orders
+  ]
+  name       = "cert-manager"
+  repository = data.helm_repository.jetstack.metadata.0.name
+  chart      = "cert-manager"
+  version    = "v0.11.0"
+  namespace  = var.cert_manager_namespace
+  wait       = true
 }
 
 resource "helm_release" "cluster-autoscaler" {
@@ -67,15 +120,6 @@ resource "helm_release" "kube-state-metrics" {
 
   values = [file("${path.module}/files/kube-state-metrics.yaml")]
 }
-
-# resource "helm_release" "kube-eagle" {
-#   depends_on = [kubernetes_namespace.extra_namespaces]
-#   name       = "kube-eagle"
-#   repository = data.helm_repository.kube-eagle.metadata.0.name
-#   chart      = "kube-eagle"
-#   namespace  = var.grafana_namespace
-#   wait       = true
-# }
 
 resource "kubernetes_secret" "fluentd-gcp-google-service-account" {
   count = var.enable_fluentd_gcp_logging && var.fluentd_gcp_logging_service_account_json_key != "" ? 1 : 0

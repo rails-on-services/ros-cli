@@ -105,6 +105,11 @@ variable "grafana_namespace" {
   description = "Namespace to install Grafana and related resources"
 }
 
+variable "cert_manager_namespace" {
+  type        = string
+  description = "Namespace to install Cert-Manager and related resources"
+}
+
 variable "helm_configuration_overrides" {
   description = "JSON string of Helm configurationOverrides key: values"
 }
