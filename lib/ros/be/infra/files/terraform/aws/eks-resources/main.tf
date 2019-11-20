@@ -36,15 +36,15 @@ resource "kubernetes_namespace" "extra_namespaces" {
   }
 }
 
-/*
-data "http" "cert-manager-crd" {
-  url = "https://raw.githubusercontent.com/jetstack/cert-manager/release-0.11/deploy/manifests/00-crds.yaml"
-}
 
-resource "k8sraw_yaml" "cert-manager-crd" {
-  yaml_body = data.http.cert-manager-crd.body
-}
-*/
+# k8sraw_yaml doesn't support multiple yaml documents in one file, so can't use remote http resource directly
+# data "http" "cert-manager-crd" {
+#   url = "https://raw.githubusercontent.com/jetstack/cert-manager/release-0.11/deploy/manifests/00-crds.yaml"
+# }
+
+# resource "k8sraw_yaml" "cert-manager-crd" {
+#   yaml_body = data.http.cert-manager-crd.body
+# }
 
 # List of CRDs required for cert-manager
 resource "k8sraw_yaml" "certificaterequests" {
