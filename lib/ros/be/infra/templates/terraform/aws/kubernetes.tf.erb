@@ -138,17 +138,17 @@ module "eks-cluster" {
   tags               = var.tags
 }
 
-output "eks" {
-  value = module.eks-cluster.this
-}
+#output "eks" {
+#  value = module.eks-cluster.this
+#}
 
+# Below two depends_on `module.eks-cluster`. Both may cause circular dependancy under certain circumstances
+# May need to temporary disable dependancy if issue faced
 data "aws_eks_cluster" "cluster" {
   depends_on = [module.eks-cluster]
   name = local.cluster_name
 }
 
-# Below depends_on `module.eks-cluster` might cause circular dependancy under certain circumstances
-# May need to temporary disable dependancy if issue faced
 data "aws_eks_cluster_auth" "cluster-auth" {
   depends_on = [module.eks-cluster]
   name       = local.cluster_name
