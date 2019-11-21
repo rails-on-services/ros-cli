@@ -48,26 +48,32 @@ resource "kubernetes_namespace" "extra_namespaces" {
 
 # List of CRDs required for cert-manager
 resource "k8sraw_yaml" "certificaterequests" {
+  depends_on = [helm_release.istio]
   yaml_body = file("${path.module}/files/cert-manager/certificaterequests.yaml")
 }
 
 resource "k8sraw_yaml" "certificates" {
+  depends_on = [helm_release.istio]
   yaml_body = file("${path.module}/files/cert-manager/certificates.yaml")
 }
 
 resource "k8sraw_yaml" "challenges" {
+  depends_on = [helm_release.istio]
   yaml_body = file("${path.module}/files/cert-manager/challenges.yaml")
 }
 
 resource "k8sraw_yaml" "clusterissuers" {
+  depends_on = [helm_release.istio]
   yaml_body = file("${path.module}/files/cert-manager/clusterissuers.yaml")
 }
 
 resource "k8sraw_yaml" "issuers" {
+  depends_on = [helm_release.istio]
   yaml_body = file("${path.module}/files/cert-manager/issuers.yaml")
 }
 
 resource "k8sraw_yaml" "orders" {
+  depends_on = [helm_release.istio]
   yaml_body = file("${path.module}/files/cert-manager/orders.yaml")
 }
 
