@@ -1,7 +1,7 @@
 module "db" {
   source  = "terraform-aws-modules/rds-aurora/aws"
   name    = var.name
-  version = "~> 2.3.0"
+  version = "~> 2.9.0"
 
   engine                          = var.engine
   engine_version                  = var.engine_version
@@ -19,7 +19,6 @@ module "db" {
   db_cluster_parameter_group_name = var.db_cluster_parameter_group_name
   db_parameter_group_name         = var.db_parameter_group_name
   allowed_security_groups         = var.allowed_security_groups
-  allowed_security_groups_count   = var.allowed_security_groups_count
 
   tags = var.tags
 }
