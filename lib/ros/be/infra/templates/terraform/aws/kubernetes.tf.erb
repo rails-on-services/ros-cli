@@ -171,7 +171,7 @@ output "eks" {
 }
 
 # Below two depends_on `module.eks-cluster`. Both may cause circular dependancy under certain circumstances
-# May need to temporary disable dependancy if issue faced
+# Temporary comment both `depends_on` if weird cycle error raised during `apply`
 data "aws_eks_cluster" "cluster" {
   depends_on = [module.eks-cluster]
   name = local.cluster_name
@@ -314,8 +314,11 @@ module "rds-<%= key %>" {
   tags          = var.tags
   subnets       = module.vpc.this.database_subnets
 
-  allowed_security_groups       = [module.vpc.this.default_security_group_id]
-  allowed_security_groups_count = 1
+  allowed_security_groups = [module.vpc.this.default_security_group_id]
+}
+
+output "rds-<%= key %>" {
+  value = module.rds-<%= key %>.this
 }
 <% end -%>
 <% end -%>
@@ -338,6 +341,10 @@ module "elasticache-redis-<%= key %>" {
   elasticache_subnet_group_name = module.vpc.this.elasticache_subnet_group_name
   allowed_security_groups       = [module.vpc.this.default_security_group_id]
   allowed_security_groups_count = 1
+}
+
+output "elasticache-redis-<%= key %>" {
+  value=module.elasticache-redis-<%= key %>.this
 }
 <% end -%>
 <% end -%>

@@ -66,8 +66,3 @@ variable "allowed_security_groups" {
   type    = list(string)
   default = []
 }
-
-variable "allowed_security_groups_count" {
-  type    = number
-  default = 0
-}
