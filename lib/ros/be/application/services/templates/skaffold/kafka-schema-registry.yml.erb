@@ -9,7 +9,7 @@ deploy:
         skipBuildDependencies: true
         overrides:
           imageTag: 5.3.1
-          replicaCount: 1
+          replicaCount: 2
           fullnameOverride: kafka-schema-registry
           overrideGroupId: kafka-schema-registry-<%= @service.current_feature_set %>
           customEnv:
@@ -39,8 +39,17 @@ deploy:
               cpu: 1
               memory: 1.5Gi
             requests:
-              cpu: 200m
+              cpu: 100m
               memory: 1Gi
+          affinity:
+            podAntiAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+              - labelSelector:
+                  matchExpressions:
+                  - key: app.kubernetes.io/name
+                    operator: In
+                    values:
+                    - kafka-schema-registry
       <%- if @service.kafka_schema_registry&.ui -%>
       - name: kafka-schema-registry-ui
         chartPath: ros/basic
@@ -63,4 +72,18 @@ deploy:
             requests:
               cpu: 50m
               memory: 100Mi
+          tolerations:
+          - key: spotInstance
+            operator: Exists
+            effect: NoSchedule
+          affinity:
+            nodeAffinity:
+              preferredDuringSchedulingIgnoredDuringExecution:
+              - weight: 1
+                preference:
+                  matchExpressions:
+                  - key: kubernetes.io/lifecycle
+                    operator: In
+                    values:
+                    - spot
       <%- end -%>
