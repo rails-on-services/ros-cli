@@ -101,7 +101,7 @@ data "aws_availability_zones" "available" {
 
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "~> 2.9.0"
+  version = "~> 2.18.0"
 
   name                   = local.vpc_name
   cidr                   = local.vpc_cidr
@@ -142,7 +142,7 @@ output "vpc" {
 
 # IAM
 module "iam" {
-  source = "./aws/eks-iam"
+  source = "rails-on-services/eks-iam/aws"
   name   = local.iam_name
 }
 
@@ -152,7 +152,7 @@ output "iam" {
 
 # EKS cluster
 module "eks-cluster" {
-  source                    = "./aws/eks-cluster"
+  source                    = "rails-on-services/eks-cluster/aws"
   cluster_name              = local.cluster_name
   vpc_id                    = module.vpc.vpc_id
   public_subnets            = module.vpc.public_subnets
@@ -196,7 +196,7 @@ data "aws_eks_cluster_auth" "cluster-auth" {
 
 # Route 53
 module "route53" {
-  source                         = "./aws/route53"
+  source                         = "rails-on-services/route53/aws"
   root_domain                    = "<%= infra.dns.root_domain %>"
   sub_domain                     = "<%= infra.dns.sub_domain %>"
   root_domain_managed_in_route53 = <%= infra.dns.root_domain_managed_in_route53 ? true : false %>
@@ -208,7 +208,7 @@ output "route53" {
 
 # Certificate Manager
 module "acm" {
-  source                    = "./aws/acm"
+  source                    = "rails-on-services/acm/aws"
   domain_name               = local.domain_name
   route53_domain_name       = substr(module.route53.this.name, 0, length(module.route53.this.name)-1)
   route53_dns_record_count  = 1
@@ -265,7 +265,7 @@ output "istio_ingressgateway_alb_arn" {
 <%- if infra.components.globalaccelerator&.config&.enabled -%>
 # Global accelerator
 module "globalaccelerator" {
-  source                      = "./aws/globalaccelerator"
+  source                      = "rails-on-services/globalaccelerator/aws"
   name                        = local.accelerator_name
   route53_zone_id             = module.route53.this.zone_id
   add_route53_record          = <%= infra.components.globalaccelerator&.config&.hostname.nil? ? false : true %>
@@ -282,7 +282,7 @@ output "globalaccelerator_ips" {
 <%- if infra.components.cdn&.components&.cdn&.enabled -%>
 # Cloudfront S3
 module "cloudfront-s3" {
-  source                 = "./aws/cloudfront-s3"
+  source                 = "rails-on-services/cloudfront-s3/aws"
   aws_profile            = local.aws_profile
   s3_bucket_name         = "${replace(replace("<%= infra.components.cdn.components.cdn.url %>", "https://", ""), ".", "-")}"
   cloudfront_cname       = "${replace("<%= infra.components.cdn.components.cdn.url %>", "https://", "")}"
@@ -296,7 +296,7 @@ module "cloudfront-s3" {
 <%- unless infra.components.object_storage&.components.nil? -%>
 # S3
 module "s3" {
-  source          = "./aws/s3"
+  source          = "rails-on-services/s3/aws"
   s3_bucket_names = [
     <%- infra.components.object_storage.components.each do |bucket, config| -%>
     <%- unless bucket.to_s == "cdn" -%>
@@ -316,21 +316,32 @@ output "s3" {
 <%- infra.components.databases.config.clusters&.each do |key, config| -%>
 # RDS Aurora
 module "rds-<%= key %>" {
-  source        = "./aws/rds"
-  name          = "<%= config.name %>"
-  instance_type = "<%= config.instance_type %>"
-  replica_count = "<%= config.replica_count %>"
-  username      = "<%= config.username %>"
-  password      = "<%= config.password %>"
-  vpc_id        = module.vpc.vpc_id
-  tags          = var.tags
-  subnets       = module.vpc.database_subnets
+  source  = "terraform-aws-modules/rds-aurora/aws"
+  name    = "<%= config.name %>"
+  version = "~> 2.9.0"
 
-  allowed_security_groups = [module.vpc.default_security_group_id]
+  engine                          = "aurora-postgresql"
+  engine_version                  = "10.7"
+  instance_type                   = "db.r5.large"
+  performance_insights_enabled    = true
+  vpc_id                          = module.vpc.vpc_id
+  subnets                         = module.vpc.database_subnets
+  db_subnet_group_name            = ""
+  username                        = "postgres"
+  password                        = ""
+  replica_count                   = 1
+  storage_encrypted               = "true"
+  apply_immediately               = "true"
+  monitoring_interval             = 10
+  db_cluster_parameter_group_name = "default.aurora-postgresql10"
+  db_parameter_group_name         = "default.aurora-postgresql10"
+  allowed_security_groups         = [module.vpc.default_security_group_id]
+
+  tags = var.tags
 }
 
 output "rds-<%= key %>" {
-  value = module.rds-<%= key %>.this
+  value = module.rds-<%= key %>
 }
 <% end -%>
 <% end -%>
@@ -339,7 +350,7 @@ output "rds-<%= key %>" {
 <%- infra.components.redis.config.clusters&.each do |key, config| -%>
 # Elasticache Redis
 module "elasticache-redis-<%= key %>" {
-  source        = "./aws/elasticache-redis"
+  source        = "rails-on-services/elasticache-redis/aws"
   name          = "<%= config.name %>"
   vpc_id        = module.vpc.vpc_id
   tags          = var.tags
