@@ -40,7 +40,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'thor'
   spec.add_dependency 'pry'
   spec.add_dependency 'rails', '6.0.0.rc2'
-  spec.add_dependency 'rake', '~> 12.0'
+  spec.add_dependency 'rake', '~> 13.0'
   spec.add_dependency 'bump'
   spec.add_dependency 'config', '1.7.1'
   spec.add_dependency 'bundler' #, '~> 2.0'
