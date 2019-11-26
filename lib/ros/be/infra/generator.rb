@@ -33,13 +33,14 @@ module Ros
             next if %i(kubernetes instance).include?(component) and infra.cluster_type != component.to_s
             provider = config.config.provider
             providers.add(provider)
-            module_names = send(provider, component)
-            module_names.each do |module_name|
-              module_path = "../files/terraform/#{provider}/#{module_name}"
+            # Since we got Terraform modules in external registry we don't have local copy
+            # module_names = send(provider, component)
+            # module_names.each do |module_name|
+              # module_path = "../files/terraform/#{provider}/#{module_name}"
               # NOTE: Uncomment next line to pause execution and inspect variable values, test code, etc
               # binding.pry
-              directory(module_path, "#{infra.deploy_path}/#{provider}/#{module_name}")
-            end
+              # directory(module_path, "#{infra.deploy_path}/#{provider}/#{module_name}")
+            # end
           end
           # Render each provider's main.tf
           providers.each do |provider|

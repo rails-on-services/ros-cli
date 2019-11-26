@@ -1,1 +1,0 @@
-Istio Gateway for Grafana.
