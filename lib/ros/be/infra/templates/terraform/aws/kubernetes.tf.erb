@@ -226,16 +226,16 @@ output "acm" {
 }
 
 # EKS Resources
-# TODO: Split all this mess into separate modules
 module "eks-resources" {
-  source                     = "./aws/eks-resources"
+  source                     = "rails-on-services/eks-resources/k8s"
+  version                    = ">= 0.0.3"
   aws_profile                = local.aws_profile
   cluster_name               = local.cluster_name
   clusterrolebindings        = module.iam.kubernetes_clusterrolebindings
   enable_external_dns        = <%= infra.components.kubernetes.components.services.components.external_dns&.config&.enabled.nil? ? false : infra.components.kubernetes.components.services.components.external_dns.config.enabled %>
   external_dns_domainFilters = [module.acm.this.domain_name]
   external_dns_zoneIdFilters = [module.route53.this.zone_id]
-  istio_version              = "<%= infra.components.kubernetes.components.services.components.istio&.config&.version.nil? ? '1.2.5' : infra.components.kubernetes.components.services.components.istio.config.version %>"
+  istio_version              = "<%= infra.components.kubernetes.components.services.components.istio&.config&.version.nil? ? '1.3.5' : infra.components.kubernetes.components.services.components.istio.config.version %>"
   extra_namespaces           = [
     <%- infra.components.kubernetes.components.infra.config.extra_namespaces&.each do |v| -%>
     "<%= v %>",
@@ -248,18 +248,32 @@ module "eks-resources" {
 
   enable_fluentd_gcp_logging                   = <%= infra.components.kubernetes.components.services.components.cluster_logging.config.provider == 'gcp' ? true : false %>
   fluentd_gcp_logging_service_account_json_key = var.fluentd_gcp_logging_service_account_json_key
-  grafana_namespace                            = "<%= infra.components.kubernetes.components.services.components.grafana.config.namespace %>"
-  grafana_host                                 = "<%= infra.components.dns.config.endpoints&.grafana.nil? ? "grafana" : infra.components.dns.config.endpoints.grafana %>"
-  grafana_endpoint                             = "<%= infra.components.dns.config.endpoints&.grafana.nil? ? "grafana" : infra.components.dns.config.endpoints.grafana %>.${local.domain_name}"
-  grafana_user                                 = "<%= infra.components.kubernetes.components.services.components.grafana&.config&.username.nil? ? "" : infra.components.kubernetes.components.services.components.grafana.config.username %>"
-  grafana_password                             = "<%= infra.components.kubernetes.components.services.components.grafana&.config&.password.nil? ? "" : infra.components.kubernetes.components.services.components.grafana.config.password %>"
   helm_configuration_overrides                 = var.helm_configuration_overrides
-  cert_manager_namespace                       = "<%= infra.components.kubernetes.components.services.components.cert_manager&.config&.namespace %>"
-
 }
 
 output "istio_ingressgateway_alb_arn" {
   value = module.eks-resources.istio_ingressgateway_alb_arn
+}
+
+# Cluster monitoring
+module "monitor" {
+  source                       = "rails-on-services/monitor/k8s"
+  version                      = ">= 0.0.4"
+  namespace                    = "<%= infra.components.kubernetes.components.services.components.grafana.config.namespace %>"
+  grafana_host                 = "<%= infra.components.dns.config.endpoints&.grafana.nil? ? "grafana" : infra.components.dns.config.endpoints.grafana %>"
+  grafana_endpoint             = "<%= infra.components.dns.config.endpoints&.grafana.nil? ? "grafana" : infra.components.dns.config.endpoints.grafana %>.${local.domain_name}"
+  grafana_user                 = "<%= infra.components.kubernetes.components.services.components.grafana&.config&.username.nil? ? "" : infra.components.kubernetes.components.services.components.grafana.config.username %>"
+  grafana_password             = "<%= infra.components.kubernetes.components.services.components.grafana&.config&.password.nil? ? "" : infra.components.kubernetes.components.services.components.grafana.config.password %>"
+  helm_configuration_overrides = var.helm_configuration_overrides
+  monitor_depends_on           = module.eks-resources
+}
+
+# Cert-manager
+module "cert-manager" {
+  source        = "rails-on-services/cert-manager/k8s"
+  version       = ">= 0.0.2"
+  namespace     = "<%= infra.components.kubernetes.components.services.components.cert_manager&.config&.namespace %>"
+  cm_depends_on = module.eks-resources
 }
 
 <%- if infra.components.globalaccelerator&.config&.enabled -%>
@@ -299,9 +313,9 @@ module "s3" {
   source          = "rails-on-services/s3/aws"
   s3_bucket_names = [
     <%- infra.components.object_storage.components.each do |bucket, config| -%>
-    <%- unless bucket.to_s == "cdn" -%>
-    "<%= bucket %>-${replace(local.domain_name, ".", "-")}",
-    <%- end -%>
+      <%- unless bucket.to_s == "cdn" -%>
+      "<%= bucket %>-${replace(local.domain_name, ".", "-")}",
+      <%- end -%>
     <%- end -%>
   ]
   tags            = var.tags
@@ -328,7 +342,7 @@ module "rds-<%= key %>" {
   subnets                         = module.vpc.database_subnets
   db_subnet_group_name            = ""
   username                        = "postgres"
-  password                        = ""
+  password                        = "<%= infra.components.databases.config.clusters[key].password %>"
   replica_count                   = 1
   storage_encrypted               = "true"
   apply_immediately               = "true"
@@ -336,8 +350,7 @@ module "rds-<%= key %>" {
   db_cluster_parameter_group_name = "default.aurora-postgresql10"
   db_parameter_group_name         = "default.aurora-postgresql10"
   allowed_security_groups         = [module.vpc.default_security_group_id]
-
-  tags = var.tags
+  tags                            = var.tags
 }
 
 output "rds-<%= key %>" {
