@@ -26,12 +26,8 @@ profiles:
         - name: <%= @service.name.to_s.gsub('_', '-') %><%= xname.gsub('_', '-') %>
           chartPath: ros/service
           remote: true
-          # values:
-            # image: <%= @service.name %>
-          # imageStrategy:
-          #   helm: {}
           wait: true
-          recreatePods: true
+          recreatePods: false
           setValueTemplates:
             replicaCount: <% if profile.eql?('scheduler') %>1<% else %>"{{.REPLICA_COUNT}}"<% end %>
             image.tag: "{{.IMAGE_TAG}}"
