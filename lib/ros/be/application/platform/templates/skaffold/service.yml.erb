@@ -6,10 +6,14 @@ build:
   - image: <%= @service.name %>
     context: <%= @service.context_path %>
     docker:
-      dockerfile: <%= @service.dockerfile_path %><% if @service.image.build_args %>
-      buildArgs:<% @service.image.build_args.each_pair do |name, value| %>
-        <%= name %>: <%= value.is_a?(Array) ? value.join(' ') : value %><% end; end %>
+      dockerfile: <%= @service.dockerfile_path %>
+      <%- if @service.image.build_args -%>
+      buildArgs:
+        <%- @service.image.build_args.each_pair do |name, value| -%>
+        <%= name %>: <%= value.is_a?(Array) ? value.join(' ') : value %>
+        <%- end -%>
         project: <%= @service.name %>
+      <%- end -%>
   tagPolicy:
     envTemplate:
       template: "{{.IMAGE_NAME}}:{{.IMAGE_TAG}}"
@@ -20,6 +24,9 @@ profiles:
   <%- @service.profiles.each do |profile| -%>
   <%- xname = profile.eql?('server') ? '' : "_#{profile}" -%>
   - name: <%= profile %>
+    patches:
+    - op: remove
+      path: /build
     deploy:
       helm:
         releases:

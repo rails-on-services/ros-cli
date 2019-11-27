@@ -159,23 +159,21 @@ module Ros
             sync_secret(env_file) if File.exist?(env_file)
             service_file = "#{platform_root}/#{service}.yml"
             Dir.chdir(platform_root) do
-              # skaffold cmds: build, deploy or run (build and deploy)
-              base_cmd = options.build ? 'run' : 'deploy'
+              if options.build
+                skaffold("build -f #{File.basename(service_file)}")
+                errors.add("skaffold_build", stderr) if exit_code.positive?
+              end
               # TODO: next unless check and gem_version_check
               profiles = [options.profile] if options.profile
               profiles ||= platform.components[service].dig(:config, :profiles) || [:none]
               replica_count = (options.replicas || 1).to_s
-              build_count = 0
               profiles.each do |profile|
-                run_cmd = build_count.zero? ? base_cmd : 'deploy'
                 profile_cmd = " -p #{profile}" unless profile.eql?(:none)
-                extra_arg = "--images=${SKAFFOLD_DEFAULT_REPO}/#{service}" if run_cmd.eql?('deploy')
-                skaffold("#{run_cmd} -f #{File.basename(service_file)}#{profile_cmd} #{extra_arg}",
+                skaffold("deploy -f #{File.basename(service_file)}#{profile_cmd}",
                          { 'REPLICA_COUNT' => replica_count })
-                errors.add("skaffold_#{run_cmd}", stderr) if exit_code.positive?
+                errors.add("skaffold_deploy", stderr) if exit_code.positive?
                 kubectl("scale deploy #{clean_kubernetes_name(service)} --replicas=#{replica_count}")
                 errors.add("scale_#{service}", stderr) if exit_code.positive?
-                build_count += 1
               end
             end
           end
