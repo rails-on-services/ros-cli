@@ -82,7 +82,7 @@ module Ros
           end
 
           def dns_domain
-            @dns_domain ||= "#{infra.dns.sub_domain}.#{infra.dns.root_domain}"
+            @dns_domain ||= (infra.dns.sub_domain.nil? || infra.dns.sub_domain.empty? ? "#{infra.dns.root_domain}" : "#{infra.dns.sub_domain}.#{infra.dns.root_domain}")
           end
 
           def bucket_base
