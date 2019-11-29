@@ -185,12 +185,12 @@ output "eks" {
 # Below two depends_on `module.eks-cluster`. Both may cause circular dependancy under certain circumstances
 # Temporary comment both `depends_on` if weird cycle error raised during `apply`
 data "aws_eks_cluster" "cluster" {
-  depends_on = [module.eks-cluster]
+  # depends_on = [module.eks-cluster]
   name = local.cluster_name
 }
 
 data "aws_eks_cluster_auth" "cluster-auth" {
-  depends_on = [module.eks-cluster]
+  # depends_on = [module.eks-cluster]
   name       = local.cluster_name
 }
 
@@ -386,6 +386,8 @@ output "elasticache-redis-<%= key %>" {
 <% end -%>
 
 # EKS extra policy templates
+
+# S3 Buckets access
 data "aws_iam_policy_document" "s3_buckets" {
   statement {
     actions   = ["s3:GetObject", "s3:PutObject"]
@@ -405,6 +407,41 @@ data "template_file" "aws_iam_policy_document_s3" {
   vars = {
     bucket_name = local.s3_buckets[count.index]
     origin_path = "/"
+  }
+}
+
+# Cloudwatch access
+data "aws_iam_policy_document" "cloudwatch" {
+  statement {
+    sid = "AllowReadingMetricsFromCloudWatch"
+
+    actions = [
+      "cloudwatch:DescribeAlarmsForMetric",
+      "cloudwatch:ListMetrics",
+      "cloudwatch:GetMetricStatistics",
+      "cloudwatch:GetMetricData"
+    ]
+
+    resources = ["*"]
+  }
+
+  statement {
+    sid = "AllowReadingTagsInstancesRegionsFromEC2"
+
+    actions = [
+      "ec2:DescribeTags",
+      "ec2:DescribeInstances",
+      "ec2:DescribeRegions"
+    ]
+
+    resources = ["*"]
+  }
+
+  statement {
+    sid = "AllowReadingResourcesForTags"
+
+    actions   = ["tag:GetResources"]
+    resources = ["*"]
   }
 }
 
