@@ -78,6 +78,10 @@ profiles:
                 <%- @service.secrets_files.each do |name| -%>
                 - <%= name %>
                 <%- end -%>
+            <%- unless profile.eql?('scheduler') %>
+            autoscaling:
+              enabled: true
+            <%- end %>
             <%- if profile.eql?('server') -%>
             bootstrap:
               enabled: true
