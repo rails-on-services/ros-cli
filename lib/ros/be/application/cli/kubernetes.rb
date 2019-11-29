@@ -172,8 +172,6 @@ module Ros
                 skaffold("deploy -f #{File.basename(service_file)}#{profile_cmd}",
                          { 'REPLICA_COUNT' => replica_count })
                 errors.add("skaffold_deploy", stderr) if exit_code.positive?
-                kubectl("scale deploy #{clean_kubernetes_name(service)} --replicas=#{replica_count}")
-                errors.add("scale_#{service}", stderr) if exit_code.positive?
               end
             end
           end
@@ -230,13 +228,14 @@ module Ros
         end
 
         def stop(services)
-          generate_config if stale_config
-          services.each do |service|
-            kubectl("scale deploy #{clean_kubernetes_name(service)} --replicas=0")
-            pods(name: service).each do |pod|
-              kubectl("delete pod #{pod}")
-            end
-          end
+          STDOUT.puts "WARN: Stop command (kubectl scale deploy --replicas=0) would have no effect as pods scale managed by HPA"
+          # generate_config if stale_config
+          # services.each do |service|
+            # kubectl("scale deploy #{clean_kubernetes_name(service)} --replicas=0")
+            # pods(name: service).each do |pod|
+              # kubectl("delete pod #{pod}")
+            # end
+          # end
         end
 
         def get_credentials
