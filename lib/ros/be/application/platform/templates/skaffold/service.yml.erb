@@ -78,7 +78,7 @@ profiles:
                 <%- @service.secrets_files.each do |name| -%>
                 - <%= name %>
                 <%- end -%>
-            <%- unless profile.eql?('scheduler') -%>
+            <%- unless profile.eql?('scheduler') || @autoscaling.empty? -%>
             autoscaling:
               <%- @autoscaling.each_line do |line| -%>
               <%= line -%>
