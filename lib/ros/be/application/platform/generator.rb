@@ -72,6 +72,8 @@ module Ros
             empty_directory("#{destination_root}/#{deploy_path}")
             components.each do |service, definition|
               @service = Service.new(service, definition, deploy_path)
+              @autoscaling = JSON.parse(default_autoscaling.to_h.merge(@service.config.autoscaling.to_h).to_json).to_yaml.lines[1..-1].join
+              # binding.pry
               # The default template type is config.type or else look for 'service.yml.erb'
               template_type = definition.dig(:config, :type) || 'service'
               template("#{template_dir}/#{template_type}.yml.erb", "#{destination_root}/#{deploy_path}/#{service}.yml")
@@ -79,6 +81,10 @@ module Ros
               content = Ros.format_envs('', envs).join("\n")
               create_file("#{destination_root}/#{deploy_path}/#{service}.env", "#{content}\n")
             end
+          end
+
+          def default_autoscaling
+            @default_autoscaling ||= (application.platform.config&.autoscaling.nil? ? {} : application.platform.config.autoscaling)
           end
 
           def environment_file
