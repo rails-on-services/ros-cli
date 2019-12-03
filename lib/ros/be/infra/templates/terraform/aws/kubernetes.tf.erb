@@ -209,6 +209,16 @@ output "route53" {
   value = module.route53.*
 }
 
+<%- if infra.components.ses&.config&.enabled -%>
+# AWS SES
+module "ses" {
+  source          = "rails-on-services/ses/aws"
+  domain_name     = local.domain_name
+  route53_zone_id = module.route53.this.zone_id
+  aws_profile     = local.aws_profile
+}
+<%- end -%>
+
 # Certificate Manager
 module "acm" {
   source                    = "rails-on-services/acm/aws"
