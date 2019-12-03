@@ -174,7 +174,10 @@ module "eks-cluster" {
   ]
 
   eks_map_roles      = module.iam.eks_map_roles
-  eks_extra_policies = data.template_file.aws_iam_policy_document_s3[*].rendered
+  eks_extra_policies = concat(
+    data.template_file.aws_iam_policy_document_s3[*].rendered,
+    data.template_file.aws_iam_policy_document_cloudwatch[*].rendered
+  )
   tags               = var.tags
 }
 
@@ -245,6 +248,7 @@ module "eks-resources" {
   istio_ingressgateway_alb_cert_arn = module.acm.this.arn
   kubeconfig                        = module.eks-cluster.this.kubeconfig
   vpc_id                            = module.vpc.vpc_id
+  # tags                              = var.tags
 
   enable_fluentd_gcp_logging                   = <%= infra.components.kubernetes.components.services.components.cluster_logging.config.provider == 'gcp' ? true : false %>
   fluentd_gcp_logging_service_account_json_key = var.fluentd_gcp_logging_service_account_json_key
@@ -411,6 +415,10 @@ data "template_file" "aws_iam_policy_document_s3" {
 }
 
 # Cloudwatch access
+data "template_file" "aws_iam_policy_document_cloudwatch" {
+  template = data.aws_iam_policy_document.cloudwatch.json
+}
+
 data "aws_iam_policy_document" "cloudwatch" {
   statement {
     sid = "AllowReadingMetricsFromCloudWatch"
