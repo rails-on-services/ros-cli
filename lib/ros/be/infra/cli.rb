@@ -27,18 +27,22 @@ module Ros
         end
 
         desc 'plan', 'Show the terraform infrastructure plan'
+        option :cl, type: :boolean, aliases: '--clear', desc: 'Clear local modules cache. Force to download latest modules from TF registry'
         def plan
           generate_config if stale_config
           Dir.chdir(infra.deploy_path) do
+            system_cmd('rm -rf .terraform/modules/') if options.cl
             system_cmd('terraform init', cmd_environment)
             system_cmd('terraform plan', cmd_environment)
           end
         end
 
         desc 'apply', 'Apply the terraform infrastructure plan'
+        option :cl, type: :boolean, aliases: '--clear', desc: 'Clear local modules cache. Force to download latest modules from TF registry'
         def apply
           generate_config if stale_config
           Dir.chdir(infra.deploy_path) do
+            system_cmd('rm -rf .terraform/modules/') if options.cl
             system_cmd('rm -f .terraform/terraform.tfstate')
             system_cmd('terraform init', cmd_environment)
             system_cmd('terraform apply', cmd_environment)
