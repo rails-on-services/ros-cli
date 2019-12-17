@@ -25,6 +25,7 @@ module Ros
   class << self
     def exec_from_rake(task_name, args, cmd = :exec)
       require 'ros/be/application/cli'
+      # require 'ros/data/metabase/cli'
       services = args.select{ |a| !a.start_with?('-') }
       options = args.select{ |a| a.start_with?('-') }
       services.each do |service|
@@ -48,6 +49,8 @@ module Ros
       require 'ros/stack'
       require 'ros/be/application/generator'
       require 'ros/be/infra/generator'
+      require 'ros/data/generator'
+      require 'ros/data/metabase/generator'
       g_string = "#{stack.map{ |s| s.capitalize }.join('::')}::Generator"
       generator = Ros.const_get(g_string).new
       generator.behavior = behavior.eql?('destroy') ? :revoke : :invoke

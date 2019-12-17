@@ -20,7 +20,6 @@ module Ros
       def application; Ros::Be::Application::Model end
       def infra; Ros::Be::Infra::Model end
       def cluster; Ros::Be::Infra::Cluster::Model end
-      def data; Ros::Be::Data::Model end
     end
 
     class Generator < Thor::Group
@@ -31,9 +30,8 @@ module Ros
 
       def execute
         require 'ros/be/infra/generator'
-        require 'ros/be/data/generator'
         require 'ros/be/application/generator'
-        [Infra::Generator, Application::Generator, Data::Generator].each do |klass|
+        [Infra::Generator, Application::Generator].each do |klass|
           generator = klass.new
           generator.behavior = behavior
           generator.destination_root = destination_root

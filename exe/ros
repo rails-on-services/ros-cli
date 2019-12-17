@@ -20,6 +20,16 @@ else
       ARGV.shift
       require "ros/#{cmd}/#{sub_cmd}/cli"
       Ros.const_get("#{cmd.capitalize}::#{sub_cmd.capitalize}::Cli").start
+    elsif cmd.eql?('data')
+      if %w(metabase).include?(sub_cmd)
+        ARGV.shift
+        require "ros/#{cmd}/#{sub_cmd}/cli"
+        Ros.const_get("#{cmd.capitalize}::#{sub_cmd.capitalize}::Cli").start
+      else
+        puts "Not implemented"
+        puts "Use ros data metabase"
+        exit
+      end
     else
       require "ros/#{cmd}/application/cli"
       Ros.const_get("#{cmd.capitalize}::Application::Cli").start
