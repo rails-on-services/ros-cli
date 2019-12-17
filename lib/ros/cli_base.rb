@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 require 'open3'
+require 'open-uri'
 
 module Ros
   class Errors
@@ -86,6 +87,46 @@ module Ros
       end
       yield
       $stdout = rs unless options.v
+    end
+
+    def fetch_terraform_custom_providers(providers={}, clean_install=false)
+      case RUBY_PLATFORM
+      when /linux/
+        platform = "linux"
+      when /darwin/
+        platform = "darwin"
+      else
+        STDOUT.puts "Platform not supported. Exiting..."
+        exit
+      end
+
+      providers.each { |k, v|
+        url = v.config.url.gsub('{platform}', platform)
+        f = url.split(/\//).last
+        if !File.file?(f) || clean_install then
+          bytes_total = nil
+          STDOUT.puts "Downloading terraform provider #{f}..."
+          open(url, "rb", "Accept" => "application/vnd.github.v4.raw",
+              :content_length_proc => lambda{|content_length|
+                bytes_total = content_length},
+              :progress_proc => lambda{|bytes_transferred|
+                if bytes_total
+                  print("\r#{bytes_transferred/1024/1024}MB/#{bytes_total/1024/1024}MB")
+                else
+                  print("\r#{bytes_transferred/1024/1024}MB (total size unknown)")
+                end
+              }) do |page|
+            File.open(f, "wb") do |file|
+              while chunk = page.read(1024)
+                file.write(chunk)
+              end
+              File.chmod(0755, f)
+            end
+          end
+        else
+          STDOUT.puts "Terraform provider #{f} exists locally. To overwrite run command with --clear flag."
+        end
+      }
     end
   end
 end

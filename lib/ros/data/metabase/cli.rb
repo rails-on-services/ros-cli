@@ -26,7 +26,7 @@ module Ros
           generate_config if stale_config
           Dir.chdir(metabase.deploy_path) do
             fetch_metabase_cards()
-            fetch_terraform_custom_providers()
+            fetch_terraform_custom_providers(metabase.config.custom_tf_providers, options.cl)
             system_cmd('rm -rf .terraform/modules/') if options.cl
             system_cmd('terraform init', cmd_environment)
             system_cmd('terraform plan', cmd_environment)
@@ -39,7 +39,7 @@ module Ros
           generate_config if stale_config
           Dir.chdir(metabase.deploy_path) do
             fetch_metabase_cards()
-            fetch_terraform_custom_providers()
+            fetch_terraform_custom_providers(metabase.config.custom_tf_providers, options.cl)
             system_cmd('rm -rf .terraform/modules/') if options.cl
             system_cmd('rm -f .terraform/terraform.tfstate')
             system_cmd('terraform init', cmd_environment)
@@ -59,39 +59,13 @@ module Ros
         private
 
         def fetch_metabase_cards
-          STDOUT.puts "Fetching data sources v#{metabase.config.data_version} ..."
+          STDOUT.puts "Fetching data sources v#{metabase.config.data_version}..."
           File.open("#{metabase.config.data_version}.tar.gz", 'wb') do |fo|
             fo.write open("https://github.com/#{metabase.config.data_repo}/archive/#{metabase.config.data_version}.tar.gz",
                 "Authorization" => "token #{metabase.config.github_token}",
                 "Accept" => "application/vnd.github.v4.raw").read
           end
-          %x(tar xzvf "#{metabase.config.data_version}.tar.gz" "whistler-data-#{metabase.config.data_version}/metabase")
-        end
-
-        def fetch_terraform_custom_providers
-          case RUBY_PLATFORM
-          when /linux/
-            platform = "linux"
-          when /darwin/
-            platform = "darwin"
-          else
-            STDOUT.puts "Platform not supported. Exiting..."
-            exit
-          end
-
-          metabase.config.custom_tf_providers.each { |k, v|
-          f = "terraform-provider-#{k.to_s}_#{v.config.version}-#{platform}-amd64"
-          unless File.file?(f) then
-            File.open(f, 'wb') do |fo|
-              STDOUT.puts "Downloading terraform provider #{k.to_s} #{v.config.version} ..."
-              fo.write open("https://github.com/#{v.config.repo}/releases/download/#{v.config.version}/#{f}",
-                "Accept" => "application/vnd.github.v4.raw").read
-              File.chmod(0755, f)
-            end
-          else
-            STDOUT.puts "Terraform provider #{k.to_s} #{v.config.version} exists locally"
-          end
-          }
+          %x(tar xzf "#{metabase.config.data_version}.tar.gz" "whistler-data-#{metabase.config.data_version}/metabase")
         end
 
         # TODO: this needs to be per provider and region comes from deployment.yml

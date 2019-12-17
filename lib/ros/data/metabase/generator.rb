@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 require 'ros/data/generator'
-require 'open-uri'
-# require 'net/http'
 
 module Ros
   module Data

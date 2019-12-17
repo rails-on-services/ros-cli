@@ -10,5 +10,5 @@ module "metabase_cards" {
   metabase_database_id = "<%= metabase.config.metabase_database_id %>"
   metabase_profile     = "<%= Ros.profile %>"
   metabase_feature_set = "<%= current_feature_set == "master" ? "" : current_feature_set %>"
-  data_repo_path       = "<%= metabase.deploy_path %>/whistler-data-<%= metabase.config.data_version %>"
+  data_repo_path       = "./whistler-data-<%= metabase.config.data_version %>"
 }
