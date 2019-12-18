@@ -13,13 +13,19 @@ module Ros
 
           def config; settings.config || Config::Options.new end
 
-          delegate :components, to: :settings
+          def components
+            settings.components
+          end
 
           def c_environment; settings.environment || Config::Options.new end
 
-          delegate :platform, to: :components
+          def platform
+            components.platform
+          end
 
-          delegate :services, to: :components
+          def services
+            components.services
+          end
 
           # def deploy_path; "#{Stack.deploy_path}/be/application" end
           def deploy_path; "#{Stack.deploy_path}/be/application/#{current_feature_set}" end

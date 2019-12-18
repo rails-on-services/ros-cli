@@ -19,7 +19,9 @@ module Ros
 
           def stack_name; Stack.name end
 
-          delegate :current_feature_set, to: :application
+          def current_feature_set
+            application.current_feature_set
+          end
 
           def has_envs; !environment.nil? end
 
@@ -45,7 +47,9 @@ module Ros
           def chart_path; 'helm-charts' end
 
           # api_hostname is for ingress controller
-          delegate :api_hostname, to: :application
+          def api_hostname
+            application.api_hostname
+          end
 
           # def bucket_name; stack.current_feature_set end
           def skaffold_version; Settings.components.be.config.skaffold_version end

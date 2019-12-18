@@ -11,3 +11,6 @@ inherit_mode:
 Metrics/BlockLength:
   Exclude:
     - '**/spec/**/*_spec.rb'
+
+Rails/Delegate:
+  Enabled: false

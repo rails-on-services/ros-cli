@@ -11,7 +11,9 @@ module Ros
 
       def environment; settings.environment || Config::Options.new end
 
-      delegate :name, to: :config
+      def name
+        config.name
+      end
 
       def registry_secret_name; "registry-#{Settings.config.platform.config.image_registry}" end
 

@@ -9,10 +9,13 @@ module Ros
         module Model
           class << self
             def settings; Settings.components.be.components.application.components.platform end
+            def config
+              settings.config
+            end
 
-            delegate :config, to: :settings
-
-            delegate :components, to: :settings
+            def components
+              settings.components
+            end
           end
         end
 
