@@ -25,7 +25,6 @@ module Ros
   class << self
     def exec_from_rake(task_name, args, cmd = :exec)
       require 'ros/be/application/cli'
-      # require 'ros/data/metabase/cli'
       services = args.select{ |a| !a.start_with?('-') }
       options = args.select{ |a| a.start_with?('-') }
       services.each do |service|

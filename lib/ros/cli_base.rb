@@ -126,7 +126,7 @@ module Ros
         else
           STDOUT.puts "Terraform provider #{f} exists locally. To overwrite run command with --clear flag."
         end
-      }
+      } unless providers.nil?
     end
   end
 end
