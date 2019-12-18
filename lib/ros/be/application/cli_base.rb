@@ -220,7 +220,11 @@ module Ros
           FileUtils.mkdir_p(openapi_dir)
           services.each do |service|
             prefix = application.components.platform.components.dig(service, :config, :ros) ? 'app:' : ''
-            if exec(service, "rails db:setup #{prefix}ros:apidoc:generate")
+
+            # NOTE: Run migrations if db exists, else setup with seeds
+            exec(service, 'rails db:migrate 2>/dev/null || rails db:setup')
+
+            if exec(service, "rails #{prefix}ros:apidoc:generate")
               # copy_service_file is implemented in both instance and kubernetes
               copy_service_file(service, '/home/rails/services/app/tmp/docs/openapi/ros-api.json', "#{openapi_dir}/#{service}.json")
             end

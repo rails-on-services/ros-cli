@@ -12,5 +12,5 @@ Metrics/BlockLength:
   Exclude:
     - '**/spec/**/*_spec.rb'
 
-Rails/Delegate:
+Rails:
   Enabled: false

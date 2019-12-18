@@ -91,11 +91,23 @@ module Ros
           end
 
           def base_hostname
-            @base_hostname ||= (infra.dns ? "#{override_feature_set.empty? || current_feature_set == 'master' ? '' : '-' + current_feature_set}.#{dns_domain}" : 'localhost')
+            @base_hostname ||= if infra.dns
+                                 if override_feature_set.empty? || current_feature_set == 'master'
+                                   ''
+                                 else
+                                   "- #{current_feature_set}.#{dns_domain}"
+                                 end
+                               else
+                                 'localhost'
+                               end
           end
 
           def dns_domain
-            @dns_domain ||= (infra.dns.sub_domain.blank? ? infra.dns.root_domain.to_s : "#{infra.dns.sub_domain}.#{infra.dns.root_domain}")
+            @dns_domain ||= if infra.dns.sub_domain.nil? || infra.dns.sub_domain.empty?
+                              infra.dns.root_domain.to_s
+                            else
+                              "#{infra.dns.sub_domain}.#{infra.dns.root_domain}"
+                            end
           end
 
           def bucket_base
