@@ -1,7 +1,8 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
 
 if ARGV[0]&.eql? '-T'
-  res = %x(rake -T #{ARGV[1]})
+  res = `rake -T #{ARGV[1]}`
   STDOUT.puts res.gsub(/^rake/, 'ros').gsub("\nrake", "\nros")
 elsif ARGV[0]&.include? ':'
   require 'rake'
@@ -13,10 +14,10 @@ else
   require 'bundler/setup'
   require 'ros'
   cmd = ARGV[0]
-  if %w(be fe data).include?(cmd)
+  if %w[be fe data].include?(cmd)
     ARGV.shift
     sub_cmd = ARGV[0]
-    if cmd.eql?('be') and %w(infra).include?(sub_cmd)
+    if cmd.eql?('be') && %w[infra].include?(sub_cmd)
       ARGV.shift
       require "ros/#{cmd}/#{sub_cmd}/cli"
       Ros.const_get("#{cmd.capitalize}::#{sub_cmd.capitalize}::Cli").start

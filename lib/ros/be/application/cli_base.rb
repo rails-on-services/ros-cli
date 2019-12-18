@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'thor'
 require 'ros/stack'
 require 'ros/cli_base'
@@ -14,9 +15,9 @@ module Ros
 
         def generate_config
           silence_output do
-            Ros::Be::Application::Services::Generator.new([], {}, { behavior: :revoke }).invoke_all
+            Ros::Be::Application::Services::Generator.new([], {}, behavior: :revoke).invoke_all
             Ros::Be::Application::Services::Generator.new.invoke_all
-            Ros::Be::Application::Platform::Generator.new([], {}, { behavior: :revoke }).invoke_all
+            Ros::Be::Application::Platform::Generator.new([], {}, behavior: :revoke).invoke_all
             Ros::Be::Application::Platform::Generator.new.invoke_all
           end
         end
@@ -39,21 +40,22 @@ module Ros
             test_commands(service, options.rspec_options).each do |test_command|
               exec(service, test_command)
               next if exit_code.zero?
+
               errors.add("#{service} #{test_command}", "#{service} failed on #{test_command}")
               break if options.fail_fast
             end
-            break if errors.size.positive? and options.fail_all
-            push([service]) if errors.size.zero? and options.push
+            break if errors.size.positive? && options.fail_all
+
+            push([service]) if errors.size.zero? && options.push
           end
         end
 
-        def test_commands(service, rspec_options=nil)
+        def test_commands(service, rspec_options = nil)
           is_ros = svc_config(service)&.config&.ros
           prefix = is_ros ? 'app:' : ''
           exec_dir = is_ros ? 'spec/dummy/' : ''
           ["rails #{prefix}db:test:prepare", "#{exec_dir}bin/spring rspec #{rspec_options}"]
         end
-
 
         def svc_config(service)
           Settings.components.be.components.application.components.platform.components.dig(service)
@@ -63,9 +65,10 @@ module Ros
           switch!
           service = service_name.split('/')[0]
           service_name = "#{service_name}.yml" unless service_name.index('.')
-          %w(services platform).each do |type|
+          %w[services platform].each do |type|
             keys = application.components[type].components.keys
             next unless keys.include?(service.to_sym)
+
             file = "#{application.deploy_path}/#{type}/#{service_name}"
             STDOUT.puts "Contents of #{file}"
             STDOUT.puts File.read(file)
@@ -93,7 +96,7 @@ module Ros
               my_services[name] = status unless svc.dig(:config, :ros)
             end
           end
-          (application.components.services.components.keys - %i(wait)).sort.each do |name|
+          (application.components.services.components.keys - %i[wait]).sort.each do |name|
             svc = application.components.services.components[name.to_s]
             status =
               if running_services.include?(name.to_s)
@@ -109,7 +112,7 @@ module Ros
           name_len = (my_services.keys + ros_services.keys + infra_services.keys).max_by(&:length).length + 1
           no_buf = -11
           header_printed = false
-          (1..[infra_services.size, my_services.size, ros_services.size].max).each do |i|
+          (1..[infra_services.size, my_services.size, ros_services.size].max).each do |_i|
             mn, ms = my_services.shift
             mn ||= ''
             ms ||= ''
@@ -123,10 +126,12 @@ module Ros
               "#{mn}#{' ' * (name_len - (mn&.length || no_buf))}#{ms}#{' ' * (buf_len - (ms&.length || no_buf))}" \
               "#{rn}#{' ' * (name_len - (rn&.length || no_buf))}#{rs}#{' ' * (buf_len - (rs&.length || no_buf))}" \
               "#{fn}#{' ' * (name_len - (fn&.length || no_buf))}#{fs}"
-            STDOUT.puts \
-              "#{'-' * mn.length}#{' ' * (name_len - (mn&.length || no_buf))}#{'-' * ms.length}#{' ' * (buf_len - (ms&.length || no_buf))}" \
-              "#{'-' * rn.length}#{' ' * (name_len - (rn&.length || no_buf))}#{'-' * rs.length}#{' ' * (buf_len - (rs&.length || no_buf))}" \
-              "#{'-' * fn.length}#{' ' * (name_len - (fn&.length || no_buf))}#{'-' * fs.length}" unless header_printed
+            unless header_printed
+              STDOUT.puts \
+                "#{'-' * mn.length}#{' ' * (name_len - (mn&.length || no_buf))}#{'-' * ms.length}#{' ' * (buf_len - (ms&.length || no_buf))}" \
+                "#{'-' * rn.length}#{' ' * (name_len - (rn&.length || no_buf))}#{'-' * rs.length}#{' ' * (buf_len - (rs&.length || no_buf))}" \
+                "#{'-' * fn.length}#{' ' * (name_len - (fn&.length || no_buf))}#{'-' * fs.length}"
+            end
             # STDOUT.puts '-' * 100 unless header_printed
             header_printed = true
           end
@@ -145,20 +150,20 @@ module Ros
 
         def credentials
           switch!
-          get_credentials if not File.exist?(creds_file)
+          get_credentials unless File.exist?(creds_file)
           generate_config if stale_config
           postman = JSON.parse(json.each_with_object([]) { |j, a| a.append(Credential.new(j).to_postman) }.to_json)
           envs = json.each_with_object([]) { |j, a| a.append(Credential.new(j).to_env) }
           cli = json.each_with_object([]) { |j, a| a.append(Credential.new(j).to_cli) }.join("\n\n")
           sdk = json.each_with_object([]) { |j, a| a.append(Credential.new(j).to_sdk) }
-          STDOUT.puts "Postman:"
-          STDOUT.puts (postman)
+          STDOUT.puts 'Postman:'
+          STDOUT.puts postman
           STDOUT.puts "\nEnvs:"
-          STDOUT.puts (envs)
+          STDOUT.puts envs
           STDOUT.puts "\nCli:"
-          STDOUT.puts (cli)
+          STDOUT.puts cli
           STDOUT.puts "\nSDK:"
-          STDOUT.puts (sdk)
+          STDOUT.puts sdk
           STDOUT.puts "\nCredentials source: #{creds_file}"
         end
 
@@ -169,16 +174,17 @@ module Ros
         def creds_file; @creds_file ||= "#{runtime_dir}/platform/credentials.json" end
 
         def documents_dir; @documents_dir ||= "#{application.deploy_path.gsub('deployments', 'documents')}/platform" end
+
         def runtime_dir; @runtime_dir ||= application.deploy_path.gsub('deployments', 'runtime') end
 
         def enabled_services
-          application.components.platform.components.to_hash.select do |k, v|
+          application.components.platform.components.to_hash.select do |_k, v|
             v.nil? || v.dig(:config, :enabled).nil? || v.dig(:config, :enabled)
           end.keys
         end
 
         def enabled_application_services
-          application.components.services.components.to_hash.select do |k, v|
+          application.components.services.components.to_hash.select do |_k, v|
             v.nil? || v.dig(:config, :enabled).nil? || v.dig(:config, :enabled)
           end.keys
         end
@@ -202,7 +208,7 @@ module Ros
               copy_service_file(service, "#{file}erd.pdf", "#{documents_dir}/#{service}-erd.pdf")
             end
           end
-          # TODO publish to slack, confluence or someother
+          # TODO: publish to slack, confluence or someother
         end
 
         # TODO: For now just change the host in the API docs
@@ -253,6 +259,7 @@ module Ros
             payload = workspace.payload(collection, data)
             result = workspace.publish(collection, payload)
             next if result.eql?('ok')
+
             STDOUT.puts "Error publishing #{service}\n#{JSON.parse(result)}"
           end
 
@@ -269,13 +276,13 @@ module Ros
             modify_payload(item['item'])
           else
             # if item['request'].try(:[], 'body').try(:[], 'raw')
-            if item['request'] and item['request']['body'] and item['request']['body']['raw']
+            if item['request'] && item['request']['body'] && item['request']['body']['raw']
               type = JSON.parse(item['request']['body']['raw'])['data']['xyz_type']
               replace_type = type.gsub(/<|>/, '')
               item['request']['body']['raw'].gsub!('xyz_type', 'type')
               item['request']['body']['raw'].gsub!(type, replace_type)
             end
-            item['request']['header'].select{ |k| k['key'].eql?('Authorization') }.first['value'] = '{{authorization}}'
+            item['request']['header'].select { |k| k['key'].eql?('Authorization') }.first['value'] = '{{authorization}}'
           end
         end
 
@@ -316,17 +323,17 @@ module Ros
         end
 
         def to_env
-          Ros.format_envs('', Config::Options.new.merge!({
-            'platform' => {
-              'tenant' => {
-                "#{tenant['id']}" => {
-                  "#{type}" => {
-                    "#{owner['id']}" => "Basic #{credential['access_key_id']}:#{secret}"
-                  }
-                }
-              }
-            }
-          })).first
+          Ros.format_envs('', Config::Options.new.merge!(
+                                'platform' => {
+                                  'tenant' => {
+                                    tenant['id'].to_s => {
+                                      type.to_s => {
+                                        owner['id'].to_s => "Basic #{credential['access_key_id']}:#{secret}"
+                                      }
+                                    }
+                                  }
+                                }
+                              )).first
         end
 
         def to_cli

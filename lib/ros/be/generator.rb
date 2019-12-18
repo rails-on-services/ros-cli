@@ -18,7 +18,9 @@ module Ros
       end
 
       def application; Ros::Be::Application::Model end
+
       def infra; Ros::Be::Infra::Model end
+
       def cluster; Ros::Be::Infra::Cluster::Model end
     end
 

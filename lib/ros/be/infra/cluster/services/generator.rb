@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'ros/be/generator'
 
 module Ros
@@ -28,15 +29,16 @@ module Ros
                 @service = Model.new(service, definition)
                 template("#{template_dir}/#{service}.yml.erb", "#{destination_root}/#{deploy_path}/#{service}.yml")
                 service_dir = "#{File.dirname(__FILE__)}/templates/services/#{service}"
-                if Dir.exists?(service_dir)
-                  Dir["#{service_dir}/*"].each do |template_file|
-                    template(template_file, "#{destination_root}/#{deploy_path}/#{service}/#{File.basename(template_file).gsub('.erb', '')}")
-                  end
+                next unless Dir.exist?(service_dir)
+
+                Dir["#{service_dir}/*"].each do |template_file|
+                  template(template_file, "#{destination_root}/#{deploy_path}/#{service}/#{File.basename(template_file).gsub('.erb', '')}")
                 end
               end
             end
 
             private
+
             def environment
               @environment ||= Stack.environment.dup.merge!(cluster.environment.dup.merge!(settings.environment.to_hash).to_hash)
             end
@@ -51,10 +53,11 @@ module Ros
             end
 
             def components
-              settings.components.to_h.select{|k, v| v.nil? || v.dig(:config, :enabled).nil? || v.dig(:config, :enabled) }
+              settings.components.to_h.select { |_k, v| v.nil? || v.dig(:config, :enabled).nil? || v.dig(:config, :enabled) }
             end
 
             def settings; cluster.settings.components&.services || Config::Options.new end
+
             # def environment ; settings.environment end
             def template_dir
               cluster.config.type.eql?('kubernetes') ? 'skaffold' : 'compose'

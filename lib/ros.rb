@@ -25,8 +25,8 @@ module Ros
   class << self
     def exec_from_rake(task_name, args, cmd = :exec)
       require 'ros/be/application/cli'
-      services = args.select{ |a| !a.start_with?('-') }
-      options = args.select{ |a| a.start_with?('-') }
+      services = args.reject { |a| a.start_with?('-') }
+      options = args.select { |a| a.start_with?('-') }
       services.each do |service|
         prefix = application.components.platform.components.dig(service, :config, :ros) ? 'app:' : ''
         Ros::Be::Application::Cli.new([], options).send(cmd, service, "rails #{prefix}#{task_name}")
@@ -34,7 +34,7 @@ module Ros
     end
 
     def enabled_services
-      application.components.platform.components.to_hash.select do |k, v|
+      application.components.platform.components.to_hash.select do |_k, v|
         v.nil? || v.dig(:config, :enabled).nil? || v.dig(:config, :enabled)
       end.keys
     end
@@ -43,7 +43,7 @@ module Ros
       Ros::Be::Application::Model
     end
 
-    def from_rake(task_name, args)
+    def from_rake(task_name, _args)
       behavior, *stack = task_name.split(':')
       require 'ros/stack'
       require 'ros/be/application/generator'
@@ -58,25 +58,24 @@ module Ros
     end
 
     def install_templates
-      %w(services platform).each do |type|
+      %w[services platform].each do |type|
         require "ros/generators/be/application/#{type}/#{type}_generator"
         klass = Object.const_get("Ros::Generators::Be::Application::#{type.capitalize}::#{type.capitalize}Generator")
         klass.install_templates
       end
-      %w(infra services).each do |type|
+      %w[infra services].each do |type|
         require "ros/generators/be/cluster/#{type}/#{type}_generator"
         klass = Object.const_get("Ros::Generators::Be::Cluster::#{type.capitalize}::#{type.capitalize}Generator")
         klass.install_templates
       end
     end
 
-
     # load deployments/env and environments/env
     # If the environment has a '-' in it and an environment is defined before the '-' then use it as a base
     def load_env(env = nil)
       Ros.env = env if env
       files = []
-      %w(deployment environment).each do |type|
+      %w[deployment environment].each do |type|
         files.append("#{Ros.root}/config/#{type}.yml")
         files.append("#{Ros.root}/config/#{type}s/#{Ros.env}.yml")
         if ENV['ROS_PROFILE']
@@ -101,32 +100,41 @@ module Ros
 
     # def platform; @platform ||= Ros::Platform.descendants.first end
     def env; @env ||= StringInquirer.new(ENV['ROS_ENV'] || default_env) end
+
     def profile; @profile ||= StringInquirer.new(ENV['ROS_PROFILE'] || '') end
+
     def env=(env); @env = StringInquirer.new(env) end
+
     def profile=(profile); @profile = StringInquirer.new(profile) end
+
     def default_env; @default_env ||= 'development' end
 
     def root
-      @root ||= (cwd = Dir.pwd
-        while not cwd.eql?('/')
-          break Pathname.new(cwd) if File.exist?("#{cwd}/config/deployment.yml")
-          cwd = File.expand_path('..', cwd)
-        end)
+      @root ||= begin
+                  cwd = Dir.pwd
+                  until cwd.eql?('/')
+                    break Pathname.new(cwd) if File.exist?("#{cwd}/config/deployment.yml")
+
+                    cwd = File.expand_path('..', cwd)
+                  end
+                end
     end
 
-    def gem_root; Pathname.new(File.expand_path('../..', __FILE__)) end
+    def gem_root; Pathname.new(File.expand_path('..', __dir__)) end
 
     def config_dir; "#{Ros.root}/config" end
+
     def environments_dir; "#{config_dir}/environments" end
+
     def deployments_dir; "#{config_dir}/deployments" end
 
     def ros_root; is_ros? ? root : root.join('ros') end
 
-    def has_ros?; not is_ros? and Dir.exists?(ros_root) end
+    def has_ros?; !is_ros? && Dir.exist?(ros_root) end
 
     # TODO: This is a hack in order to differentiate for purpose of templating files
     def is_ros?
-      Settings.config.platform.config.image_registry.eql?('railsonservices') and platform.environment.platform.partition_name.eql?('ros')
+      Settings.config.platform.config.image_registry.eql?('railsonservices') && platform.environment.platform.partition_name.eql?('ros')
     end
 
     def platform; Settings.components.be.components.application.components.platform end

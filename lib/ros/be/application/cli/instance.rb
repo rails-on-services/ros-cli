@@ -12,7 +12,7 @@ module Ros
           @errors = Ros::Errors.new
         end
 
-        def cmd(services)
+        def cmd(_services)
           # binding.pry
           # TODO: update service labels so can check for them rather than deploying each time
           STDOUT.puts 'Not implemented on cli/instance' if options.v
@@ -41,11 +41,9 @@ module Ros
         def up(services)
           services = enabled_services if services.empty?
           generate_config if stale_config
-          STDOUT.puts 'NOT regenerating config' if options.v and not stale_config
+          STDOUT.puts 'NOT regenerating config' if options.v && !stale_config
           compose_options = ''
-          if options.daemon or options.console or options.shell or options.attach
-            compose_options = '-d'
-          end
+          compose_options = '-d' if options.daemon || options.console || options.shell || options.attach
           services.each do |service|
             # if the service name is without a profile extension, e.g. 'iam' then load config and check db migration
             # If the database check is ok then bring up the service and trigger a reload of nginx
@@ -58,7 +56,7 @@ module Ros
             end
             if ref = svc_config(service)
               config = ref.dig(:config) || Config::Options.new
-              next unless database_check(service, config) unless config.type&.eql?('basic')
+              next unless config.type&.eql?('basic') || database_check(service, config)
             end
             compose("up #{compose_options} #{service}")
             errors.add(:up, 'see terminal output') if exit_code.positive?
@@ -98,7 +96,7 @@ module Ros
 
         def exec(service, command)
           generate_config if stale_config
-          build([service]) if command.eql?('bash') and options.build
+          build([service]) if command.eql?('bash') && options.build
           run_string = services.include?(service) ? 'exec' : 'run --rm'
           compose("#{run_string} #{service} #{command}", true)
         end
@@ -106,7 +104,7 @@ module Ros
         def logs(service)
           generate_config if stale_config
           compose_options = options.tail ? '-f' : ''
-          trap("SIGINT") { throw StandardError } if options.tail
+          trap('SIGINT') { throw StandardError } if options.tail
           project_name = Ros::Be::Application::Model.compose_project_name
           system_cmd("docker logs #{compose_options} #{project_name}_#{service}_1", {}, true)
           # compose("logs #{compose_options} #{services.join(' ')}", true)
@@ -162,9 +160,12 @@ module Ros
         def reload_nginx(services)
           nginx_reload = false
           services.each do |service|
-            nginx_reload = true if Settings.components.be.components.application.components.platform.components.dig(service)
+            if Settings.components.be.components.application.components.platform.components.dig(service)
+              nginx_reload = true
+            end
           end
           return unless nginx_reload
+
           running_services = services(application_component: 'platform')
           silence_output do
             Ros::Be::Application::Services::Generator.new.invoke(:nginx_conf, [running_services])
@@ -191,15 +192,17 @@ module Ros
           filters.append("--format '{{.Names}}'")
           capture_cmd("docker ps #{filters.join(' ')}")
           return [] if options.n
+
           # TODO: _server is only one profile; fix
           # TODO: _1 is assumed; there could be > 1
-          stdout.split("\n").map{ |a| a.gsub("#{application.compose_project_name}_", '').chomp('_1') }
+          stdout.split("\n").map { |a| a.gsub("#{application.compose_project_name}_", '').chomp('_1') }
         end
 
         def database_check(name, config)
           prefix = config.ros ? 'app:' : ''
           migration_file = "#{application.compose_dir}/#{name}-migrated"
-          return true if File.exist?(migration_file) unless options.seed
+          return true unless options.seed || !File.exist?(migration_file)
+
           FileUtils.rm(migration_file) if File.exist?(migration_file)
           if success = compose("run --rm #{name} rails #{prefix}ros:db:reset:seed")
             FileUtils.touch(migration_file)
@@ -220,10 +223,12 @@ module Ros
         end
 
         def gem_cache_server
-          return unless %x(docker ps).index('gem_server')
+          return unless `docker ps`.index('gem_server')
+
           host = RbConfig::CONFIG['host_os']
-          return %x(ifconfig vboxnet1).split[7] if host =~ /darwin/
-          %x(ip -o -4 addr show dev docker0).split[3].split('/')[0]
+          return `ifconfig vboxnet1`.split[7] if host =~ /darwin/
+
+          `ip -o -4 addr show dev docker0`.split[3].split('/')[0]
         end
 
         def switch!
@@ -233,7 +238,7 @@ module Ros
             FileUtils.rm_f('.env')
             FileUtils.ln_s("../#{application.deploy_path}/platform", '.env')
           end
-          if not Ros.is_ros?
+          unless Ros.is_ros?
             Dir.chdir("#{Ros.root}/ros/services") do
               FileUtils.rm_f('.env')
               FileUtils.ln_s("../../#{application.deploy_path}/platform", '.env')

@@ -9,11 +9,17 @@ module Ros
         module Model
           class << self
             def settings; infra.components[infra.cluster_type] end
+
             def config; settings.config || {} end
+
             def environment; settings.environment || {} end
+
             def deploy_path; "#{infra.deploy_path}/cluster" end
+
             def provider; Stack.config.infra[config.provider] end
+
             def name; config.name.nil? ? infra.config.cluster.name : config.name end
+
             def infra; Infra::Model end
 
             def init(cli)
@@ -26,19 +32,21 @@ module Ros
 
             def init_aws(cli)
               credentials_file = "#{Dir.home}/.aws/credentials"
-              unless (File.exist?(credentials_file) or ENV['AWS_ACCESS_KEY_ID'])
+              unless File.exist?(credentials_file) || ENV['AWS_ACCESS_KEY_ID']
                 STDOUT.puts "missing #{credentials_file}"
                 return
               end
 
               cmd_string = "aws eks update-kubeconfig --name #{name}"
               # environment variable should be in higher priority than config
-              if infra.config.cluster.aws_profile && ! ENV['AWS_PROFILE'] && ! ENV['AWS_ACCESS_KEY_ID']
+              if infra.config.cluster.aws_profile && !ENV['AWS_PROFILE'] && !ENV['AWS_ACCESS_KEY_ID']
                 cmd_string = "#{cmd_string} --profile #{infra.config.cluster.aws_profile}"
               end
 
               role_name = cli.options.role_name.nil? ? provider.cluster.role_name : cli.options.role_name
-              cmd_string = "#{cmd_string} --role-arn arn:aws:iam::#{provider.account_id}:role/#{role_name}" if cli.options.long || cli.options.role_name
+              if cli.options.long || cli.options.role_name
+                cmd_string = "#{cmd_string} --role-arn arn:aws:iam::#{provider.account_id}:role/#{role_name}"
+              end
               cli.system_cmd(cmd_string)
               cli.errors.add(:update_kube_config, cli.stderr) if cli.exit_code.positive?
               cli.system_cmd('kubectl cluster-info')

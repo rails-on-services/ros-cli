@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'open3'
 require 'open-uri'
 
@@ -30,6 +31,7 @@ module Ros
     # returns boolean true if command successful, false otherwise
     def capture_cmd(cmd, envs = {})
       return if setup_cmd(cmd)
+
       @stdout, @stderr, process_status = Open3.capture3(envs, cmd)
       @exit_code = process_status.exitstatus
       @exit_code.zero?
@@ -38,8 +40,9 @@ module Ros
     # run command with output captured unless verbose (options.v) then to terminal
     # returns boolean true if command successful, false otherwise
     def system_cmd(cmd, envs = {}, never_capture = false)
-      return capture_cmd(cmd, envs) unless (options.v or never_capture)
+      return capture_cmd(cmd, envs) unless options.v || never_capture
       return if setup_cmd(cmd)
+
       system(envs, cmd)
       @exit_code = $?.exitstatus
       @exit_code.zero?
@@ -47,14 +50,14 @@ module Ros
 
     def setup_cmd(cmd)
       puts cmd if options.v
-			@stdout = nil
-			@stderr = nil
+      @stdout = nil
+      @stderr = nil
       @exit_code = 0
       options.n
     end
 
     def exit
-      STDOUT.puts(errors.messages.map{ |(k, v)| "#{v}\n" }) if errors.size.positive?
+      STDOUT.puts(errors.messages.map { |(_k, v)| "#{v}\n" }) if errors.size.positive?
       Kernel.exit(errors.size)
     end
 

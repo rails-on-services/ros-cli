@@ -10,22 +10,29 @@ module Ros
       module Model
         class << self
           def settings; Settings.components.be.components.application end
+
           def config; settings.config || Config::Options.new end
-          def components; settings.components end
+
+          delegate :components, to: :settings
+
           def c_environment; settings.environment || Config::Options.new end
 
-          def platform; components.platform end
-          def services; components.services end
+          delegate :platform, to: :components
+
+          delegate :services, to: :components
+
           # def deploy_path; "#{Stack.deploy_path}/be/application" end
           def deploy_path; "#{Stack.deploy_path}/be/application/#{current_feature_set}" end
 
           def compose_file; @compose_file ||= "#{compose_dir}/compose.env" end
+
           # def compose_dir; "#{Ros.root}/tmp/runtime/#{Ros.env}/#{current_feature_set}" end
           def compose_dir; deploy_path.gsub('deployments', 'runtime') end
+
           def compose_project_name; "#{Stack.name}_#{current_feature_set}" end
 
           def current_feature_set
-            @feature_set ||=  override_feature_set.empty? ? config.feature_set : override_feature_set
+            @feature_set ||= override_feature_set.empty? ? config.feature_set : override_feature_set
           end
 
           def override_feature_set; StringInquirer.new(ENV['ROS_FS'] || '') end
@@ -38,7 +45,7 @@ module Ros
           def application_environment
             {
               infra: {
-                provider: cluster.config.provider,
+                provider: cluster.config.provider
               },
               platform: {
                 feature_set: current_feature_set,
@@ -47,14 +54,14 @@ module Ros
                     storage: {
                       buckets:
                       infra.settings.components.object_storage.components.each_with_object({}) do |(name, config), hash|
-                        hash[name] = Hash.new
+                        hash[name] = {}
                         hash[name]['name'] = "#{name}-#{bucket_base}"
                         config.to_hash.reject { |key| key.eql?(:services) }.each_pair { |key, value| hash[name][key] = value }
                       end,
                       services:
                       infra.settings.components.object_storage.components.each_with_object({}) do |(name, config), hash|
                         config.services.each do |dir|
-                          hash[dir] = "#{name}"
+                          hash[dir] = name.to_s
                         end
                       end
                     },
@@ -78,18 +85,19 @@ module Ros
           end
 
           def base_hostname
-            @base_hostname ||= (infra.dns ? "#{override_feature_set.empty? || current_feature_set == 'master' ? '' : '-' + current_feature_set }.#{dns_domain}" : 'localhost')
+            @base_hostname ||= (infra.dns ? "#{override_feature_set.empty? || current_feature_set == 'master' ? '' : '-' + current_feature_set}.#{dns_domain}" : 'localhost')
           end
 
           def dns_domain
-            @dns_domain ||= (infra.dns.sub_domain.nil? || infra.dns.sub_domain.empty? ? "#{infra.dns.root_domain}" : "#{infra.dns.sub_domain}.#{infra.dns.root_domain}")
+            @dns_domain ||= (infra.dns.sub_domain.blank? ? infra.dns.root_domain.to_s : "#{infra.dns.sub_domain}.#{infra.dns.root_domain}")
           end
 
           def bucket_base
-            @bucket_base ||= "#{dns_domain.gsub('.', '-')}"
+            @bucket_base ||= dns_domain.gsub('.', '-').to_s
           end
 
           def infra; Ros::Be::Infra::Model end
+
           def cluster; Ros::Be::Infra::Cluster::Model end
         end
       end

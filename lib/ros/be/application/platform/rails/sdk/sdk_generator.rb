@@ -11,7 +11,8 @@ module Ros
       def self.source_paths; ["#{File.dirname(__FILE__)}/templates", File.dirname(__FILE__)] end
 
       def generate
-        return unless self.behavior.eql? :invoke
+        return unless behavior.eql? :invoke
+
         gem_options = '--exe --no-coc --no-mit'
         inside 'lib' do
           system "bundle gem #{gem_options} #{name}_sdk"
@@ -21,19 +22,21 @@ module Ros
       end
 
       def revoke
-        return unless self.behavior.eql? :revoke
+        return unless behavior.eql? :revoke
+
         FileUtils.rm_rf("#{destination_root}/lib/sdk")
         say '      remove  lib/sdk'
       end
 
       def gemfile
         inside 'lib/sdk' do
-          append_to_file 'Gemfile', after: "source \"https://rubygems.org\"\n" do <<~HEREDOC
+          append_to_file 'Gemfile', after: "source \"https://rubygems.org\"\n" do
+            <<~HEREDOC
 
-          gem 'ros_sdk', path: '../../ros/lib/sdk'
-          gem 'pry'
-          gem 'awesome_print'
-          HEREDOC
+              gem 'ros_sdk', path: '../../ros/lib/sdk'
+              gem 'pry'
+              gem 'awesome_print'
+            HEREDOC
           end
           # remove_file "lib/#{name}_sdk/version.rb"
           remove_file 'bin/console'
@@ -44,8 +47,9 @@ module Ros
       def lib_file_content
         inside 'lib/sdk/lib' do
           create_file "#{name}_sdk/models.rb"
-          append_to_file "#{name}_sdk.rb", after: "version\"\n" do <<~HEREDOC
-            require '#{name}_sdk/models'
+          append_to_file "#{name}_sdk.rb", after: "version\"\n" do
+            <<~HEREDOC
+              require '#{name}_sdk/models'
             HEREDOC
           end
         end
@@ -62,10 +66,11 @@ module Ros
           comment_lines gemspec, /spec\.homepage/
           comment_lines gemspec, /spec\.metadata/
           comment_lines gemspec, /spec\.files/
-          comment_lines gemspec, "`git"
+          comment_lines gemspec, '`git'
           # append_to_file gemspec, after: "when it is released.\n  " do <<~HEREDOC
-          append_to_file gemspec, after: "s)/}) }\n" do <<~HEREDOC
-            spec.files         = Dir['lib/**/*.rb', 'exe/*', 'Rakefile', 'README.md'].each do |e|
+          append_to_file gemspec, after: "s)/}) }\n" do
+            <<~HEREDOC
+              spec.files         = Dir['lib/**/*.rb', 'exe/*', 'Rakefile', 'README.md'].each do |e|
             HEREDOC
           end
         end

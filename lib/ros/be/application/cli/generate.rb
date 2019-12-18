@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'ros/be/application/cli_base'
 
 module Ros
@@ -17,11 +18,12 @@ module Ros
         end
 
         desc 'service', 'Generates a new service'
-        def service(name)
+        def service(_name)
           generate_service(args, options, current_command_chain[1].eql?(:destroy) ? :revoke : :invoke)
         end
 
         private
+
         def generate_service(args, options = {}, behavior = nil)
           test_for_project
           require 'ros/be/application/platform/rails/service/service_generator'

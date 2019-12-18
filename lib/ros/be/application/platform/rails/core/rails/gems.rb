@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # core/rails/gems.rb
 
 comment_lines 'Gemfile', "gem 'tzinfo-data'"

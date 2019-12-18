@@ -10,6 +10,7 @@ module Ros
         def clean_kubernetes_name(name)
           name.to_s.gsub(/[^a-zA-Z-]/, '-')
         end
+
         def initialize(options = {})
           @options = options
           @errors = Ros::Errors.new
@@ -34,13 +35,13 @@ module Ros
           end
         end
 
-        def push(services)
-          STDOUT.puts("build command already pushed the image, skipping.")
+        def push(_services)
+          STDOUT.puts('build command already pushed the image, skipping.')
         end
 
         # TODO: Add ability for fail fast
         def up(services)
-          #@services = services.empty? ? enabled_services : services
+          # @services = services.empty? ? enabled_services : services
           @platform_services = []
           @infra_services = []
 
@@ -50,31 +51,32 @@ module Ros
             elsif enabled_application_services.include?(service.to_sym)
               @infra_services.push(service)
             else
-              STDERR.puts "Services specified not found or enabled: #{service}, exit"
+              warn "Services specified not found or enabled: #{service}, exit"
               return
             end
           end
 
           # No services specified - launch whole app stack
-          if @platform_services.empty? and @infra_services.empty?
-            STDOUT.puts "No specific service specified, deploy all enabled services"
+          if @platform_services.empty? && @infra_services.empty?
+            STDOUT.puts 'No specific service specified, deploy all enabled services'
             @platform_services = enabled_services
             @infra_services = enabled_application_services
           # app service(s) specified - launch app and ensure required infra services are up and running
-          elsif not @platform_services.empty? and @infra_services.empty?
+          elsif !@platform_services.empty? && @infra_services.empty?
             @infra_services = enabled_application_services
           # infra service(s) specified - force update
-          elsif @platform_services.empty? and not @infra_services.empty?
+          elsif @platform_services.empty? && !@infra_services.empty?
             @force_infra_deploy = true
           end
           generate_config if stale_config
-          if options.force or not system_cmd("kubectl get ns #{namespace}", kube_env)
+          if options.force || !system_cmd("kubectl get ns #{namespace}", kube_env)
             STDOUT.puts 'Forcing namespace create' if options.force
             deploy_namespace
           else
             STDOUT.puts 'Namespace exists. skipping create. Use -f to force'
           end
           return if options.skip
+
           update_helm_repo
           deploy_services unless options.skip_infra
           deploy_infra_migration_jobs unless options.skip_infra
@@ -88,7 +90,7 @@ module Ros
           system_cmd("kubectl create ns #{namespace}", kube_env)
           errors.add(:kubectl_create_namespace, stderr) if exit_code.positive?
           system_cmd("kubectl label namespace #{namespace} istio-injection=enabled --overwrite", kube_env)
-          errors.add(:kubectl_label_namespace, stderr) if exit_code.positive? and stderr.index('AlreadyExists').nil?
+          errors.add(:kubectl_label_namespace, stderr) if exit_code.positive? && stderr.index('AlreadyExists').nil?
 
           # deploy helm into namespace
           kubectl("apply -f #{application.deploy_path}/services/kubernetes/tiller-rbac")
@@ -99,15 +101,17 @@ module Ros
 
         def deploy_services
           env_file = "#{services_root}/services.env"
-          sync_secret(env_file) if File.exists?(env_file)
+          sync_secret(env_file) if File.exist?(env_file)
           @infra_services.each do |service|
             if service.to_s.eql?('kafka-connect')
-              deploy_gcp_bigquery_secret unless application.components.services.components[:'kafka-connect']&.config&.gcp_service_account_key.nil?
+              unless application.components.services.components[:'kafka-connect']&.config&.gcp_service_account_key.nil?
+                deploy_gcp_bigquery_secret
+              end
             end
             if service.to_s.eql?('ingress')
               next true unless options.n || get_vs(name: :ingress).empty? || options.force
             else
-              next if pod(name: service) unless @force_infra_deploy
+              next unless @force_infra_deploy || !pod(name: service)
             end
             env_file = "#{services_root}/#{service}.env"
             sync_secret(env_file) if File.exist?(env_file)
@@ -123,21 +127,22 @@ module Ros
 
         def deploy_infra_migration_jobs
           enabled_application_services.each do |service|
-            if File.directory?("#{services_root}/jobs/#{service}")
-              Dir.glob("#{services_root}/jobs/#{service}/*.yml") do |job_file|
-                job_name = YAML.load_file(job_file)['metadata']['name']
-                kubectl("delete job #{job_name}") if kubectl("get job #{job_name}")
-                kube_cmd = "apply -f #{job_file} --force"
-                kubectl(kube_cmd)
-              end
+            next unless File.directory?("#{services_root}/jobs/#{service}")
+
+            Dir.glob("#{services_root}/jobs/#{service}/*.yml") do |job_file|
+              job_name = YAML.load_file(job_file)['metadata']['name']
+              kubectl("delete job #{job_name}") if kubectl("get job #{job_name}")
+              kube_cmd = "apply -f #{job_file} --force"
+              kubectl(kube_cmd)
             end
           end
         end
 
         def deploy_gcp_bigquery_secret
-          if kubectl("get secret gcp-jsonkey")
+          if kubectl('get secret gcp-jsonkey')
             return unless options.force
-            kubectl("delete secret gcp-jsonkey")
+
+            kubectl('delete secret gcp-jsonkey')
           end
           secret = application.components.services.components[:'kafka-connect']&.config&.gcp_service_account_key
           kube_cmd = "create secret generic gcp-jsonkey --from-literal=application_default_credentials.json='#{secret}'"
@@ -157,14 +162,14 @@ module Ros
         def deploy_platform
           update_platform_env unless options.skip_infra
           @platform_services.each do |service|
-            #next unless platform.components.keys.include?(service.to_sym)
+            # next unless platform.components.keys.include?(service.to_sym)
             env_file = "#{platform_root}/#{service}.env"
             sync_secret(env_file) if File.exist?(env_file)
             service_file = "#{platform_root}/#{service}.yml"
             Dir.chdir(platform_root) do
               if options.build
                 skaffold("build -f #{File.basename(service_file)}")
-                errors.add("skaffold_build", stderr) if exit_code.positive?
+                errors.add('skaffold_build', stderr) if exit_code.positive?
               end
               # TODO: next unless check and gem_version_check
               profiles = [options.profile] if options.profile
@@ -173,8 +178,8 @@ module Ros
               profiles.each do |profile|
                 profile_cmd = " -p #{profile}" unless profile.eql?(:none)
                 skaffold("deploy -f #{File.basename(service_file)}#{profile_cmd}",
-                         { 'REPLICA_COUNT' => replica_count })
-                errors.add("skaffold_deploy", stderr) if exit_code.positive?
+                         'REPLICA_COUNT' => replica_count)
+                errors.add('skaffold_deploy', stderr) if exit_code.positive?
               end
             end
           end
@@ -186,8 +191,8 @@ module Ros
         end
 
         def update_helm_repo
-          system_cmd("helm repo add ros https://rails-on-services.github.io/helm-charts")
-          system_cmd("helm repo update")
+          system_cmd('helm repo add ros https://rails-on-services.github.io/helm-charts')
+          system_cmd('helm repo update')
         end
 
         def ps
@@ -208,13 +213,13 @@ module Ros
 
         def logs(service)
           generate_config if stale_config
-          trap("SIGINT") { throw StandardError } if options.tail
-          k8s_selector = {name: service, component: :server}.map{ |k, v| "app.kubernetes.io/#{k}=#{v}"}.join(',')
+          trap('SIGINT') { throw StandardError } if options.tail
+          k8s_selector = { name: service, component: :server }.map { |k, v| "app.kubernetes.io/#{k}=#{v}" }.join(',')
           kubectl("#{command('logs')} -l #{k8s_selector} -c #{clean_kubernetes_name(service)}", true)
         rescue StandardError
         end
 
-        def running_services; @running_services ||= pods(component: :server).map{ |svc| svc.split('-').first }.uniq end
+        def running_services; @running_services ||= pods(component: :server).map { |svc| svc.split('-').first }.uniq end
 
         # TODO: This isn't working quite as expected
         # NOTE: restart should not remove a service, just restart it
@@ -230,14 +235,14 @@ module Ros
           # status
         end
 
-        def stop(services)
-          STDOUT.puts "WARN: Stop command (kubectl scale deploy --replicas=0) would have no effect as pods scale managed by HPA"
+        def stop(_services)
+          STDOUT.puts 'WARN: Stop command (kubectl scale deploy --replicas=0) would have no effect as pods scale managed by HPA'
           # generate_config if stale_config
           # services.each do |service|
-            # kubectl("scale deploy #{clean_kubernetes_name(service)} --replicas=0")
-            # pods(name: service).each do |pod|
-              # kubectl("delete pod #{pod}")
-            # end
+          # kubectl("scale deploy #{clean_kubernetes_name(service)} --replicas=0")
+          # pods(name: service).each do |pod|
+          # kubectl("delete pod #{pod}")
+          # end
           # end
         end
 
@@ -274,9 +279,10 @@ module Ros
             base_cmd = 'delete'
             services.each do |service|
               next unless platform.components.keys.include?(service.to_sym)
+
               # kubectl("delete secret #{service}") if kubectl("get secret #{service}")
               service_file = "#{platform_root}/#{service}.yml"
-              profiles = (options.profile.nil? or options.profile.eql?('all')) ? platform.components[service].config.profiles : [options.profile]
+              profiles = options.profile.nil? || options.profile.eql?('all') ? platform.components[service].config.profiles : [options.profile]
               # binding.pry
               Dir.chdir(platform_root) do
                 profiles.each do |profile|
@@ -297,22 +303,25 @@ module Ros
         def command(cmd); "#{cmd}#{options.tail ? ' -f' : ''}" end
 
         def pod(labels = {}); get_pods(labels, true) unless options.n end
+
         def pods(labels = {}); get_pods(labels) unless options.n end
 
         def get_pods(labels = {}, return_one = false)
           # cmd = "get pod -l app=#{service} -l app.kubernetes.io/instance=#{service} #{labels.map{ |k, v| "-l #{k}=#{v}" }.join(' ')} -o yaml"
           # cmd = "get pod #{labels.map{ |k, v| "-l app.kubernetes.io/#{k}=#{v}" }.join(' ')} -o yaml"
-          cmd = "get pod -l #{labels.map{ |k, v| "app.kubernetes.io/#{k}=#{v}" }.join(',')} -o yaml"
+          cmd = "get pod -l #{labels.map { |k, v| "app.kubernetes.io/#{k}=#{v}" }.join(',')} -o yaml"
           result = svpr(cmd)
           return result.first if return_one
+
           result
         end
 
         # TODO: DRY up with get_pods above
         def get_vs(labels = {}, return_one = false)
-          cmd = "get virtualservice -l #{labels.map{ |k, v| "app.kubernetes.io/#{k}=#{v}" }.join(',')} -o yaml"
+          cmd = "get virtualservice -l #{labels.map { |k, v| "app.kubernetes.io/#{k}=#{v}" }.join(',')} -o yaml"
           result = svpr(cmd)
           return result.first if return_one
+
           result
         end
 
@@ -328,12 +337,14 @@ module Ros
 
         # Supporting methods (2)
         def kubectl(cmd, never_capture = false)
-          raise StandardError.new("kubeconfig not found at #{kubeconfig}") unless File.exist?(kubeconfig)
+          raise StandardError, "kubeconfig not found at #{kubeconfig}" unless File.exist?(kubeconfig)
+
           system_cmd("kubectl -n #{namespace} #{cmd}", kube_env, never_capture)
         end
 
         def kubectl_capture(cmd)
-          raise StandardError.new("kubeconfig not found at #{kubeconfig}") unless File.exist?(kubeconfig)
+          raise StandardError, "kubeconfig not found at #{kubeconfig}" unless File.exist?(kubeconfig)
+
           capture_cmd("kubectl -n #{namespace} #{cmd}")
         end
 
@@ -360,6 +371,7 @@ module Ros
         def sync_secret(file)
           name = File.basename(file).chomp('.env')
           return if local_secrets_content(file) == k8s_secrets_content(name)
+
           STDOUT.puts "NOTICE: Updating cluster with new contents for secret #{name}"
           kubectl("delete secret #{name}") # if kubectl("get secret #{name}")
           kubectl("create secret generic #{name} --from-env-file #{file}")
@@ -374,6 +386,7 @@ module Ros
           require 'base64'
           kubectl_capture("get secret #{type} -o yaml")
           return {} if exit_code.positive? || options.n
+
           yml = YAML.load(stdout)
           yml['data'].each_with_object({}) { |a, h| h[a[0]] = Base64.decode64(a[1]) }
         end
@@ -381,6 +394,7 @@ module Ros
         def check; File.file?(kubeconfig) end
 
         def platform_root; "#{Ros::Be::Application::Model.deploy_path}/platform" end
+
         def services_root; "#{Ros::Be::Application::Model.deploy_path}/services" end
 
         def config_files

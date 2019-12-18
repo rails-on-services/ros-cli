@@ -8,7 +8,9 @@ def source_paths
 end
 
 def user_path; Pathname.new(destination_root).join('../../lib/generators/service') end
-def service_path; File.expand_path(File.dirname(__FILE__)) end
+
+def service_path; __dir__ end
+
 def core_path; Pathname.new(File.dirname(__FILE__)).join('../../core/rails') end
 
 require_relative '../../core/rails/profile'

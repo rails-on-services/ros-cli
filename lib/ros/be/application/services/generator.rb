@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'ros/be/generator'
 require 'json'
 
@@ -6,7 +7,6 @@ module Ros
   module Be
     module Application
       module Services
-
         class Model
           attr_accessor :name, :config, :environment, :deploy_path, :runtime_path
           def initialize(name, definition, deploy_path, runtime_path)
@@ -18,7 +18,9 @@ module Ros
           end
 
           def stack_name; Stack.name end
-          def current_feature_set; application.current_feature_set end
+
+          delegate :current_feature_set, to: :application
+
           def has_envs; !environment.nil? end
 
           def dependency_exclusions
@@ -39,13 +41,19 @@ module Ros
 
           # skaffold only methods
           def relative_path; @relative_path ||= ('../' * deploy_path.split('/').size).chomp('/') end
+
           def chart_path; 'helm-charts' end
+
           # api_hostname is for ingress controller
-          def api_hostname; application.api_hostname end
+          delegate :api_hostname, to: :application
+
           # def bucket_name; stack.current_feature_set end
           def skaffold_version; Settings.components.be.config.skaffold_version end
+
           def compose_version; Settings.components.be.config.compose_version || '3.2' end
+
           def map_ports_to_host; false end
+
           def expose_ports(port)
             port, proto = port.to_s.split('/')
             host_port = map_ports_to_host ? "#{port}:" : ''
@@ -55,11 +63,11 @@ module Ros
 
           # skaffold sftp only methods
           def sftp
-            @sftp ||= Config::Options.new({
-              secrets_files: environment ? [:services, name.to_sym] : %i(services),
+            @sftp ||= Config::Options.new(
+              secrets_files: environment ? [:services, name.to_sym] : %i[services],
               pull_policy: 'Always',
               hostname: application.sftp_hostname
-            })
+            )
           end
 
           def kafka_connect
@@ -80,17 +88,17 @@ module Ros
 
           def kafka
             @kafka ||=
-            if application.components.services.components.kafka&.config&.enabled
-              Config::Options.new({
-                bootstrap_servers: "kafka:9092"
-              })
-            elsif application.components.services.components.kafkastack&.config&.enabled
-              Config::Options.new({
-                bootstrap_servers: "kafkastack:9092"
-              })
-            else
-              application&.config&.external_kafka || Config::Options.new
-            end
+              if application.components.services.components.kafka&.config&.enabled
+                Config::Options.new(
+                  bootstrap_servers: 'kafka:9092'
+                )
+              elsif application.components.services.components.kafkastack&.config&.enabled
+                Config::Options.new(
+                  bootstrap_servers: 'kafkastack:9092'
+                )
+              else
+                application&.config&.external_kafka || Config::Options.new
+              end
           end
 
           # kafka topics involved
@@ -101,34 +109,35 @@ module Ros
           def cloudevents_subjects
             subjects = []
             platform_components.each do |service, definition|
-              ros_prefix = definition.config.ros ? "ros/" : ""
-              Dir.glob("#{ros_prefix}services/#{service.to_s}/doc/schemas/cloud_events/#{service.to_s}/*.avsc") do |file|
+              ros_prefix = definition.config.ros ? 'ros/' : ''
+              Dir.glob("#{ros_prefix}services/#{service}/doc/schemas/cloud_events/#{service}/*.avsc") do |file|
                 json = JSON.parse(File.read(file))
-                subjects.push(json["name"])
+                subjects.push(json['name'])
               end
             end
             subjects
           end
 
           def platform_components
-           application.settings.components.platform.components.to_h.select{|k, v| v.nil? || v.dig(:config, :enabled).nil? || v.dig(:config, :enabled) }
+            application.settings.components.platform.components.to_h.select { |_k, v| v.nil? || v.dig(:config, :enabled).nil? || v.dig(:config, :enabled) }
           end
 
           # bigquery dataset to write data into
           def bigquery_dataset
-            @bigquery_dataset ||= application.override_feature_set.empty? ? "warehouse" : "warehouse_" + current_feature_set.gsub(/\W/, '_')
+            @bigquery_dataset ||= application.override_feature_set.empty? ? 'warehouse' : 'warehouse_' + current_feature_set.gsub(/\W/, '_')
           end
 
           # Configuration values for fluentd request logging config file
           def fluentd
-            @fluentd ||= Config::Options.new({
+            @fluentd ||= Config::Options.new(
               header: cluster.infra.cluster_type.eql?('kubernetes') ? "configMaps:\n  ros.conf: |" : '',
               include_input_source: cluster.infra.cluster_type.eql?('kubernetes') ? false : true,
               current_feature_set: application.current_feature_set
-            }).merge!((application.components.services.components[:'fluentd'].config)&.to_hash)
+            ).merge!(application.components.services.components[:fluentd].config&.to_hash)
           end
 
           def cluster; Ros::Be::Infra::Cluster::Model end
+
           def application; Ros::Be::Application::Model end
         end
 
@@ -149,7 +158,10 @@ module Ros
           end
 
           def create_fluentd_log_dir_for_compose
-            return unless components.keys.include?(:fluentd) and infra.cluster_type.eql?('instance') and behavior.eql?(:invoke)
+            unless components.keys.include?(:fluentd) && infra.cluster_type.eql?('instance') && behavior.eql?(:invoke)
+              return
+            end
+
             empty_directory(runtime_path)
             FileUtils.chmod('+w', runtime_path)
           end
@@ -164,10 +176,11 @@ module Ros
               @service = Model.new(service, definition, deploy_path, runtime_path)
               template("#{template_dir}/#{service}.yml.erb", "#{destination_root}/#{deploy_path}/#{service}.yml")
               service_template_dir = "#{base_service_template_dir}/#{service}"
-              if Dir.exists?(service_template_dir)
-                Dir["#{service_template_dir}/**/*"].reject{ |fn| File.directory?(fn) }.each do |template_file|
+              if Dir.exist?(service_template_dir)
+                Dir["#{service_template_dir}/**/*"].reject { |fn| File.directory?(fn) }.each do |template_file|
                   # skip if it exists as an instance method on this class as it will be invoked by thor automatically
                   next if respond_to?(File.basename(template_file).gsub('.', '_').chomp('_erb').to_sym)
+
                   destination_file = "#{destination_root}/#{deploy_path}/#{template_file.gsub("#{base_service_template_dir}/", '')}".chomp('.erb')
                   template(template_file, destination_file)
                 end
@@ -175,14 +188,15 @@ module Ros
 
               # Generate K8s jobs
               job_template_dir = "#{base_job_template_dir}/#{service}"
-              if infra.cluster_type.eql?('kubernetes') and Dir.exists?(job_template_dir)
-                Dir["#{job_template_dir}/**/*"].reject{ |fn| File.directory?(fn) }.each do |template_file|
+              if infra.cluster_type.eql?('kubernetes') && Dir.exist?(job_template_dir)
+                Dir["#{job_template_dir}/**/*"].reject { |fn| File.directory?(fn) }.each do |template_file|
                   destination_file = "#{destination_root}/#{deploy_path}/jobs/#{service}/#{template_file.gsub("#{job_template_dir}/", '')}".chomp('.erb')
                   template(template_file, destination_file)
                 end
               end
 
               next unless envs = @service.environment
+
               content = Ros.format_envs('', envs).join("\n")
               create_file("#{destination_root}/#{deploy_path}/#{service}.env", "#{content}\n")
             end
@@ -190,13 +204,15 @@ module Ros
 
           def nginx_conf
             return unless infra.cluster_type.eql?('instance')
+
             # empty_directory("#{destination_root}/#{deploy_path}/nginx")
             remove_file("#{destination_root}/#{deploy_path}/nginx/nginx.conf")
-            template("services/nginx/nginx.conf.erb", "#{destination_root}/#{deploy_path}/nginx/nginx.conf")
+            template('services/nginx/nginx.conf.erb', "#{destination_root}/#{deploy_path}/nginx/nginx.conf")
           end
 
           def copy_kubernetes_files
             return unless infra.cluster_type.eql?('kubernetes')
+
             directory('../files/kubernetes', "#{deploy_path}/kubernetes")
           end
 
@@ -212,18 +228,18 @@ module Ros
             @environment ||= application.environment.dup.merge!(settings.environment&.to_hash)
           end
 
-          def service_names; components.keys  end
+          def service_names; components.keys end
 
           def platform_service_names; platform_components.keys end
 
           def platform_components
-            platform_settings.components.to_h.select{|k, v| v.nil? || v.dig(:config, :enabled).nil? || v.dig(:config, :enabled) }
+            platform_settings.components.to_h.select { |_k, v| v.nil? || v.dig(:config, :enabled).nil? || v.dig(:config, :enabled) }
           end
 
           def platform_settings; application.settings.components.platform end
 
           def components
-            settings.components.to_h.select{|k, v| v.nil? || v.dig(:config, :enabled).nil? || v.dig(:config, :enabled) }
+            settings.components.to_h.select { |_k, v| v.nil? || v.dig(:config, :enabled).nil? || v.dig(:config, :enabled) }
           end
 
           def settings; application.settings.components.services end

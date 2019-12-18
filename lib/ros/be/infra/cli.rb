@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 # require 'ros/cli_base'
 require 'ros/be/generator'
 require 'ros/be/application/cli_base'
@@ -54,7 +55,7 @@ module Ros
         end
 
         desc 'show', 'Show infrastructure details'
-        def show(type = 'json')
+        def show(_type = 'json')
           Dir.chdir(infra.deploy_path) do
             show_json
           end
@@ -69,6 +70,7 @@ module Ros
         end
 
         private
+
         # TODO: this needs to be per provider and region comes from deployment.yml
         def cmd_environment
           { 'AWS_DEFAULT_REGION' => 'ap-southeast-1' }
@@ -80,7 +82,7 @@ module Ros
 
         def generate_config
           silence_output do
-            Ros::Be::Infra::Generator.new([], {}, {behavior: :revoke}).invoke_all
+            Ros::Be::Infra::Generator.new([], {}, behavior: :revoke).invoke_all
             Ros::Be::Infra::Generator.new.invoke_all
           end
         end
@@ -95,13 +97,12 @@ module Ros
               ip = json['ec2-eip']['value']['public_ip']
               STDOUT.puts "ssh -A admin@#{ip}"
             end
-            if json['lb_route53_record']
-              STDOUT.puts "API endpoint: #{json['lb_route53_record']['value'][0]['fqdn']}"
-            end
+            STDOUT.puts "API endpoint: #{json['lb_route53_record']['value'][0]['fqdn']}" if json['lb_route53_record']
           end
         end
 
         def infra; Ros::Be::Infra::Model end
+
         def cluster; Ros::Be::Infra::Cluster::Model end
       end
     end

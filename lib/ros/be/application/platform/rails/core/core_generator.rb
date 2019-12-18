@@ -11,7 +11,8 @@ module Ros
       def self.source_paths; ["#{File.dirname(__FILE__)}/templates", File.dirname(__FILE__)] end
 
       def generate
-        return unless self.behavior.eql? :invoke
+        return unless behavior.eql? :invoke
+
         template_file = "#{File.dirname(__FILE__)}/rails/core_generator.rb"
         rails_options = '--api -G -S -J -C -T -M --database=postgresql --skip-active-storage'
         plugin_options = '--full --dummy-path=spec/dummy'
@@ -35,7 +36,7 @@ module Ros
       # end
 
       def finish_message
-        action = self.behavior.eql?(:invoke) ? 'Created' : 'Destroyed'
+        action = behavior.eql?(:invoke) ? 'Created' : 'Destroyed'
         say "\n#{action} core gem at #{destination_root}/lib/core"
       end
     end

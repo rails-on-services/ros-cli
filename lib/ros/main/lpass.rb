@@ -13,7 +13,7 @@ module Ros
       def add
         test_for_project
         lpass_name = "#{Ros.root}/config/environments/#{Ros.env}.yml"
-        %x(lpass login #{options.username}) if options.username
+        `lpass login #{options.username}` if options.username
         binding.pry
         # %x(lpass add --non-interactive --notes #{Ros.env} < #{lpass_name})
       end
@@ -21,7 +21,7 @@ module Ros
       desc 'show', "Displays #{Ros.env} environment from Lastpass"
       def show
         test_for_project
-        %x(lpass show --notes #{Ros.env})
+        `lpass show --notes #{Ros.env}`
       end
 
       desc 'update', "Updates #{Ros.env} environment in Lastpass"
@@ -30,8 +30,9 @@ module Ros
       end
 
       private
+
       def test_for_project
-        raise Error, set_color("ERROR: Not a Ros project", :red) if Ros.root.nil?
+        raise Error, set_color('ERROR: Not a Ros project', :red) if Ros.root.nil?
       end
     end
   end

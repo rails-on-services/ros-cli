@@ -18,7 +18,7 @@ module Ros
           if File.exist?("#{Ros.deployments_dir}/#{name}.yml.enc")
             if ENV['ROS_MASTER_KEY']
               # then for all encrypted files with associated wit the env, decrypt them all
-              Dir["#{Ros.deployments_dir}/#{name}*.enc"].map{ |f| File.basename(f) }.each do |f|
+              Dir["#{Ros.deployments_dir}/#{name}*.enc"].map { |f| File.basename(f) }.each do |f|
                 output_f = "#{Ros.environments_dir}/#{f.chomp('.enc')}"
                 STDOUT.puts "Decrypting #{f} to #{output_f}"
                 system("ansible-vault decrypt #{Ros.deployments_dir}/#{f} --output #{output_f}")
@@ -36,7 +36,7 @@ module Ros
           end
           # If a new environment has been generated and the encryption key is present then encrypt the file
           # to a location that will be saved in the repository
-          if not File.exist?("#{Ros.deployments_dir}/#{name}.yml.enc")
+          unless File.exist?("#{Ros.deployments_dir}/#{name}.yml.enc")
             if ENV['ROS_MASTER_KEY']
               system("ansible-vault encrypt #{Ros.environments_dir}/#{name}.yml --output #{Ros.deployments_dir}/#{name}.yml.enc")
             else
@@ -62,10 +62,15 @@ module Ros
         # end
 
         private
+
         def partition_name; platform.environment.platform.partition_name end
+
         def platform; application.components.platform end
+
         def application; Settings.components.be.components.application end
+
         def uri; infra.uri end
+
         def infra; Ros::Be::Infra::Model end
       end
     end

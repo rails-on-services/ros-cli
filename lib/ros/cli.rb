@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 # https://nandovieira.com/creating-generators-and-executables-with-thor
 require 'thor'
 require 'ros/be/application/cli'
@@ -20,25 +21,26 @@ module Ros
     desc 'new NAME', 'Create a new Ros project. "ros new my_project" creates a new project in "./my_project"'
     option :force, type: :boolean, default: false, aliases: '-f'
     def new(name)
-      FileUtils.rm_rf(name) if Dir.exists?(name) and options.force
-      raise Error, set_color("ERROR: #{name} already exists. Use -f to force", :red) if Dir.exists?(name)
+      FileUtils.rm_rf(name) if Dir.exist?(name) && options.force
+      raise Error, set_color("ERROR: #{name} already exists. Use -f to force", :red) if Dir.exist?(name)
+
       generate_project(name)
     end
 
     desc 'console', 'Start the Ros console (short-cut alias: "c")'
-    map %w(c) => :console
+    map %w[c] => :console
     def console(service = nil)
       if service.nil?
         Pry.start
         return
       end
-      Ros::Be::Application::Cli.new([], { v: true, }).console(service)
+      Ros::Be::Application::Cli.new([], v: true).console(service)
     end
 
     desc 'server', 'Start the Ros console (short-cut alias: "s")'
-    map %w(s) => :server
+    map %w[s] => :server
     def server(service)
-      Ros::Be::Application::Cli.new([], { v: true, daemon: true, attach: true }).server(service)
+      Ros::Be::Application::Cli.new([], v: true, daemon: true, attach: true).server(service)
     end
 
     desc 'be COMMAND', 'Invoke backend commands'

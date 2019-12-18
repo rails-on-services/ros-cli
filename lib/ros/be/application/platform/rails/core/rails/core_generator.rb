@@ -7,7 +7,8 @@ def source_paths
 end
 
 def user_path; Pathname.new(destination_root).join('../../../generators/core') end
-def core_path; File.expand_path(File.dirname(__FILE__)) end
+
+def core_path; __dir__ end
 
 require_relative 'profile'
 @profile = Profile.new(name, self, options.dup)
