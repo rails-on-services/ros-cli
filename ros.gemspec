@@ -38,18 +38,19 @@ Gem::Specification.new do |spec|
 
   # spec.add_dependency 'dotenv'
   spec.add_dependency 'thor'
-  spec.add_dependency 'pry'
   spec.add_dependency 'rails', '6.0.0.rc2'
   spec.add_dependency 'rake', '~> 13.0'
   spec.add_dependency 'bump'
   spec.add_dependency 'config', '1.7.1'
   spec.add_dependency 'bundler' #, '~> 2.0'
-  spec.add_dependency 'overcommit'
   spec.add_dependency 'faraday'
-  spec.add_dependency 'reek'
+  # TODO: What is this used for?
   spec.add_dependency 'fasterer'
-  spec.add_dependency 'rubocop-rails'
 
   # spec.add_development_dependency 'rake', '~> 12.0'
+  spec.add_development_dependency 'overcommit'
+  spec.add_development_dependency 'perx-rubocop'
+  spec.add_development_dependency 'pry'
+  spec.add_development_dependency 'reek'
   spec.add_development_dependency 'rspec', '~> 3.8'
 end
