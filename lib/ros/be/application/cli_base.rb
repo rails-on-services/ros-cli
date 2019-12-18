@@ -55,7 +55,9 @@ module Ros
         end
 
 
-        def svc_config(service); Settings.components.be.components.application.components.platform.components.dig(service) end
+        def svc_config(service)
+          Settings.components.be.components.application.components.platform.components.dig(service)
+        end
 
         def show(service_name)
           switch!
