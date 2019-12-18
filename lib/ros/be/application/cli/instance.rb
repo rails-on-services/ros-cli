@@ -5,7 +5,6 @@ module Ros
     module Application
       class Instance
         include CliBase
-        attr_accessor :services
 
         def initialize(options = {})
           @options = options
@@ -160,9 +159,9 @@ module Ros
         def reload_nginx(services)
           nginx_reload = false
           services.each do |service|
-            if Settings.components.be.components.application.components.platform.components.dig(service)
-              nginx_reload = true
-            end
+            next unless Settings.components.be.components.application.components.platform.components.dig(service)
+
+            nginx_reload = true
           end
           return unless nginx_reload
 
@@ -247,7 +246,8 @@ module Ros
         end
 
         def namespace
-          @namespace ||= (ENV['ROS_PROFILE'] ? "#{ENV['ROS_PROFILE']}-" : '') + Ros::Generators::Stack.compose_project_name
+          @namespace ||= (ENV['ROS_PROFILE'] ? "#{ENV['ROS_PROFILE']}-" : '') +
+                         Ros::Generators::Stack.compose_project_name
         end
 
         def config_files

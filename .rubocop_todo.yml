@@ -6,14 +6,6 @@
 # Note that changes in the inspected code, or installation of new
 # versions of RuboCop, may require this file to be generated again.
 
-# Offense count: 2
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyleAlignWith, AutoCorrect, Severity.
-# SupportedStylesAlignWith: keyword, variable, start_of_line
-Layout/EndAlignment:
-  Exclude:
-    - 'lib/ros/be/application/platform/rails/service/service_generator.rb'
-
 # Offense count: 8
 # Configuration parameters: AllowSafeAssignment.
 Lint/AssignmentInCondition:
@@ -22,19 +14,6 @@ Lint/AssignmentInCondition:
     - 'lib/ros/be/application/cli/kubernetes.rb'
     - 'lib/ros/be/application/platform/generator.rb'
     - 'lib/ros/be/application/services/generator.rb'
-    - 'lib/ros/postman/workspace.rb'
-
-# Offense count: 2
-Lint/Debugger:
-  Exclude:
-    - 'lib/ros/be/application/cli/kubernetes.rb'
-    - 'lib/ros/main/lpass.rb'
-
-# Offense count: 4
-Lint/DuplicateMethods:
-  Exclude:
-    - 'lib/ros/be/application/cli/instance.rb'
-    - 'lib/ros/postman/comm.rb'
     - 'lib/ros/postman/workspace.rb'
 
 # Offense count: 1
@@ -79,17 +58,12 @@ Metrics/AbcSize:
 # Configuration parameters: CountComments.
 Metrics/ClassLength:
   Max: 298
+  Exclude:
+    - 'lib/ros/be/application/cli/kubernetes.rb'
 
 # Offense count: 12
 Metrics/CyclomaticComplexity:
   Max: 22
-
-# Offense count: 50
-# Cop supports --auto-correct.
-# Configuration parameters: AutoCorrect, AllowHeredoc, AllowURI, URISchemes, IgnoreCopDirectives, IgnoredPatterns.
-# URISchemes: http, https
-Metrics/LineLength:
-  Max: 173
 
 # Offense count: 37
 # Configuration parameters: CountComments, ExcludedMethods.

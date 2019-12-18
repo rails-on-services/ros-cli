@@ -17,7 +17,7 @@ module Ros
         end
 
         def cmd(services)
-          binding.pry
+          # binding.pry
         end
 
         def build(services)
@@ -103,10 +103,10 @@ module Ros
           env_file = "#{services_root}/services.env"
           sync_secret(env_file) if File.exist?(env_file)
           @infra_services.each do |service|
-            if service.to_s.eql?('kafka-connect')
-              unless application.components.services.components[:'kafka-connect']&.config&.gcp_service_account_key.nil?
-                deploy_gcp_bigquery_secret
-              end
+            if service.to_s.eql?('kafka-connect') &&
+               application.components.services.components[:'kafka-connect']&.config&.gcp_service_account_key
+
+              deploy_gcp_bigquery_secret
             end
             if service.to_s.eql?('ingress')
               next true unless options.n || get_vs(name: :ingress).empty? || options.force
@@ -236,7 +236,8 @@ module Ros
         end
 
         def stop(_services)
-          STDOUT.puts 'WARN: Stop command (kubectl scale deploy --replicas=0) would have no effect as pods scale managed by HPA'
+          STDOUT.puts 'WARN: Stop command (kubectl scale deploy --replicas=0) '\
+                      'would have no effect as pods scale managed by HPA'
           # generate_config if stale_config
           # services.each do |service|
           # kubectl("scale deploy #{clean_kubernetes_name(service)} --replicas=0")
@@ -282,7 +283,11 @@ module Ros
 
               # kubectl("delete secret #{service}") if kubectl("get secret #{service}")
               service_file = "#{platform_root}/#{service}.yml"
-              profiles = options.profile.nil? || options.profile.eql?('all') ? platform.components[service].config.profiles : [options.profile]
+              profiles = if options.profile.nil? || options.profile.eql?('all')
+                           platform.components[service].config.profiles
+                         else
+                           [options.profile]
+                         end
               # binding.pry
               Dir.chdir(platform_root) do
                 profiles.each do |profile|
@@ -307,8 +312,6 @@ module Ros
         def pods(labels = {}); get_pods(labels) unless options.n end
 
         def get_pods(labels = {}, return_one = false)
-          # cmd = "get pod -l app=#{service} -l app.kubernetes.io/instance=#{service} #{labels.map{ |k, v| "-l #{k}=#{v}" }.join(' ')} -o yaml"
-          # cmd = "get pod #{labels.map{ |k, v| "-l app.kubernetes.io/#{k}=#{v}" }.join(' ')} -o yaml"
           cmd = "get pod -l #{labels.map { |k, v| "app.kubernetes.io/#{k}=#{v}" }.join(',')} -o yaml"
           result = svpr(cmd)
           return result.first if return_one

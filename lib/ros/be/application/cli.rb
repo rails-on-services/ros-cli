@@ -55,7 +55,8 @@ module Ros
         desc 'test IMAGE', 'test one or all images'
         option :build, type: :boolean, aliases: '-b', desc: 'Build image before testing'
         option :fail_all, type: :boolean, aliases: '--fa', desc: 'Skip any remaining services after a test fails'
-        option :fail_fast, type: :boolean, aliases: '--ff', desc: 'Skip any remaining tests for a service after a test fails'
+        option :fail_fast, type: :boolean, aliases: '--ff',
+                           desc: 'Skip any remaining tests for a service after a test fails'
         option :push, type: :boolean, aliases: '-p', desc: 'Push image after successful testing'
         option :rspec_options, type: :string, aliases: '--rspec-options', desc: 'Extra rspec options'
         def test(*services)
@@ -78,7 +79,8 @@ module Ros
           command.exit
         end
 
-        desc 'attach SERVICE', 'attach to a running service; ctrl-f to detach; ctrl-c to stop/kill the service (short-cut alias: "at")'
+        desc 'attach SERVICE',
+             'attach to a running service; ctrl-f to detach; ctrl-c to stop/kill the service (short-cut alias: "at")'
         map %w[at] => :attach
         def attach(service)
           command = context(options)
@@ -109,9 +111,14 @@ module Ros
           prefix = 'enable-api.'
           api_tag_name = tag_name.match?(/staging|production/) ? tag_name.to_s : "#{prefix}#{tag_name}"
           existing_local_tags = `git tag`.split
-          existing_remote_tags = `git ls-remote --tags`.split("\n").map { |tag_string| tag_string.split("\t").last.gsub('refs/tags/', '') }
+          existing_remote_tags = `git ls-remote --tags`.split("\n").map do |tag_string|
+            tag_string.split("\t").last.gsub('refs/tags/', '')
+          end
           versions = []
-          (existing_local_tags + existing_remote_tags).select { |tag| tag.match?(/#{api_tag_name}\.[v]\d+$/i) }.each do |tag|
+          matching_tags = (existing_local_tags + existing_remote_tags).select do |tag|
+            tag.match?(/#{api_tag_name}\.[v]\d+$/i)
+          end
+          matching_tags.each do |tag|
             # push numeric version suffix into versions array
             versions.push(tag[/\d+$/].to_i)
           end
@@ -131,7 +138,8 @@ module Ros
         option :daemon, type: :boolean, aliases: '-d', desc: 'Run in the background'
         option :force, type: :boolean, default: false, aliases: '-f', desc: 'Force cluster creation'
         option :profile, type: :string, aliases: '-p', desc: 'Service profile to bring up'
-        option :replicas, type: :numeric, aliases: '-r', desc: 'Number of containers (instance) or pods (kubernetes) to run'
+        option :replicas, type: :numeric, aliases: '-r',
+                          desc: 'Number of containers (instance) or pods (kubernetes) to run'
         option :seed, type: :boolean, aliases: '--seed', desc: 'Seed the database before starting the service'
         option :shell, type: :boolean, aliases: '--sh', desc: 'Connect to service shell after starting'
         option :skip, type: :boolean, aliases: '--skip', desc: 'Skip starting services (just initialize cluster)'
@@ -247,7 +255,8 @@ module Ros
         end
 
         desc 'list', 'List backend application configuration objects'
-        option :show_enabled, type: :boolean, aliases: '--enabled', desc: 'Only show services enabled in current config file'
+        option :show_enabled, type: :boolean, aliases: '--enabled',
+                              desc: 'Only show services enabled in current config file'
         map %w[ls] => :list
         def list(what = nil)
           STDOUT.puts 'Options: infra, services, platform' if what.nil?
@@ -279,7 +288,8 @@ module Ros
         def preflight_check(fix: false)
           options = {}
           ros_repo = Dir.exist?(Ros.ros_root)
-          environments = Dir["#{Ros.deployments_dir}/*.yml"].reject { |f| File.basename(f).index('-') }.map { |f| File.basename(f).chomp('.yml') }
+          environments = Dir["#{Ros.deployments_dir}/*.yml"].reject { |f| File.basename(f).index('-') }
+          environments = environments.map { |f| File.basename(f).chomp('.yml') }
           if fix
             `git clone git@github.com:rails-on-services/ros.git` unless ros_repo
             require 'ros/main/env/generator'

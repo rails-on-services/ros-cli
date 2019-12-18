@@ -134,7 +134,8 @@ module Ros
 
     # TODO: This is a hack in order to differentiate for purpose of templating files
     def is_ros?
-      Settings.config.platform.config.image_registry.eql?('railsonservices') && platform.environment.platform.partition_name.eql?('ros')
+      Settings.config.platform.config.image_registry.eql?('railsonservices') &&
+        platform.environment.platform.partition_name.eql?('ros')
     end
 
     def platform; Settings.components.be.components.application.components.platform end

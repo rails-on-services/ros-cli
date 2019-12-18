@@ -39,7 +39,10 @@ module Ros
           image_version = Gem::Version.new(images.static_gems[gemfile_gem.name.to_sym])
           next if gemfile_version.eql?(image_version)
 
-          errors << { image: image, name: gemfile_gem.name, image_version: image_version.to_s, gemfile_version: gemfile_version.to_s }
+          errors << { image: image,
+                      name: gemfile_gem.name,
+                      image_version: image_version.to_s,
+                      gemfile_version: gemfile_version.to_s }
         end
       end
     end

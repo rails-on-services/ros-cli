@@ -2,7 +2,8 @@
 
 module Postman
   class Comm
-    attr_accessor :base_url, :api_key, :endpoint
+    attr_accessor :base_url, :api_key
+    attr_reader :endpoint
 
     def initialize(base_url: 'https://api.getpostman.com', endpoint: nil, api_key: ENV['POSTMAN_API_KEY'])
       @base_url = base_url
@@ -43,11 +44,12 @@ module Postman
     end
 
     def endpoint=(ep)
-      unless valid_endpoints.include? ep.to_s
-        raise ArgumentError, "Invalid endpoint. Valid endpoints are #{valid_endpoints.join(', ')}"
+      if valid_endpoints.include? ep.to_s
+        @endpoint = ep.to_s
+        @endpoint
       end
 
-      @endpoint = ep.to_s
+      raise ArgumentError, "Invalid endpoint. Valid endpoints are #{valid_endpoints.join(', ')}"
     end
 
     def valid_endpoints

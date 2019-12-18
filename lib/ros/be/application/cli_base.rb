@@ -226,7 +226,9 @@ module Ros
             end
           end
           Dir["#{openapi_dir}/*.json"].each do |file|
-            Postman::OpenApi.new(file_name: File.basename(file), openapi_dir: openapi_dir, postman_dir: postman_dir).convert_to_postman
+            Postman::OpenApi.new(file_name: File.basename(file),
+                                 openapi_dir: openapi_dir,
+                                 postman_dir: postman_dir).convert_to_postman
           end
         end
 
@@ -254,7 +256,8 @@ module Ros
             collection = workspace.collection(service)
             data = JSON.parse(File.read(file))
 
-            # Modify Postman JSON to replace the authorization value <String> with the Postman variable {{authorization}}
+            # Modify Postman JSON to replace the authorization value <String>
+            # with the Postman variable {{authorization}}
             data['item'].each { |item| modify_payload(item) }
             payload = workspace.payload(collection, data)
             result = workspace.publish(collection, payload)

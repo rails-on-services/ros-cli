@@ -12,9 +12,9 @@ module Ros
       desc 'add', "Add #{Ros.env} environment to Lastpass"
       def add
         test_for_project
-        lpass_name = "#{Ros.root}/config/environments/#{Ros.env}.yml"
+        _lpass_name = "#{Ros.root}/config/environments/#{Ros.env}.yml"
         `lpass login #{options.username}` if options.username
-        binding.pry
+        # binding.pry
         # %x(lpass add --non-interactive --notes #{Ros.env} < #{lpass_name})
       end
 

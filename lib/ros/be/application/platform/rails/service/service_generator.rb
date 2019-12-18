@@ -70,7 +70,7 @@ module Ros
 
           def sdk_lib_path; lib_path.join("sdk/lib/#{platform_name}_sdk") end
         end
-  end
-end
+      end
+    end
   end
 end
