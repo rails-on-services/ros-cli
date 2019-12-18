@@ -29,6 +29,9 @@ profiles:
       path: /build
     deploy:
       helm:
+        flags:
+          install: ['--atomic']
+          upgrade: ['--atomic']
         releases:
         - name: <%= @service.name.to_s.gsub('_', '-') %><%= xname.gsub('_', '-') %>
           chartPath: ros/service

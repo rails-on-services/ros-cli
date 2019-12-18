@@ -40,7 +40,6 @@ module Ros
 
         # TODO: Add ability for fail fast
         def up(services)
-          #@services = services.empty? ? enabled_services : services
           @platform_services = []
           @infra_services = []
 
@@ -56,15 +55,19 @@ module Ros
           end
 
           # No services specified - launch whole app stack
-          if @platform_services.empty? and @infra_services.empty?
+          if @platform_services.empty? && @infra_services.empty? && !options.only_infra
             STDOUT.puts "No specific service specified, deploy all enabled services"
             @platform_services = enabled_services
             @infra_services = enabled_application_services
+          # Launch all infra services and jobs. Useful for new environments to make sure infra is up and running before deploy any services
+          elsif @platform_services.empty? && @infra_services.empty? && options.only_infra
+            STDOUT.puts "De[ploying infra services only"
+            @infra_services = enabled_application_services
           # app service(s) specified - launch app and ensure required infra services are up and running
-          elsif not @platform_services.empty? and @infra_services.empty?
+          elsif !@platform_services.empty? && @infra_services.empty?
             @infra_services = enabled_application_services
           # infra service(s) specified - force update
-          elsif @platform_services.empty? and not @infra_services.empty?
+          elsif @platform_services.empty? && !@infra_services.empty?
             @force_infra_deploy = true
           end
           generate_config if stale_config

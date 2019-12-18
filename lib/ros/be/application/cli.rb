@@ -136,6 +136,7 @@ module Ros
         option :shell, type: :boolean, aliases: '--sh', desc: 'Connect to service shell after starting'
         option :skip, type: :boolean, aliases: '--skip', desc: 'Skip starting services (just initialize cluster)'
         option :skip_infra, type: :boolean, aliases: '--skip-infra', desc: 'Skip deploy infra services'
+        option :only_infra, type: :boolean, aliases: '--only-infra', desc: 'Launch only infra related services and jobs'
         def up(*services)
           command = context(options)
           command.up(services)
