@@ -38,7 +38,7 @@ module Ros
       end
 
       def sha
-        @sha ||= system('git rev-parse --git-dir > /dev/null 2>&1') ? %x(git rev-parse --short HEAD).chomp : 'no-sha'
+        @sha ||= system('git rev-parse --git-dir > /dev/null 2>&1') ? %x(git rev-parse --short=7 HEAD).chomp : 'no-sha'
       end
 
       def version; Dir.chdir(Ros.root) { Bump::Bump.current } end

@@ -34,6 +34,7 @@ module Ros
             provider = config.config.provider
             providers.add(provider)
             # Since we got Terraform modules in external registry we don't have local copy
+
             # module_names = send(provider, component)
             # module_names.each do |module_name|
               # module_path = "../files/terraform/#{provider}/#{module_name}"
@@ -101,7 +102,7 @@ module Ros
           {
             terraform: {
               backend: {
-                "#{Settings.config.terraform.state.type}": Settings.config.terraform.state.to_h.select { |k, v| k.to_s != 'type' && ! v.nil? } || {}
+                "#{Settings.config.terraform.state.infra.type}": Settings.config.terraform.state.infra.to_h.select { |k, v| k.to_s != 'type' && ! v.nil? } || {}
               }
             }
           }

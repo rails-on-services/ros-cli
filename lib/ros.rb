@@ -48,6 +48,8 @@ module Ros
       require 'ros/stack'
       require 'ros/be/application/generator'
       require 'ros/be/infra/generator'
+      require 'ros/data/generator'
+      require 'ros/data/metabase/generator'
       g_string = "#{stack.map{ |s| s.capitalize }.join('::')}::Generator"
       generator = Ros.const_get(g_string).new
       generator.behavior = behavior.eql?('destroy') ? :revoke : :invoke

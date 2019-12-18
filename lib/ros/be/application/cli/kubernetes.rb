@@ -146,8 +146,11 @@ module Ros
 
         def deploy_platform_environment
           return if kubectl("get secret #{Stack.registry_secret_name}") unless options.force
-          kube_cmd = "create secret generic #{Stack.registry_secret_name} " \
-            "--from-file=.dockerconfigjson=#{Dir.home}/.docker/config.json --type=kubernetes.io/dockerconfigjson"
+          kube_cmd = "create secret docker-registry #{Stack.registry_secret_name} " \
+            "--docker-server=#{Stack.config.platform.config.docker_server} " \
+            "--docker-username=#{Stack.config.platform.config.docker_username} " \
+            "--docker-password=#{Stack.config.platform.config.docker_password} " \
+            "--docker-email=#{Stack.config.platform.config.docker_email}"
           kubectl(kube_cmd)
         end
 

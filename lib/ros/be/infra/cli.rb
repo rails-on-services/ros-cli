@@ -31,6 +31,7 @@ module Ros
         def plan
           generate_config if stale_config
           Dir.chdir(infra.deploy_path) do
+            fetch_terraform_custom_providers(infra.config.custom_tf_providers, options.cl)
             system_cmd('rm -rf .terraform/modules/') if options.cl
             system_cmd('terraform init', cmd_environment)
             system_cmd('terraform plan', cmd_environment)
@@ -42,6 +43,7 @@ module Ros
         def apply
           generate_config if stale_config
           Dir.chdir(infra.deploy_path) do
+            fetch_terraform_custom_providers(infra.config.custom_tf_providers, options.cl)
             system_cmd('rm -rf .terraform/modules/') if options.cl
             system_cmd('rm -f .terraform/terraform.tfstate')
             system_cmd('terraform init', cmd_environment)
@@ -61,6 +63,7 @@ module Ros
         desc 'destory', 'Destroy infrastructure'
         def destroy
           Dir.chdir(infra.deploy_path) do
+            fetch_terraform_custom_providers(infra.config.custom_tf_providers, options.cl)
             system_cmd('terraform destroy', {})
           end
         end
