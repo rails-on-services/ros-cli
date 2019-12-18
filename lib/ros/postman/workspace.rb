@@ -3,7 +3,7 @@
 module Postman
   class Workspace
     attr_accessor :id, :name, :comm
-    attr_accessor :collections, :environments, :mocks, :monitors # , :workspaces
+    attr_accessor :mocks, :monitors
 
     def initialize(id: nil, name: nil, comm: nil)
       @id = id
@@ -18,7 +18,9 @@ module Postman
 
     def collection_names; collections.map { |a| a['name'] } end
 
-    def collections; @collections ||= data['collections'] || [] end
+    def collections
+      @collections ||= data['collections'] || []
+    end
 
     def environment(name)
       col = environments.each.select { |c| c['name'].eql?(name) }.first || {}
@@ -27,7 +29,9 @@ module Postman
 
     def environment_names; environments.map { |a| a['name'] } end
 
-    def environments; @environments ||= data['environments'] || [] end
+    def environments
+      @environments ||= data['environments'] || []
+    end
 
     # Convert data to payload format expected by Postman API
     def payload(endpoint, json_data)
