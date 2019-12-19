@@ -2,12 +2,12 @@
 
 require 'ros/cli_base'
 require 'ros/cli'
-require 'ros/data/metabase/generator'
+require 'ros/data/bqview/generator'
 require 'ros/data/generator'
 
 module Ros
   module Data
-    module Metabase
+    module Bqview
       class Cli < Thor
         include CliBase
 
@@ -24,9 +24,9 @@ module Ros
         option :cl, type: :boolean, aliases: '--clear', desc: 'Clear local modules cache. Force to download latest modules from TF registry'
         def plan
           generate_config if stale_config
-          Dir.chdir(metabase.deploy_path) do
+          Dir.chdir(bqview.deploy_path) do
             fetch_data_repo()
-            fetch_terraform_custom_providers(metabase.config.custom_tf_providers, options.cl)
+            fetch_terraform_custom_providers(bqview.config.custom_tf_providers, options.cl)
             system_cmd('rm -rf .terraform/modules/') if options.cl
             system_cmd('terraform init', cmd_environment)
             system_cmd('terraform plan', cmd_environment)
@@ -37,9 +37,9 @@ module Ros
         option :cl, type: :boolean, aliases: '--clear', desc: 'Clear local modules cache. Force to download latest modules from TF registry'
         def apply
           generate_config if stale_config
-          Dir.chdir(metabase.deploy_path) do
+          Dir.chdir(bqview.deploy_path) do
             fetch_data_repo()
-            fetch_terraform_custom_providers(metabase.config.custom_tf_providers, options.cl)
+            fetch_terraform_custom_providers(bqview.config.custom_tf_providers, options.cl)
             system_cmd('rm -rf .terraform/modules/') if options.cl
             system_cmd('rm -f .terraform/terraform.tfstate')
             system_cmd('terraform init', cmd_environment)
@@ -50,7 +50,7 @@ module Ros
 
         desc 'destory', 'Destroy infrastructure'
         def destroy
-          Dir.chdir(metabase.deploy_path) do
+          Dir.chdir(bqview.deploy_path) do
             fetch_terraform_custom_providers()
             system_cmd('terraform destroy', {})
           end
@@ -60,17 +60,17 @@ module Ros
         def cmd_environment; {} end
 
         def config_files
-          Dir["#{Ros.root.join(metabase.deploy_path)}/*.tf"]
+          Dir["#{Ros.root.join(bqview.deploy_path)}/*.tf"]
         end
 
         def generate_config
           silence_output do
-            Ros::Data::Metabase::Generator.new([], {}, {behavior: :revoke}).invoke_all
-            Ros::Data::Metabase::Generator.new.invoke_all
+            Ros::Data::Bqview::Generator.new([], {}, {behavior: :revoke}).invoke_all
+            Ros::Data::Bqview::Generator.new.invoke_all
           end
         end
 
-        def metabase; Ros::Data::Metabase::Model end
+        def bqview; Ros::Data::Bqview::Model end
       end
     end
   end

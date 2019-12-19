@@ -6,7 +6,7 @@ module Ros
   module Data
     module Model
       class << self
-        def settings; Settings.components.data end
+        def config; Settings.components.data.config end
       end
     end
 
@@ -17,6 +17,7 @@ module Ros
         base.extend(Ros::BaseGenerator::ClassMethods)
       end
 
+      def bqview; Ros::Data::Bqview::Model end
       def metabase; Ros::Data::Metabase::Model end
     end
 
@@ -28,7 +29,8 @@ module Ros
 
       def execute
         require 'ros/data/metabase/generator'
-        [Metabase::Generator].each do |klass|
+        require 'ros/data/bqview/generator'
+        [Metabase::Generator, Bqview::Generator].each do |klass|
           generator = klass.new
           generator.behavior = behavior
           generator.destination_root = destination_root

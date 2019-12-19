@@ -69,6 +69,9 @@ module Ros
       Dir["#{Ros.gem_root.join('lib/ros/be')}/**/{templates,files}/**/*"].each do |f|
         return true if mtime < File.mtime(f)
       end
+      Dir["#{Ros.gem_root.join('lib/ros/data')}/**/{templates,files}/**/*"].each do |f|
+        return true if mtime < File.mtime(f)
+      end
       # Check custom templates
       Dir["#{Ros.root.join('lib/generators')}/be/**/{templates,files}/**/*"].each do |f|
         return true if mtime < File.mtime(f)
@@ -128,5 +131,17 @@ module Ros
         end
       } unless providers.nil?
     end
+
+    def fetch_data_repo
+      STDOUT.puts "Fetching data source v#{data.config.data_version}..."
+      File.open("data.tar.gz", 'wb') do |fo|
+        fo.write open("https://github.com/#{data.config.data_repo}/archive/#{data.config.data_version}.tar.gz",
+            "Authorization" => "token #{data.config.github_token}",
+            "Accept" => "application/vnd.github.v4.raw").read
+      end
+      %x(tar xzf "data.tar.gz")
+    end
+
+    def data; Ros::Data::Model end
   end
 end

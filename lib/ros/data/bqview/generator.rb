@@ -3,13 +3,13 @@ require 'ros/data/generator'
 
 module Ros
   module Data
-    module Metabase
+    module Bqview
       module Model
         class << self
           def data; Settings.components.data end
-          def settings; data.components.metabase end
+          def settings; data.components.bqview end
           def config; settings.config || Config::Options.new end
-          def deploy_path; "#{Stack.deploy_path}/data/metabase" end
+          def deploy_path; "#{Stack.deploy_path}/data/bqview" end
         end
       end
 
@@ -24,9 +24,8 @@ module Ros
             tf_state[:terraform][:backend][:s3][:key] = tf_state[:terraform][:backend][:s3][:key] + "-#{current_feature_set}"
           end
 
-          create_file("#{metabase.deploy_path}/state.tf.json", "#{JSON.pretty_generate(tf_state)}")
-          template("terraform/metabase.tf.erb", "#{metabase.deploy_path}/metabase.tf")
-
+          create_file("#{bqview.deploy_path}/state.tf.json", "#{JSON.pretty_generate(tf_state)}")
+          template("terraform/bqview.tf.erb", "#{bqview.deploy_path}/bqview.tf")
         end
 
         private
@@ -34,14 +33,22 @@ module Ros
           @tf_state ||= {
             terraform: {
               backend: {
-                "#{Settings.config.terraform.state.metabase.type}": Settings.config.terraform.state.metabase.to_h.select { |k, v| k.to_s != 'type' && ! v.nil? } || {}
+                "#{Settings.config.terraform.state.bqview.type}": Settings.config.terraform.state.bqview.to_h.select { |k, v| k.to_s != 'type' && ! v.nil? } || {}
               }
             }
           }
         end
+
+        def tf_vars
+          vars = {}
+            vars["fluentd_gcp_logging_service_account_json_key"] = \
+            Ros::Be::Infra::Model.infra.components.kubernetes.components&.services&.components&.cluster_logging&.config&.gcp_service_account_key || ""
+          return vars
+      end
+
+        def profile; Ros.profile end
         def current_feature_set; Ros::Be::Application::Model.current_feature_set end
-        def metabase; Ros::Data::Metabase::Model end
-        def app; Ros::Be::Application::Model end
+        def bqview; Ros::Data::Bqview::Model end
       end
     end
   end

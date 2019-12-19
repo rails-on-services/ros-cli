@@ -1,0 +1,43 @@
+locals {
+  project        = "perx-whistler<%= profile.empty? ? "" : "-" %><%= profile %>"
+  suffix         = "<%= current_feature_set == "master" ? "" : "_" %><%= current_feature_set == "master" ? "" : current_feature_set %>"
+  data_repo_path = "./whistler-data-<%= bqview.data.config.data_version %>/bigquery"
+
+  labels = {
+    environment = "<%= profile.empty? ? "production" : profile %>"
+  }
+}
+
+variable "fluentd_gcp_logging_service_account_json_key" {
+  default = ""
+}
+
+provider "google" {
+  credentials = var.fluentd_gcp_logging_service_account_json_key
+  project     = local.project
+  region      = "us-central1"
+}
+
+resource "google_bigquery_dataset" "this" {
+  dataset_id    = "warehouse_views${local.suffix}"
+  friendly_name = "warehouse_views${local.suffix}"
+  location      = "US"
+  labels        = local.labels
+}
+
+resource "google_bigquery_table" "default" {
+  project    = local.project
+  dataset_id = google_bigquery_dataset.this.dataset_id
+  labels     = local.labels
+
+  for_each = fileset(local.data_repo_path, "**/*.sql")
+  table_id = "${replace(basename(each.key), ".sql", "")}_view"
+
+  view {
+    query = templatefile("${local.data_repo_path}/${each.key}", {
+      project = local.project,
+      dataset = "warehouse${local.suffix}"
+    })
+    use_legacy_sql = false
+  }
+}
