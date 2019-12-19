@@ -10,22 +10,23 @@ spec:
         sidecar.istio.io/inject: "false"
     spec:
       restartPolicy: OnFailure
-      initContainers:
+      containers:
         <%- @service.kafka_connect.connectors.each do |name, config| -%>
+        <%- if config.type == 'bigquery' -%>
+        <%- @service.cloudevents_subjects.each do |svc, topics| -%>
         - image: gcr.io/cloud-builders/curl
-          name: <%= name %>
+          name: <%= name %>-<%= svc.to_s %>
           command:
             - curl
             - -X
             - PUT
-            - http://kafka-connect-<%= @service.current_feature_set %>:8083/connectors/<%= name %>-<%= @service.current_feature_set %>/config
+            - http://kafka-connect-<%= @service.current_feature_set %>:8083/connectors/<%= name %>-<%= @service.current_feature_set %>-<%= svc.to_s %>/config
             - -H
             - "Content-Type: application/json"
             - -H
             - "Accept: application/json"
             - -d
             - >
-              <%- if config.type == 'bigquery' -%>
               {
                 "connector.class": "com.wepay.kafka.connect.bigquery.BigQuerySinkConnector",
                 "autoUpdateSchemas": "true",
@@ -33,7 +34,7 @@ spec:
                 "autoCreateTables": "true",
                 "sanitizeTopics": "true",
                 "tasks.max": "<%= config.tasks ? config.tasks : 2 %>",
-                "topics": "<%= @service.cloudevents_subjects.join(',') %>",
+                "topics": "<%= topics.join(',') %>",
                 "schemaRegistryLocation": "http://kafka-schema-registry:8081",
                 "topicsToTables": "(\\w+)\\.(\\w+)=$1_$2",
                 "project": "<%= config.project %>",
@@ -42,7 +43,8 @@ spec:
                 "schemaRetriever": "com.wepay.kafka.connect.bigquery.schemaregistry.schemaretriever.SchemaRegistrySchemaRetriever",
                 "key.converter": "org.apache.kafka.connect.storage.StringConverter"
               }
-              <%- end -%>
+        <%- end -%>
+        <%- end -%>
         <%- if config.type == 'bigquery' -%>
         - image: google/cloud-sdk:alpine
           name: <%= name %>-create-bq-dataset
@@ -66,10 +68,6 @@ spec:
               mountPath: /etc/google/auth
         <%- end -%>
         <%- end -%>
-      containers:
-        - image: busybox:latest
-          name: echo
-          command: ['sh', '-c', 'echo Connectors created. Check above logs!']
       volumes:
         - name: gcp-jsonkey
           secret:
