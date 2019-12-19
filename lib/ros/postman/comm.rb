@@ -44,12 +44,13 @@ module Postman
     end
 
     def endpoint=(ep)
-      if valid_endpoints.include? ep.to_s
-        @endpoint = ep.to_s
-        @endpoint
+      ep_string = ep.to_s
+      if valid_endpoints.include? ep_string
+        @endpoint = ep_string
+        return
       end
 
-      raise ArgumentError, "Invalid endpoint. Valid endpoints are #{valid_endpoints.join(', ')}"
+      raise ArgumentError, "Invalid endpoint(#{ep_string}). Valid endpoints are #{valid_endpoints.join(', ')}"
     end
 
     def valid_endpoints
