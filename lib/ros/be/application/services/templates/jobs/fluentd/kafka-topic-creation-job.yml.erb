@@ -11,7 +11,8 @@ spec:
     spec:
       restartPolicy: OnFailure
       containers:
-        - name: create-topic
+        <%- @service.kafka_topics.each do |svc, topics| -%>
+        - name: create-topics-<%= svc.to_s %>
           image: confluentinc/cp-kafka:5.3.0
           command:
             - bash
@@ -30,7 +31,7 @@ spec:
               <%- end -%>
               EOT
 
-              topics=(<%= @service.kafka_topics.join(" ") %>)
+              topics=(<%= topics.join(" ") %>)
               for topic in ${topics[@]}; do
                 if kafka-topics --bootstrap-server <%= @service.kafka.bootstrap_servers %> --command-config ./config --list | grep "^${topic}$" ; then
                   echo "Topic ${topic} already exist, nothing to do"
@@ -43,3 +44,4 @@ spec:
                   --replication-factor <%= @service.kafka.topic_replication_factor || 1 %>
                 fi
               done
+        <%- end -%>

@@ -95,23 +95,24 @@ module Ros
 
           # kafka topics involved
           def kafka_topics
-            @kafka_topics ||= [fluentd.http_log_kafka_topic] + cloudevents_subjects
+            @kafka_topics ||= cloudevents_subjects
           end
 
           def cloudevents_subjects
-            subjects = []
+            subjects = {}
             platform_components.each do |service, definition|
               ros_prefix = definition.config.ros ? "ros/" : ""
               Dir.glob("#{ros_prefix}services/#{service.to_s}/doc/schemas/cloud_events/#{service.to_s}/*.avsc") do |file|
                 json = JSON.parse(File.read(file))
-                subjects.push(json["name"])
+                key = json["name"].split(".").first.to_sym
+                (subjects[key] ||=[]) << json["name"]
               end
             end
             subjects
           end
 
           def platform_components
-           application.settings.components.platform.components.to_h.select{|k, v| v.nil? || v.dig(:config, :enabled).nil? || v.dig(:config, :enabled) }
+            application.settings.components.platform.components.to_h.select{|k, v| v.nil? || v.dig(:config, :enabled).nil? || v.dig(:config, :enabled) }
           end
 
           # bigquery dataset to write data into
