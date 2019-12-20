@@ -21,13 +21,13 @@ else
       require "ros/#{cmd}/#{sub_cmd}/cli"
       Ros.const_get("#{cmd.capitalize}::#{sub_cmd.capitalize}::Cli").start
     elsif cmd.eql?('data')
-      if %w(metabase).include?(sub_cmd)
+      if (sub_cmd).match(/metabase|bqview/)
         ARGV.shift
         require "ros/#{cmd}/#{sub_cmd}/cli"
         Ros.const_get("#{cmd.capitalize}::#{sub_cmd.capitalize}::Cli").start
       else
         puts "Not implemented"
-        puts "Use ros data metabase"
+        puts "Use ros data metabase|bqview"
         exit
       end
     else
