@@ -95,7 +95,7 @@ module Ros
                                  if override_feature_set.empty? || current_feature_set == 'master'
                                    ''
                                  else
-                                   "- #{current_feature_set}.#{dns_domain}"
+                                   "-#{current_feature_set}.#{dns_domain}"
                                  end
                                else
                                  'localhost'
