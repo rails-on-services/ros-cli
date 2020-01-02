@@ -14,7 +14,6 @@ deploy:
               app.kubernetes.io/component: database
               app.kubernetes.io/part-of: application-services
           image:
-            repository: mdillon/postgis
             tag: 10
           fullnameOverride: postgres
           postgresqlDataDir: /data/pgdata
@@ -34,3 +33,5 @@ deploy:
             requests:
               cpu: 0.5
               memory: 1.5Gi
+          postgresqlExtendedConf:
+            max_connections: 200
