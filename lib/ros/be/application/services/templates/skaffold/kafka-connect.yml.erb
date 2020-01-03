@@ -17,6 +17,9 @@ deploy:
           podLabels:
             app.kubernetes.io/name: kafka-connect
             app.kubernetes.io/part-of: application-services
+          podAnnotations:
+            prometheus.io/scheme: http
+            prometheus.io/path: /metrics
           ## Kafka Connect JVM Heap Option
           heapOptions: "-Xms1024M -Xmx1024M"
           resources:

@@ -18,6 +18,9 @@ deploy:
           podLabels:
             app.kubernetes.io/name: kafka-schema-registry
             app.kubernetes.io/part-of: application-services
+          podAnnotations:
+            prometheus.io/scheme: http
+            prometheus.io/path: /metrics
           kafka:
             <%- if @service.kafka.security_protocol == "SASL_SSL" -%>
             bootstrapServers: "SASL_SSL://<%= @service.kafka.bootstrap_servers %>"
