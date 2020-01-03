@@ -201,7 +201,7 @@ module Ros
           migration_file = "#{application.compose_dir}/#{name}-migrated"
           return true if File.exist?(migration_file) unless options.seed
           FileUtils.rm(migration_file) if File.exist?(migration_file)
-          if success = compose("run --rm #{name} rails #{prefix}ros:db:reset:seed")
+          if success = compose("run --rm #{name} bin/rails #{prefix}ros:db:reset:seed")
             FileUtils.touch(migration_file)
             remove_cache('iam') if name.eql?('iam')
           else
