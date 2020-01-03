@@ -133,14 +133,16 @@ profiles:
                       values:
                       - spot
               podAntiAffinity:
-                requiredDuringSchedulingIgnoredDuringExecution:
-                - labelSelector:
-                    matchExpressions:
-                    - key: app.kubernetes.io/name
-                      operator: In
-                      values:
-                      - <%= @service.name.to_s.gsub('_', '-') %><%= xname.gsub('_', '-') %>
-                  topologyKey: kubernetes.io/hostname
+                preferredDuringSchedulingIgnoredDuringExecution:
+                - weight: 1
+                  podAffinityTerm:
+                    labelSelector:
+                      matchExpressions:
+                      - key: app.kubernetes.io/name
+                        operator: In
+                        values:
+                        - <%= @service.name.to_s.gsub('_', '-') %><%= xname.gsub('_', '-') %>
+                    topologyKey: kubernetes.io/hostname
             tolerations:
             - key: spotInstance
               operator: Exists
