@@ -357,7 +357,7 @@ module "rds-<%= key %>" {
 
   engine                          = "aurora-postgresql"
   engine_version                  = "10.7"
-  instance_type                   = "db.r5.large"
+  instance_type                   = "<%= infra.components.databases.config.clusters.default.instance_type %>"
   performance_insights_enabled    = true
   vpc_id                          = module.vpc.vpc_id
   subnets                         = module.vpc.database_subnets
