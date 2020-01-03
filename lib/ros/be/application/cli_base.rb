@@ -51,7 +51,7 @@ module Ros
           is_ros = svc_config(service)&.config&.ros
           prefix = is_ros ? 'app:' : ''
           exec_dir = is_ros ? 'spec/dummy/' : ''
-          ["rails #{prefix}db:test:prepare", "#{exec_dir}bin/spring rspec #{rspec_options}"]
+          ["bin/rails #{prefix}db:test:prepare", "#{exec_dir}bin/spring rspec #{rspec_options}"]
         end
 
 
