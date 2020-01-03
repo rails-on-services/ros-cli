@@ -196,7 +196,7 @@ module Ros
           services.each do |service|
             prefix = application.components.platform.components.dig(service, :config, :ros) ? 'app:' : ''
             file = application.components.platform.components.dig(service, :config, :ros) ? 'spec/dummy/' : ''
-            if exec(service, "rails db:setup #{prefix}ros:erd:generate")
+            if exec(service, "bin/rails db:setup #{prefix}ros:erd:generate")
               copy_service_file(service, "#{file}erd.pdf", "#{documents_dir}/#{service}-erd.pdf")
             end
           end
@@ -212,7 +212,7 @@ module Ros
           FileUtils.mkdir_p(openapi_dir)
           services.each do |service|
             prefix = application.components.platform.components.dig(service, :config, :ros) ? 'app:' : ''
-            if exec(service, "rails db:setup #{prefix}ros:apidoc:generate")
+            if exec(service, "bin/rails db:setup #{prefix}ros:apidoc:generate")
               # copy_service_file is implemented in both instance and kubernetes
               copy_service_file(service, '/home/rails/services/app/tmp/docs/openapi/ros-api.json', "#{openapi_dir}/#{service}.json")
             end
