@@ -61,7 +61,7 @@ module Ros
             @infra_services = enabled_application_services
           # Launch all infra services and jobs. Useful for new environments to make sure infra is up and running before deploy any services
           elsif @platform_services.empty? && @infra_services.empty? && options.only_infra
-            STDOUT.puts "De[ploying infra services only"
+            STDOUT.puts "Deploying infra services only"
             @infra_services = enabled_application_services
           # app service(s) specified - launch app and ensure required infra services are up and running
           elsif !@platform_services.empty? && @infra_services.empty?

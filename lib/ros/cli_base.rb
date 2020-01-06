@@ -133,7 +133,7 @@ module Ros
     end
 
     def fetch_data_repo
-      STDOUT.puts "Fetching data source v#{data.config.data_version}..."
+      STDOUT.puts "Fetching data source v#{data.config.data_version} from https://github.com/#{data.config.data_repo}/archive/#{data.config.data_version}.tar.gz"
       File.open("data.tar.gz", 'wb') do |fo|
         fo.write open("https://github.com/#{data.config.data_repo}/archive/#{data.config.data_version}.tar.gz",
             "Authorization" => "token #{data.config.github_token}",

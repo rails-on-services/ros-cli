@@ -29,7 +29,9 @@ module Ros
             fetch_terraform_custom_providers(bqview.config.custom_tf_providers, options.cl)
             system_cmd('rm -rf .terraform/modules/') if options.cl
             system_cmd('terraform init', cmd_environment)
+            errors.add(:terraform_init, stderr) if exit_code.positive?
             system_cmd('terraform plan', cmd_environment)
+            errors.add(:terraform_plan, stderr) if exit_code.positive?
           end
         end
 
@@ -43,7 +45,9 @@ module Ros
             system_cmd('rm -rf .terraform/modules/') if options.cl
             system_cmd('rm -f .terraform/terraform.tfstate')
             system_cmd('terraform init', cmd_environment)
+            errors.add(:terraform_init, stderr) if exit_code.positive?
             system_cmd('terraform apply', cmd_environment)
+            errors.add(:terraform_apply, stderr) if exit_code.positive?
             system_cmd('terraform output -json > output.json', cmd_environment)
           end
         end
