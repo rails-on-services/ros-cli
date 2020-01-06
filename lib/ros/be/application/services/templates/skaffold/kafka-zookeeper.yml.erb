@@ -7,6 +7,8 @@ deploy:
       - name: kafka-zookeeper
         chartPath: ros/cp-zookeeper
         skipBuildDependencies: true
+        remote: true
+        wait: true
         overrides:
           imageTag: 5.3.1
           servers: 1
