@@ -37,8 +37,10 @@ module Ros
 
         desc 'apply', 'Apply the terraform infrastructure plan'
         option :cl, type: :boolean, aliases: '--clear', desc: 'Clear local modules cache. Force to download latest modules from TF registry'
+        option :auto_approve, type: :boolean, aliases: '--auto-approve', desc: 'Terraform. Skip interactive approval of plan before applying'
         def apply
           generate_config if stale_config
+          auto_approve = options.auto_approve? ? "-auto-approve" : ""
           Dir.chdir(bqview.deploy_path) do
             fetch_data_repo()
             fetch_terraform_custom_providers(bqview.config.custom_tf_providers, options.cl)
@@ -46,7 +48,7 @@ module Ros
             system_cmd('rm -f .terraform/terraform.tfstate')
             system_cmd('terraform init', cmd_environment)
             errors.add(:terraform_init, stderr) if exit_code.positive?
-            system_cmd('terraform apply', cmd_environment)
+            system_cmd("terraform apply #{auto_approve}", cmd_environment)
             errors.add(:terraform_apply, stderr) if exit_code.positive?
             system_cmd('terraform output -json > output.json', cmd_environment)
           end
