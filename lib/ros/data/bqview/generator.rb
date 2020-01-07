@@ -42,8 +42,8 @@ module Ros
 
         def tf_vars
           vars = {}
-            vars["fluentd_gcp_logging_service_account_json_key"] = \
-            Ros::Be::Infra::Model.infra.components.kubernetes.components&.services&.components&.cluster_logging&.config&.gcp_service_account_key || ""
+          vars["fluentd_gcp_logging_service_account_json_key"] = \
+            Ros::Be::Infra::Model.components.kubernetes.components&.services&.components&.cluster_logging&.config&.gcp_service_account_key || ""
           return vars
       end
 
