@@ -24,6 +24,7 @@ module Ros
             tf_state[:terraform][:backend][:s3][:key] = tf_state[:terraform][:backend][:s3][:key] + "-#{current_feature_set}"
           end
 
+          create_file("#{bqview.deploy_path}/terraform.tfvars.json", "#{JSON.pretty_generate(tf_vars)}")
           create_file("#{bqview.deploy_path}/state.tf.json", "#{JSON.pretty_generate(tf_state)}")
           template("terraform/bqview.tf.erb", "#{bqview.deploy_path}/bqview.tf")
         end
