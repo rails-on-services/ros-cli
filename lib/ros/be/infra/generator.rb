@@ -50,9 +50,6 @@ module Ros
           end
 
           create_file("#{infra.deploy_path}/terraform.tfvars.json", "#{JSON.pretty_generate(tf_vars)}")
-
-          # Copy over 3rd party terraform plugins
-          directory('../files/terraform/plugins', "#{infra.deploy_path}", :mode => :preserve)
         end
 
         def execute

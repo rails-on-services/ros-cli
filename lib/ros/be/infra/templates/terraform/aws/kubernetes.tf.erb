@@ -20,6 +20,14 @@ provider "kubernetes" {
   load_config_file       = true
 }
 
+# This is custom provider to manage Kubernetes CRDs that currently aren't supported by terraform
+provider "kubectl" {
+  host                   = data.aws_eks_cluster.cluster.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority[0].data)
+  token                  = data.aws_eks_cluster_auth.cluster-auth.token
+  load_config_file       = false
+}
+
 provider "helm" {
   version         = "~> 0.10"
   namespace       = "kube-system"
@@ -33,6 +41,10 @@ provider "helm" {
     token                  = data.aws_eks_cluster_auth.cluster-auth.token
     load_config_file       = true
   }
+}
+
+provider "http" {
+  version = "~> 1.1"
 }
 
 provider "local" {
@@ -248,7 +260,6 @@ output "acm" {
 # EKS Resources
 module "eks-resources" {
   source                     = "rails-on-services/eks-resources/k8s"
-  version                    = ">= 0.0.3"
   aws_profile                = local.aws_profile
   cluster_name               = local.cluster_name
   clusterrolebindings        = module.iam.kubernetes_clusterrolebindings
@@ -279,7 +290,6 @@ output "istio_ingressgateway_alb_arn" {
 # Cluster monitoring
 module "monitor" {
   source                       = "rails-on-services/monitor/k8s"
-  version                      = ">= 0.0.4"
   namespace                    = "<%= infra.components.kubernetes.components.services.components.grafana.config.namespace %>"
   grafana_host                 = "<%= infra.components.dns.config.endpoints&.grafana.nil? ? "grafana" : infra.components.dns.config.endpoints.grafana %>"
   grafana_endpoint             = "<%= infra.components.dns.config.endpoints&.grafana.nil? ? "grafana" : infra.components.dns.config.endpoints.grafana %>.${local.domain_name}"
@@ -292,7 +302,6 @@ module "monitor" {
 # Cert-manager
 module "cert-manager" {
   source        = "rails-on-services/cert-manager/k8s"
-  version       = ">= 0.0.2"
   namespace     = "<%= infra.components.kubernetes.components.services.components.cert_manager&.config&.namespace %>"
   cm_depends_on = module.eks-resources
 }

@@ -105,7 +105,7 @@ module Ros
 
       providers.each { |k, v|
         url = v.config.url.gsub('{platform}', platform)
-        f = url.split(/\//).last
+        f = v.config.name
         if !File.file?(f) || clean_install then
           bytes_total = nil
           STDOUT.puts "Downloading terraform provider #{f}..."
