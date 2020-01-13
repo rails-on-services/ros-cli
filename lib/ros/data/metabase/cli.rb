@@ -47,6 +47,8 @@ module Ros
             system_cmd('rm -rf .terraform/modules/') if options.cl
             system_cmd('rm -f .terraform/terraform.tfstate')
             system_cmd('terraform init', cmd_environment)
+            # TODO: Find out why error handling doesn't work.
+            # Terraform command throws positive exit code, but ros-cli exit code is 0
             errors.add(:terraform_init, stderr) if exit_code.positive?
             system_cmd("terraform apply #{auto_approve}", cmd_environment)
             errors.add(:terraform_apply, stderr) if exit_code.positive?
