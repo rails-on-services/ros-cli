@@ -67,12 +67,6 @@ provider "external" {
   version = "~> 1.2"
 }
 
-# This is custom provider to manage Kubernetes CRDs that currently aren't supported by terraform
-# https://github.com/terraform-providers/terraform-provider-kubernetes/issues/215
-provider "k8sraw" {
-  create_retry_count = 15
-}
-
 # Variables
 variable "tags" {
   default = {}
