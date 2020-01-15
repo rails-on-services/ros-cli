@@ -33,7 +33,7 @@ deploy:
               memory: 1Gi
           ## Additional env variables
           customEnv:
-            CONNECT_LOG4J_LOGGERS: "com.wepay.kafka.connect.bigquery=DEBUG,org.apache.kafka.connect.runtime.rest=DEBUG"
+            CONNECT_LOG4J_LOGGERS: "com.wepay.kafka.connect.bigquery=INFO,org.apache.kafka.connect.runtime.rest=INFO"
             CONNECT_LOG4J_APPENDER_STDOUT_LAYOUT_CONVERSIONPATTERN: "[%d] %p %X{connector.context}%m (%c:%L)%n"
             CONNECT_LOG4J_ROOT_LOGLEVEL: "WARN"
 
