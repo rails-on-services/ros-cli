@@ -8,7 +8,7 @@ deploy:
         chartPath: ros/cp-kafka-connect
         skipBuildDependencies: true
         remote: true
-        # wait: true
+        wait: true
         overrides:
           replicaCount: 1
           image: railsonservices/kafka-connect
@@ -27,10 +27,10 @@ deploy:
           resources:
             limits:
               cpu: 1
-              memory: 1.5Gi
+              memory: 2.5Gi
             requests:
-              cpu: 200m
-              memory: 1Gi
+              cpu: 500m
+              memory: 2Gi
           ## Additional env variables
           customEnv:
             CONNECT_LOG4J_LOGGERS: "com.wepay.kafka.connect.bigquery=INFO,org.apache.kafka.connect.runtime.rest=INFO"
