@@ -277,9 +277,9 @@ module "eks-resources" {
   helm_configuration_overrides                 = var.helm_configuration_overrides
 }
 
-output "istio_ingressgateway_alb_arn" {
-  value = module.eks-resources.istio_ingressgateway_alb_arn
-}
+# output "istio_ingressgateway_alb_arn" {
+#   value = module.eks-resources.istio_ingressgateway_alb_arn
+# }
 
 # Cluster monitoring
 module "monitor" {
@@ -303,13 +303,17 @@ module "cert-manager" {
 <%- if infra.components.globalaccelerator&.config&.enabled -%>
 # Global accelerator
 module "globalaccelerator" {
-  source                      = "rails-on-services/globalaccelerator/aws"
-  name                        = local.accelerator_name
-  route53_zone_id             = module.route53.this.zone_id
-  add_route53_record          = <%= infra.components.globalaccelerator&.config&.hostname.nil? ? false : true %>
-  route53_record_name         = "<%= infra.components.globalaccelerator&.config&.hostname %>"
-  add_elb_listener            = true
-  elb_endpoint                = module.eks-resources.istio_ingressgateway_alb_arn
+  source              = "rails-on-services/globalaccelerator/aws"
+  name                = local.accelerator_name
+  route53_zone_id     = module.route53.this.zone_id
+  add_route53_record  = <%= infra.components.globalaccelerator&.config&.hostname.nil? ? false : true %>
+  route53_record_name = "<%= infra.components.globalaccelerator&.config&.hostname %>"
+  add_elb_listener    = true
+  elb_endpoint        = data.aws_alb.ingressgateway_alb.arn
+}
+
+data "aws_alb" "ingressgateway_alb" {
+  name = regex("[[:alnum:]]{8}-istiosystem-istio-[[:alnum:]]{4}", module.eks-resources.istio_ingressgateway_alb.load_balancer_ingress.0.hostname)
 }
 
 output "globalaccelerator_ips" {
